@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>الرئيسية | الكلية العسكرية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen flex flex-col selection:bg-orange-500 selection:text-white">
+    <%- include('partials/navbar') %>
+
+    <main class="w-full max-w-7xl mx-auto px-6 py-10 flex-1">
+        
+        <div class="bg-gradient-to-r from-[#12171f] via-[#18202c] to-[#12171f] border border-[#222b38] rounded-3xl p-8 mb-10 relative overflow-hidden shadow-2xl backdrop-blur-md">
+            <span class="bg-orange-500/20 text-orange-400 border border-orange-500/30 text-xs font-mono font-bold px-3 py-1 rounded-full uppercase tracking-wider">CENTRAL DASHBOARD</span>
+            <h2 class="text-3xl sm:text-4xl font-black text-white mt-4 mb-2">القيادة المركزية - الكلية العسكرية</h2>
+            <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">نظام المتابعة الميدانية والتدقيق الإداري العام التابع لقطاع شرطة جستس المخصص لإدارة طلبات الالتحاق ورصد درجات التأهيل الميداني.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+            <div class="bg-[#0e1218]/90 border border-[#1f2630] p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                <div>
+                    <span class="text-xs text-gray-500 font-bold block mb-1">إجمالي المتقدمين</span>
+                    <span class="text-4xl font-black text-white font-mono"><%= stats.totalCount %></span>
+                </div>
+            </div>
+            <div class="bg-[#0e1218]/90 border border-[#1f2630] p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                <div>
+                    <span class="text-xs text-gray-500 font-bold block mb-1">ميدان التدريب الحالي</span>
+                    <span class="text-4xl font-black text-teal-400 font-mono"><%= stats.prelimCount %></span>
+                </div>
+            </div>
+            <div class="bg-[#0e1218]/90 border border-[#1f2630] p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                <div>
+                    <span class="text-xs text-gray-500 font-bold block mb-1">المجتازين للدورة</span>
+                    <span class="text-4xl font-black text-emerald-400 font-mono"><%= stats.passedCount %></span>
+                </div>
+            </div>
+            <div class="bg-[#0e1218]/90 border border-[#1f2630] p-6 rounded-2xl flex items-center justify-between shadow-lg">
+                <div>
+                    <span class="text-xs text-gray-500 font-bold block mb-1">الملفات المرفوضة</span>
+                    <span class="text-4xl font-black text-red-400 font-mono"><%= stats.failedCount %></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="mb-16">
+            <h3 class="text-lg font-black text-white mb-8 uppercase tracking-wider pb-2 border-b border-[#1f2630]">
+                الهيكل القيادي للمنظومة
+            </h3>
+            
+            <div class="max-w-2xl mx-auto bg-gradient-to-b from-[#16110a] to-[#0e1218] border border-amber-500/40 rounded-3xl p-8 text-center relative overflow-hidden shadow-[0_10px_40px_rgba(245,158,11,0.15)] mb-8">
+                <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-amber-500 to-transparent"></div>
+                <h4 class="text-3xl font-black text-white mb-2">بيدرو الشمري</h4>
+                <p class="text-sm text-amber-500 font-bold uppercase tracking-widest mb-5">مسؤول الكلية العسكرية</p>
+                <div class="text-xs text-gray-400 font-mono bg-black/40 px-4 py-2 rounded-xl border border-white/5 inline-block">
+                    الإشراف العام والاعتماد المباشر لكافة القرارات التنظيمية
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-[#0e1218]/90 border border-blue-500/30 rounded-2xl p-6 text-center shadow-lg hover:border-blue-500/60 transition-colors">
+                    <h4 class="text-xl font-black text-white mb-2">جو ريستوفا</h4>
+                    <p class="text-xs text-blue-400 font-bold mb-4">نائب مسؤول الكلية ومسؤول العمليات</p>
+                    <div class="text-[11px] text-gray-400 font-mono bg-[#12171f] p-3 rounded-lg border border-[#222b38]">
+                        إدارة مركز العمليات والمتابعة التكتيكية للوحدات الميدانية.
+                    </div>
+                </div>
+
+                <div class="bg-[#0e1218]/90 border border-emerald-500/30 rounded-2xl p-6 text-center shadow-lg hover:border-emerald-500/60 transition-colors">
+                    <h4 class="text-xl font-black text-white mb-2">عبدالعزيز الحربي</h4>
+                    <p class="text-xs text-emerald-400 font-bold mb-4">مشرف التدريب ومسؤول الأنظمة والتفاوض</p>
+                    <div class="text-[11px] text-gray-400 font-mono bg-[#12171f] p-3 rounded-lg border border-[#222b38]">
+                        تنظيم الاختبارات النظرية والخطط الاستراتيجية لإجراءات التفاوض.
+                    </div>
+                </div>
+
+                <div class="bg-[#0e1218]/90 border border-teal-500/30 rounded-2xl p-6 text-center shadow-lg hover:border-teal-500/60 transition-colors">
+                    <h4 class="text-xl font-black text-white mb-2">بهاء خالد</h4>
+                    <p class="text-xs text-teal-400 font-bold mb-4">مشرف التدريب ومسؤول الاستيقافات</p>
+                    <div class="text-[11px] text-gray-400 font-mono bg-[#12171f] p-3 rounded-lg border border-[#222b38]">
+                        متابعة وتقييم مهارات الاستيقاف المروري والجنائي والتدريب الميداني.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <h3 class="text-lg font-black text-white mb-6 uppercase tracking-wider pb-2 border-b border-[#1f2630]">
+                سجل أعضاء وهيئة تدريب الكلية
+            </h3>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <% if(typeof trainers !== 'undefined' && trainers.length > 0) { %>
+                    <% trainers.forEach(trainer => { %>
+                        <div class="bg-[#0e1218]/80 border border-[#222b38] rounded-xl p-5 text-center hover:bg-[#12171f] hover:border-gray-500 transition-all shadow-sm flex flex-col justify-center min-h-[120px]">
+                            <h5 class="text-sm font-bold text-white mb-3 truncate"><%= trainer.name %></h5>
+                            <div class="flex flex-col gap-2">
+                                <span class="text-[10px] text-gray-300 font-mono bg-[#1a2029] px-2 py-1.5 rounded border border-[#2a3441]">
+                                    <%= trainer.role %>
+                                </span>
+                                <span class="text-[10px] text-gray-500 font-mono">
+                                    <%= trainer.duty %>
+                                </span>
+                            </div>
+                        </div>
+                    <% }) %>
+                <% } else { %>
+                    <div class="col-span-full bg-[#0e1218] border border-dashed border-[#222b38] rounded-xl p-8 text-center text-gray-500">
+                        <p class="text-sm font-bold font-mono">لا توجد أسماء مسجلة في كادر التدريب حالياً.</p>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+
+    </main>
+
+    <%- include('partials/footer') %>
+</body>
+</html>

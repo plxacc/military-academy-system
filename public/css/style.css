@@ -1,0 +1,120 @@
+@import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;900&display=swap');
+
+body {
+    font-family: 'Tajawal', 'Tahoma', sans-serif !important;
+    background-color: #07090c;
+    color: #e2e8f0;
+    background-image: linear-gradient(rgba(7, 9, 12, 0.88), rgba(7, 9, 12, 0.96)), url('/images/bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    background-repeat: no-repeat;
+}
+
+/* =========================================
+   تنسيقات التمرير (Scrollbar)
+   ========================================= */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: #0b0e12; }
+::-webkit-scrollbar-thumb { background: #f97316; border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #ea580c; }
+
+/* =========================================
+   الأنيميشن (Animations)
+   ========================================= */
+@keyframes fadeIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+.animate-modal { animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+
+/* =========================================
+   الكروت التكتيكية (Cards)
+   ========================================= */
+.card-tactical {
+    background-color: rgba(14, 18, 24, 0.9);
+    border: 1px solid #1f2630;
+    border-radius: 1rem;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    backdrop-filter: blur(12px);
+    transition: all 0.3s ease;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+}
+.card-tactical:hover {
+    border-color: rgba(249, 115, 22, 0.5);
+    box-shadow: 0 10px 25px -5px rgba(249, 115, 22, 0.15);
+}
+.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1rem; }
+.card-title { font-weight: 900; font-size: 1.25rem; color: white; transition: color 0.3s; }
+.card-tactical:hover .card-title { color: #fbd38d; }
+.card-id { font-size: 0.75rem; font-family: monospace; color: #6b7280; display: block; margin-top: 0.125rem; }
+
+/* =========================================
+   الأزرار العسكرية (Buttons)
+   ========================================= */
+.btn {
+    width: 100%;
+    font-weight: 700;
+    padding: 0.75rem 1rem;
+    border-radius: 0.75rem;
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+.btn-view {
+    background-color: #161b22;
+    color: #fb923c;
+    border: 1px solid rgba(249, 115, 22, 0.3);
+}
+.btn-view:hover { background-color: #1f2630; box-shadow: 0 4px 15px rgba(249, 115, 22, 0.1); }
+
+.btn-accept {
+    background: linear-gradient(to right, #059669, #0f766e);
+    color: white;
+    box-shadow: 0 4px 15px rgba(5, 150, 105, 0.2);
+}
+.btn-accept:hover { background: linear-gradient(to right, #10b981, #14b8a6); }
+
+.btn-reject {
+    background-color: #1a2029;
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+.btn-reject:hover { background-color: rgba(220, 38, 38, 0.8); color: white; }
+
+/* =========================================
+   الشارات (Badges)
+   ========================================= */
+.badge {
+    font-size: 0.65rem;
+    font-weight: 900;
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    text-transform: uppercase;
+}
+.badge-new { background-color: rgba(249, 115, 22, 0.1); color: #fb923c; border: 1px solid rgba(249, 115, 22, 0.2); }
+.badge-interview { background-color: rgba(245, 158, 11, 0.1); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.2); }
+.badge-rejected { background-color: rgba(239, 68, 68, 0.1); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.2); }
+
+/* =========================================
+   حقول الإدخال والبحث (Inputs)
+   ========================================= */
+.search-input {
+    width: 100%;
+    background-color: #0e1218;
+    border: 1px solid #222b38;
+    border-radius: 0.75rem;
+    padding: 0.625rem 1rem;
+    font-size: 0.75rem;
+    color: white;
+    font-family: monospace;
+    transition: all 0.3s;
+    outline: none;
+}
+.search-input:focus { border-color: #f97316; }

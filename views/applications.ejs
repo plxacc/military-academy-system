@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>تقديمات الشرطة | الكلية العسكرية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen flex flex-col selection:bg-orange-500 selection:text-white relative">
+    <%- include('partials/navbar') %>
+
+    <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-[#1f2630] pb-5">
+            <div>
+                <span class="text-orange-500 font-mono text-xs font-bold uppercase tracking-widest">STAGE 01 // NEW APPLICANTS</span>
+                <h2 class="text-3xl font-black text-white mt-1">📋 تقديمات الشرطة الجديدة</h2>
+            </div>
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="🔍 ابحث بالاسم أو Copy ID..." class="search-input md:w-80">
+                <div class="bg-[#12171f] px-4 py-2.5 rounded-xl border border-[#222b38] text-xs font-bold whitespace-nowrap">
+                    جديد: <span id="countDisplay" class="text-orange-400 font-mono"><%= applications.length %></span>
+                </div>
+            </div>
+        </div>
+
+        <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+            <% applications.forEach(app => { %>
+                <div class="card-tactical group" data-search="<%= app.name %> <%= app.id %>">
+                    <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-orange-500 to-amber-600"></div>
+                    <div>
+                        <div class="card-header">
+                            <div>
+                                <h3 class="card-title"><%= app.name %></h3>
+                                <span class="card-id">ID: <%= app.id %></span>
+                            </div>
+                            <span class="badge badge-new">جديد</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 my-4 text-xs font-mono bg-[#080a0e]/80 p-3 rounded-xl border border-[#1a2029]">
+                            <div class="text-gray-400">👤 العمر: <strong class="text-white"><%= app.age %></strong></div>
+                            <div class="text-gray-400">💬 الديسكورد: <strong class="text-white truncate" dir="ltr"><%= app.discordId %></strong></div>
+                        </div>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-[#1a2029]">
+                        <button onclick="openModal('<%= app.id %>')" class="btn btn-view">👁️ استعراض ملف التقديم والإجابات</button>
+                    </div>
+                </div>
+            <% }) %>
+        </div>
+
+        <% if(reviewedApps && reviewedApps.length > 0) { %>
+            <div class="pt-8 border-t-2 border-[#1f2630]">
+                <h3 class="text-xl font-black text-gray-300 mb-6">📁 سجل التقديمات المراجعة (<%= reviewedApps.length %>)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75 hover:opacity-100 transition-opacity">
+                    <% reviewedApps.forEach(app => { %>
+                        <div class="card-tactical !p-5" data-search="<%= app.name %> <%= app.id %> <%= app.copyId %>">
+                            <div class="card-header mb-2">
+                                <div>
+                                    <h3 class="card-title text-lg"><%= app.name %></h3>
+                                    <span class="card-id">ID: <%= app.copyId || app.id %></span>
+                                </div>
+                                <span class="badge <%= app.status.includes('مقبول') ? 'badge-new !text-emerald-400 !border-emerald-500' : 'badge-rejected' %>">
+                                    <%= app.status.includes('مقبول') ? '✔ مقبول' : '✖ مرفوض' %>
+                                </span>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-white/5 text-xs font-mono <%= app.status.includes('مقبول') ? 'text-emerald-400/90' : 'text-red-400/90' %>">
+                                📝 <%= app.gradedBy || '[تمت المراجعة بواسطة القيادة]' %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </main>
+
+    <div id="applicantModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-[#0e1218] border border-[#222b38] w-full max-w-4xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh] animate-modal relative">
+            <div class="bg-[#12171f] px-6 py-5 border-b border-[#222b38] flex justify-between items-center sticky top-0 z-10">
+                <div class="flex items-center gap-3">
+                    <span class="w-3 h-3 rounded-full bg-orange-500 animate-pulse"></span>
+                    <div>
+                        <h3 id="modalName" class="text-xl font-black text-white">اسم المتقدم</h3>
+                        <p id="modalId" class="card-id">ID: 000000000</p>
+                    </div>
+                </div>
+                <button onclick="closeModal('applicantModal')" class="w-10 h-10 rounded-xl bg-[#1a2029] hover:bg-red-600/80 text-gray-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+            </div>
+            
+            <div class="p-6 overflow-y-auto flex-1 space-y-4">
+                <div id="modalQaGrid" class="grid grid-cols-1 md:grid-cols-2 gap-4"></div>
+            </div>
+
+            <% if(user.permissions.canApproveReject || user.permissions.canAcceptApplications) { %>
+                <div class="bg-[#12171f] px-6 py-4 border-t border-[#222b38] flex flex-col sm:flex-row gap-3 justify-end items-center sticky bottom-0 z-10">
+                    <button id="btnRejectMain" onclick="promptReject()" class="btn btn-reject sm:w-auto px-8 py-2.5">✖ رفض التقديم</button>
+                    <button id="btnAcceptMain" onclick="promptAcceptData()" class="btn btn-accept sm:w-auto px-10 py-2.5">✔ قبول واستكمال البيانات</button>
+                </div>
+            <% } %>
+        </div>
+    </div>
+
+    <div id="fillDataModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-[#0e1218] border border-emerald-500/40 w-full max-w-md rounded-2xl shadow-2xl p-6 animate-modal">
+            <h3 class="text-xl font-black text-white mb-2">📝 استكمال بيانات المرشح</h3>
+            <p class="text-xs text-gray-400 mb-6">يرجى التأكد من تعبئة الرقم الوطني للمتقدم قبل نقله للمقابلة.</p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-300">الرقم الوطني: <span class="text-red-500">*</span></label>
+                    <input type="text" id="fillNationalId" class="search-input mt-1 w-full" placeholder="أدخل الرقم الوطني للمتقدم">
+                </div>
+                <div id="ageContainer" style="display: none;">
+                    <label class="text-xs font-bold text-gray-300">العمر: <span class="text-red-500">*</span> <span class="text-[10px] text-gray-500">(غير متوفر في التقديم)</span></label>
+                    <input type="number" id="fillAge" class="search-input mt-1 w-full" placeholder="أدخل العمر الحقيقي">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal('fillDataModal')" class="btn bg-[#1a2029] text-gray-400 hover:text-white border border-[#222b38]">إلغاء</button>
+                <button onclick="confirmAcceptSubmit()" class="btn btn-accept" id="finalAcceptBtn">✔ تأكيد واعتماد</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlert" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-[#12171f] border border-orange-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-modal">
+            <div class="text-4xl mb-3">⚠️</div>
+            <h3 class="text-lg font-black text-white mb-2">تنبيه النظام</h3>
+            <p id="alertMessage" class="text-sm text-gray-300 mb-6 leading-relaxed">رسالة التنبيه هنا</p>
+            <button onclick="closeModal('customAlert')" class="btn bg-orange-600 hover:bg-orange-500 text-white">حسناً، فهمت</button>
+        </div>
+    </div>
+
+    <div id="customConfirm" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-[#12171f] border border-red-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-modal">
+            <div class="text-4xl mb-3">🛑</div>
+            <h3 class="text-lg font-black text-white mb-2">تأكيد الرفض</h3>
+            <p id="confirmMessage" class="text-sm text-gray-300 mb-6 leading-relaxed">هل أنت متأكد من رفض المتقدم؟</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('customConfirm')" class="btn bg-[#1a2029] text-gray-400 hover:text-white">إلغاء</button>
+                <button onclick="executeReject()" id="finalRejectBtn" class="btn btn-reject">✖ نعم، ارفض المتقدم</button>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        const rawEncodedData = '<%- encodeURIComponent(JSON.stringify(applications || [])) %>';
+        const applicantsData = JSON.parse(decodeURIComponent(rawEncodedData));
+        
+        let currentApp = null; 
+
+        function filterCards() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.card-tactical');
+            cards.forEach(card => {
+                if (card.getAttribute('data-search') && card.getAttribute('data-search').toLowerCase().includes(input)) {
+                    card.style.display = 'flex';
+                } else { card.style.display = 'none'; }
+            });
+        }
+
+        // فتح نافذة الاستعراض الرئيسية
+        function openModal(id) {
+            currentApp = applicantsData.find(a => String(a.id) === String(id));
+            if (!currentApp) return;
+
+            document.getElementById('modalName').innerText = currentApp.name;
+            document.getElementById('modalId').innerText = "Copy ID: " + currentApp.id;
+            
+            const qaContainer = document.getElementById('modalQaGrid');
+            qaContainer.innerHTML = "";
+
+            if (currentApp.qaList && currentApp.qaList.length > 0) {
+                currentApp.qaList.forEach((item, idx) => {
+                    qaContainer.innerHTML += `
+                        <div class="bg-[#0b0e12] p-4 rounded-2xl border border-[#1f2630] flex flex-col shadow-inner">
+                            <span class="text-xs font-bold text-orange-400 mb-2 font-mono block">❓ السؤال [${idx + 1}]: ${item.question}</span>
+                            <p class="text-sm text-gray-200 leading-relaxed bg-[#07090c] p-3 rounded-xl border border-white/5 whitespace-pre-wrap">${item.answer}</p>
+                        </div>`;
+                });
+            }
+
+            document.getElementById('applicantModal').classList.remove('hidden');
+            document.getElementById('applicantModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+            // نرجع السكرول للبودي فقط إذا قفلنا النافذة الرئيسية (عشان ما يعلق السكرول)
+            if(modalId === 'applicantModal') document.body.style.overflow = 'auto';
+        }
+
+        function showAlert(msg) {
+            document.getElementById('alertMessage').innerText = msg;
+            document.getElementById('customAlert').classList.remove('hidden');
+            document.getElementById('customAlert').classList.add('flex');
+        }
+
+        // فتح نافذة إكمال البيانات (الذكية)
+        function promptAcceptData() {
+            if (!currentApp) return;
+            
+            document.getElementById('fillNationalId').value = '';
+
+            // فحص العمر: إذا كان يحتوي على أرقام (عربية أو إنجليزية) يعني متوفر
+            const ageVal = currentApp.age ? String(currentApp.age).trim() : '';
+            const hasValidAgeNumber = /\d|[\u0660-\u0669]/.test(ageVal);
+
+            if (hasValidAgeNumber) {
+                document.getElementById('ageContainer').style.display = 'none'; // نخفيه لأنه موجود
+            } else {
+                document.getElementById('ageContainer').style.display = 'block'; // نظهره لأنه ناقص
+                document.getElementById('fillAge').value = '';
+            }
+
+            document.getElementById('fillDataModal').classList.remove('hidden');
+            document.getElementById('fillDataModal').classList.add('flex');
+        }
+
+        // إرسال طلب القبول
+        async function confirmAcceptSubmit() {
+            const nationalId = document.getElementById('fillNationalId').value.trim();
+            const ageContainerVisible = document.getElementById('ageContainer').style.display !== 'none';
+            const ageInput = document.getElementById('fillAge').value.trim();
+
+            if (!nationalId) {
+                showAlert("عذراً، يجب تعبئة (الرقم الوطني) قبل الاعتماد!");
+                return;
+            }
+
+            // إذا كانت خانة العمر ظاهرة (يعني ناقص)، تأكد إنه عباها
+            let finalAge = currentApp.age;
+            if (ageContainerVisible) {
+                if (!ageInput) {
+                    showAlert("عذراً، التقديم لا يحتوي على عمر، يجب كتابته يدوياً!");
+                    return;
+                }
+                finalAge = ageInput; // ناخذ اللي كتبه بيده
+            }
+
+            const btn = document.getElementById('finalAcceptBtn');
+            btn.innerText = "⏳ جاري الرفع..."; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/accept-raw', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ 
+                        id: currentApp.id, 
+                        name: currentApp.name, 
+                        answers: currentApp.answers,
+                        discordId: currentApp.discordId, // يُرسل مخفي في الخلفية
+                        nationalId: nationalId,
+                        age: finalAge
+                    }) 
+                });
+                const result = await res.json();
+                if (result.success) location.reload(); 
+                else { showAlert('⚠️ خطأ: ' + result.error); btn.disabled = false; btn.innerText = "✔ تأكيد واعتماد"; }
+            } catch (error) { 
+                showAlert('⚠️ تعذر الاتصال بالسيرفر.'); 
+                btn.disabled = false; btn.innerText = "✔ تأكيد واعتماد";
+            }
+        }
+
+        // فتح نافذة الرفض
+        function promptReject() {
+            document.getElementById('confirmMessage').innerText = `هل أنت متأكد من رفض المتقدم (${currentApp.name}) نهائياً؟`;
+            document.getElementById('customConfirm').classList.remove('hidden');
+            document.getElementById('customConfirm').classList.add('flex');
+        }
+
+        // إرسال الرفض
+        async function executeReject() {
+            const btn = document.getElementById('finalRejectBtn');
+            btn.innerText = "⏳ جاري الرفض..."; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/reject-raw', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ id: currentApp.id, name: currentApp.name, answers: currentApp.answers }) 
+                });
+                const result = await res.json();
+                if (result.success) location.reload(); 
+                else { showAlert('⚠️ خطأ: ' + result.error); btn.disabled = false; btn.innerText = "✖ نعم، ارفض المتقدم"; }
+            } catch (error) { 
+                showAlert('⚠️ تعذر الاتصال بالسيرفر.'); 
+                btn.disabled = false; btn.innerText = "✖ نعم، ارفض المتقدم";
+            }
+        }
+    </script>
+</body>
+</html>

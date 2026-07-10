@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>المقابلات الشخصية | الكلية العسكرية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="min-h-screen flex flex-col selection:bg-amber-500 selection:text-white relative">
+    <%- include('partials/navbar') %>
+
+    <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-[#1f2630] pb-5">
+            <div>
+                <span class="text-amber-500 font-mono text-xs font-bold uppercase tracking-widest">STAGE 02 // VOICE INTERVIEWS</span>
+                <h2 class="text-3xl font-black text-white mt-1">🎙️ المقابلات الشخصية العسكرية</h2>
+            </div>
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="🔍 ابحث بالاسم، Discord ID، أو Copy ID..." class="search-input md:w-80 focus:border-amber-500">
+                <div class="bg-[#12171f] px-4 py-2.5 rounded-xl border border-[#222b38] text-xs font-bold whitespace-nowrap">
+                    في الانتظار: <span id="countDisplay" class="text-amber-400 font-mono"><%= applications.length %></span>
+                </div>
+            </div>
+        </div>
+
+        <% if(applications.length === 0) { %>
+            <div class="bg-[#0e1218]/90 border border-dashed border-[#222b38] rounded-2xl p-16 text-center text-gray-500 backdrop-blur-md mb-12">
+                <span class="text-4xl block mb-3">⏳</span>
+                <p class="text-lg font-bold">لا يوجد مرشحين في قاعة الانتظار حالياً.</p>
+            </div>
+        <% } else { %>
+            <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+                <% applications.forEach(app => { %>
+                    <div class="card-tactical group" data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId %>">
+                        <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-amber-500 to-yellow-600"></div>
+                        
+                        <div>
+                            <div class="card-header">
+                                <div>
+                                    <h3 class="card-title group-hover:text-amber-400"><%= app.name %></h3>
+                                    <span class="card-id font-bold text-amber-500/80 mt-1 block">● مرشح للمقابلة</span>
+                                </div>
+                                <span class="badge badge-interview animate-pulse">جاهز</span>
+                            </div>
+
+                            <div class="bg-[#080a0e]/90 border border-[#1a2029] rounded-xl p-3 mb-4 space-y-2 text-xs font-mono shadow-inner">
+                                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                                    <span class="text-gray-400">💬 Discord ID:</span>
+                                    <span class="text-white font-bold select-all"><%= app.id %></span>
+                                </div>
+                                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                                    <span class="text-gray-400">📋 Copy ID:</span>
+                                    <span class="text-white font-bold select-all"><%= app.copyId || 'غير متوفر' %></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">🪪 الرقم الوطني:</span>
+                                    <span class="text-amber-400 font-bold select-all"><%= app.nationalId || 'غير متوفر' %></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <% if(user.permissions.canApproveReject || user.permissions.canAcceptApplications) { %>
+                            <div class="grid grid-cols-2 gap-2 pt-4 border-t border-[#1a2029]">
+                                <button onclick="promptAcceptInterview('<%= app.id %>', '<%= app.name %>')" class="btn btn-accept !py-2.5">✔ قبول مبدئي</button>
+                                <button onclick="promptRejectInterview('<%= app.id %>', '<%= app.name %>')" class="btn btn-reject !py-2.5">✖ رفض مبدئي</button>
+                            </div>
+                        <% } else { %>
+                            <div class="text-center bg-[#161b22] py-2 rounded-xl text-xs text-gray-500 font-bold mt-2">🔒 قرار المقابلة للقيادة والمشرفين</div>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+
+        <% if(rejectedApps && rejectedApps.length > 0) { %>
+            <div class="pt-8 border-t-2 border-red-900/30">
+                <h3 class="text-xl font-black text-red-400 mb-6">🔻 سجل السقوط في المقابلات الشخصية (<%= rejectedApps.length %>)</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-60 hover:opacity-100 transition-opacity">
+                    <% rejectedApps.forEach(app => { %>
+                        <div class="card-tactical !p-5 !border-red-900/40 bg-[#120a0d]/80" data-search="<%= app.name %> <%= app.id %> <%= app.copyId %>">
+                            <div class="absolute top-0 right-0 w-2 h-full bg-red-700"></div>
+                            <div class="card-header mb-2">
+                                <div>
+                                    <h3 class="card-title text-lg line-through text-gray-400"><%= app.name %></h3>
+                                    <span class="card-id">ID: <%= app.copyId || app.id %></span>
+                                </div>
+                                <span class="badge badge-rejected">سقوط بالمقابلة</span>
+                            </div>
+                            <div class="mt-3 pt-3 border-t border-red-900/20 text-xs text-red-400/90 font-mono">
+                                📝 <%= app.gradedBy || '[✖ تم الرفض بواسطة القيادة]' %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            </div>
+        <% } %>
+    </main>
+
+    <div id="acceptInterviewModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-[#0e1218] border border-emerald-500/40 w-full max-w-md rounded-2xl shadow-2xl p-6 animate-modal">
+            <h3 class="text-xl font-black text-white mb-2">🎙️ اعتماد المقابلة</h3>
+            <p class="text-xs text-gray-400 mb-6">المتقدم: <strong id="acceptTargetName" class="text-amber-400"></strong></p>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="text-xs font-bold text-gray-300">من أجرى المقابلة مع المتقدم؟ <span class="text-red-500">*</span></label>
+                    <input type="text" id="interviewerName" class="search-input mt-1 w-full" placeholder="مثال: المدرب فلان">
+                </div>
+            </div>
+
+            <div class="flex gap-3 mt-8">
+                <button onclick="closeModal('acceptInterviewModal')" class="btn bg-[#1a2029] text-gray-400 hover:text-white border border-[#222b38]">إلغاء</button>
+                <button onclick="confirmAcceptInterview()" id="finalAcceptBtn" class="btn btn-accept">✔ اعتماد ونقل للميدان</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customConfirm" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-[#12171f] border border-red-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-modal">
+            <div class="text-4xl mb-3">🛑</div>
+            <h3 class="text-lg font-black text-white mb-2">تأكيد الرفض</h3>
+            <p id="confirmMessage" class="text-sm text-gray-300 mb-6 leading-relaxed">هل أنت متأكد من رسوب المتقدم في المقابلة؟</p>
+            <div class="flex gap-3">
+                <button onclick="closeModal('customConfirm')" class="btn bg-[#1a2029] text-gray-400 hover:text-white">إلغاء</button>
+                <button onclick="executeRejectInterview()" id="finalRejectBtn" class="btn btn-reject">✖ نعم، ارفض المتقدم</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="customAlert" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+        <div class="bg-[#12171f] border border-orange-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-modal">
+            <div class="text-4xl mb-3">⚠️</div>
+            <h3 class="text-lg font-black text-white mb-2">تنبيه النظام</h3>
+            <p id="alertMessage" class="text-sm text-gray-300 mb-6 leading-relaxed">رسالة التنبيه هنا</p>
+            <button onclick="closeModal('customAlert')" class="btn bg-orange-600 hover:bg-orange-500 text-white">حسناً، فهمت</button>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        let targetId = '';
+        let targetName = '';
+
+        function filterCards() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.card-tactical');
+            let visibleCount = 0;
+            cards.forEach(card => {
+                if (card.getAttribute('data-search') && card.getAttribute('data-search').toLowerCase().includes(input)) {
+                    card.style.display = 'flex';
+                    if (card.parentElement.id === 'cardsGrid') visibleCount++;
+                } else { card.style.display = 'none'; }
+            });
+            const countDisplay = document.getElementById('countDisplay');
+            if(countDisplay) countDisplay.innerText = visibleCount;
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).classList.add('hidden');
+            document.getElementById(modalId).classList.remove('flex');
+        }
+
+        function showAlert(msg) {
+            document.getElementById('alertMessage').innerText = msg;
+            document.getElementById('customAlert').classList.remove('hidden');
+            document.getElementById('customAlert').classList.add('flex');
+        }
+
+        // ========================================
+        // 1. إجراءات القبول المبدئي
+        // ========================================
+        function promptAcceptInterview(id, name) {
+            targetId = id;
+            targetName = name;
+            document.getElementById('acceptTargetName').innerText = name;
+            document.getElementById('interviewerName').value = ''; // تصفير الحقل
+            
+            document.getElementById('acceptInterviewModal').classList.remove('hidden');
+            document.getElementById('acceptInterviewModal').classList.add('flex');
+        }
+
+        async function confirmAcceptInterview() {
+            const interviewer = document.getElementById('interviewerName').value.trim();
+            if (!interviewer) {
+                showAlert("يجب كتابة اسم مجري المقابلة لتوثيقه في السجل!");
+                return;
+            }
+
+            const btn = document.getElementById('finalAcceptBtn');
+            btn.innerText = "⏳ جاري الاعتماد..."; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/decide-interview', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ id: targetId, decision: 'accept', interviewer: interviewer }) 
+                });
+                const result = await res.json();
+                if (result.success) location.reload(); 
+                else { showAlert('⚠️ خطأ: ' + result.error); btn.disabled = false; btn.innerText = "✔ اعتماد ونقل للميدان"; }
+            } catch (error) { 
+                showAlert('⚠️ تعذر الاتصال بالسيرفر.'); 
+                btn.disabled = false; btn.innerText = "✔ اعتماد ونقل للميدان";
+            }
+        }
+
+        // ========================================
+        // 2. إجراءات الرفض المبدئي
+        // ========================================
+        function promptRejectInterview(id, name) {
+            targetId = id;
+            document.getElementById('confirmMessage').innerText = `هل أنت متأكد من رسوب المتقدم (${name}) في المقابلة الشخصية؟`;
+            document.getElementById('customConfirm').classList.remove('hidden');
+            document.getElementById('customConfirm').classList.add('flex');
+        }
+
+        async function executeRejectInterview() {
+            const btn = document.getElementById('finalRejectBtn');
+            btn.innerText = "⏳ جاري الرفض..."; btn.disabled = true;
+
+            try {
+                const res = await fetch('/api/decide-interview', { 
+                    method: 'POST', 
+                    headers: { 'Content-Type': 'application/json' }, 
+                    body: JSON.stringify({ id: targetId, decision: 'reject' }) 
+                });
+                const result = await res.json();
+                if (result.success) location.reload(); 
+                else { showAlert('⚠️ خطأ: ' + result.error); btn.disabled = false; btn.innerText = "✖ نعم، ارفض المتقدم"; }
+            } catch (error) { 
+                showAlert('⚠️ تعذر الاتصال بالسيرفر.'); 
+                btn.disabled = false; btn.innerText = "✖ نعم، ارفض المتقدم";
+            }
+        }
+    </script>
+</body>
+</html>
