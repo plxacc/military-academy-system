@@ -35,6 +35,8 @@ app.use(express.urlencoded({ limit: '15mb', extended: true }));
 
 // تعريف مجلد الصور والستايل بشكل صحيح إجباري
 app.use(express.static(path.join(__dirname, 'public')));
+app.set('views', path.join(__dirname, 'views'));
+app.set('view engine', 'ejs');
 
 app.use(session({ secret: 'secret-military-academy', resave: false, saveUninitialized: false }));
 app.use(passport.initialize());
