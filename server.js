@@ -4,6 +4,7 @@ const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const cors = require('cors');
 const path = require('path');
+const axios = require('axios');
 require('dotenv').config();
 
 const { getUserPermissions } = require('./config/roles');
@@ -51,12 +52,14 @@ passport.use(new DiscordStrategy({
     scope: ['identify', 'guilds', 'guilds.members.read']
 }, async (accessToken, refreshToken, profile, done) => {
     try {
-        const guildMemberResponse = await fetch(`https://discord.com/api/users/@me/guilds/${process.env.GUILD_ID}/member`, {
+        // استخدام axios بدلاً من fetch لضمان التوافق الكامل مع خوادم Vercel
+        const response = await axios.get(`https://discord.com/api/users/@me/guilds/${process.env.GUILD_ID}/member`, {
             headers: { Authorization: `Bearer ${accessToken}` }
         });
-        const memberData = await guildMemberResponse.json();
+        
+        const memberData = response.data;
         const userRoles = memberData.roles || [];
-        const permissions = getUserPermissions(userRoles);
+        const permissions = getUserPermissions(userRoles); // دالة الصلاحيات حقتك
         
         return done(null, {
             id: profile.id,
@@ -66,7 +69,15 @@ passport.use(new DiscordStrategy({
             permissions: permissions
         });
     } catch (error) {
-        return done(error, null);
+        console.error("⛔ Discord Strategy Error:", error.message);
+        // في حال فشل جلب الرتب من السيرفر، نمرر الحساب بصلاحيات فارغة بدلاً من إسقاط السيرفر كاملاً
+        return done(null, {
+            id: profile.id,
+            username: profile.username,
+            avatar: profile.avatar,
+            roles: [],
+            permissions: typeof getUserPermissions === 'function' ? getUserPermissions([]) : {}
+        });
     }
 }));
 
