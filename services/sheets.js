@@ -1,35 +1,25 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
-require('dotenv').config();
 
-// 1. تنظيف ومعالجة مفتاح قوقل السري ليتوافق مع Vercel
+// 1. تنظيف مفتاح قوقل السري ليتوافق مع سيرفرات Vercel
 let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
-
-// إزالة علامات التنصيص إذا أضافها Vercel بالخطأ
 if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
     privateKey = privateKey.slice(1, -1);
 }
-// تحويل الرموز النصية إلى أسطر حقيقية يفهمها قوقل
 privateKey = privateKey.replace(/\\n/g, '\n');
 
-// 2. إعداد المصادقة
+// 2. إعداد تصريح الدخول (البطاقة العسكرية للبوت)
 const serviceAccountAuth = new JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    key: privateKey, // استخدام المفتاح بعد التنظيف
+    key: privateKey,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
+// 3. ⚠️ السطر الأهم اللي كان يسبب خطأ 403: تمرير تصريح الدخول للشيت
 const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
 
-let memoryCache = { rawApps: null, academyApps: null, lastFetchTime: 0 };
-const CACHE_TTL = 15 * 1000;
-
-function clearCache() {
-    memoryCache.rawApps = null;
-    memoryCache.academyApps = null;
-    memoryCache.lastFetchTime = 0;
-}
-
+// ---------------------------------------------------------
+// من هنا تبدأ دوالك القديمة بدون أي تغيير (getRawApplications إلخ..)
 // 🚀 نظام إرسال اللوقات للديسكورد عبر Webhook
 async function sendDiscordLog(message) {
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
