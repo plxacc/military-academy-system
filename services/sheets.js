@@ -1,6 +1,14 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
+const { GoogleSpreadsheet } = require('google-spreadsheet');
+const { JWT } = require('google-auth-library');
 
+// 👇 ضف هذا المتغير هنا لحل مشكلة الكاش 👇
+let memoryCache = {}; 
+
+// 1. تنظيف مفتاح قوقل السري ليتوافق مع سيرفرات Vercel
+let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
+// ... (باقي الكود كما هو)
 // 1. تنظيف مفتاح قوقل السري ليتوافق مع سيرفرات Vercel
 let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
 if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
