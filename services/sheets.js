@@ -2,10 +2,20 @@ const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 require('dotenv').config();
 
+// 1. تنظيف ومعالجة مفتاح قوقل السري ليتوافق مع Vercel
+let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
+
+// إزالة علامات التنصيص إذا أضافها Vercel بالخطأ
+if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
+    privateKey = privateKey.slice(1, -1);
+}
+// تحويل الرموز النصية إلى أسطر حقيقية يفهمها قوقل
+privateKey = privateKey.replace(/\\n/g, '\n');
+
+// 2. إعداد المصادقة
 const serviceAccountAuth = new JWT({
     email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
-    // 💡 هذا التعديل يضمن قراءة المفتاح بشكل صحيح سواء محلياً أو على الاستضافة:
-    key: process.env.GOOGLE_PRIVATE_KEY ? process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n') : '',
+    key: privateKey, // استخدام المفتاح بعد التنظيف
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
