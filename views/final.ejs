@@ -10,19 +10,31 @@
     <%- include('partials/navbar') %>
 
     <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
-        <!-- الهيدر -->
+        <!-- الهيدر ولوحة التحكم الديناميكية -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-[#1f2630] pb-5">
             <div>
                 <span class="text-indigo-400 font-mono text-xs font-bold uppercase tracking-widest">STAGE 04 // FINAL COMMAND REVIEW</span>
-                <h2 class="text-3xl font-black text-white mt-1">👑 شاشة الفرز واعتماد التخرج</h2>
+                <h2 class="text-3xl font-black text-white mt-1">👑 شاشة الفرز والاعتماد النهائي</h2>
             </div>
-            <div class="flex items-center gap-3 w-full md:w-auto">
-                <input type="text" id="searchInput" onkeyup="filterLines()" placeholder="🔍 ابحث بالاسم أو الأيدي..." class="search-input md:w-80">
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <!-- التحكم بدرجة النجاح -->
+                <div class="flex items-center bg-[#12171f] border border-[#222b38] rounded-xl overflow-hidden h-[42px] shadow-inner w-full sm:w-auto">
+                    <span class="px-3 text-xs font-bold text-gray-400 whitespace-nowrap">درجة الاجتياز:</span>
+                    <input type="number" id="passScoreInput" value="40" min="0" max="50" oninput="updatePassStatus()" class="w-16 h-full bg-[#0e1218] text-white text-center font-mono font-bold outline-none border-r border-[#222b38] focus:bg-[#1a2029]">
+                </div>
+                
+                <!-- زر التصدير -->
+                <button onclick="openExportModal()" class="btn !bg-indigo-600 hover:!bg-indigo-500 !border-indigo-400/50 text-white !py-2.5 h-[42px] whitespace-nowrap w-full sm:w-auto shadow-[0_0_15px_rgba(79,70,229,0.3)]">
+                    📄 تصدير بيانات الناجحين
+                </button>
+                
+                <!-- البحث -->
+                <input type="text" id="searchInput" onkeyup="filterLines()" placeholder="🔍 ابحث بالاسم أو الأيدي..." class="search-input w-full sm:w-64 h-[42px]">
             </div>
         </div>
 
         <% 
-            // فرز تلقائي من الأعلى درجة إلى الأقل بدون أرقام مراكز
+            // فرز تلقائي من الأعلى درجة إلى الأقل
             const sortedApps = applications.sort((a, b) => b.totalScore - a.totalScore); 
         %>
 
@@ -30,30 +42,25 @@
             <div class="bg-[#0e1218]/90 border border-dashed border-[#222b38] rounded-2xl p-16 text-center text-gray-500 backdrop-blur-md">
                 <span class="text-4xl block mb-3">👑</span>
                 <p class="text-lg font-bold">لا يوجد ملفات بانتظار الاعتماد النهائي حالياً.</p>
+                <p class="text-xs mt-2">يجب على المدربين إنهاء الرصد في الميدان وإرسال التقييم النهائي لتظهر الملفات هنا.</p>
             </div>
         <% } else { %>
-            <!-- حاوية الخطوط العرضية (Rows) بدلاً من المربعات -->
             <div id="linesContainer" class="flex flex-col gap-4 mb-16">
-                <% sortedApps.forEach(app => { 
-                    const isPassed = app.totalScore >= 40;
-                    const isException = app.status.includes('استثناء');
-                    const isQualified = isPassed || isException;
-                    
-                    // تحديد الألوان بناءً على حالة النجاح/الرسوب/الاستثناء
-                    const borderColor = isQualified ? (isException ? 'border-indigo-500/50' : 'border-emerald-500/50') : 'border-red-500/50';
-                    const scoreColor = isQualified ? (isException ? 'text-indigo-400' : 'text-emerald-400') : 'text-red-500';
-                    const glowEffect = isQualified ? (isException ? 'shadow-[0_0_15px_rgba(99,102,241,0.1)]' : 'shadow-[0_0_15px_rgba(16,185,129,0.1)]') : '';
-                %>
-                    <!-- الخط العرضي الواحد -->
-                    <div class="line-item flex flex-col xl:flex-row items-center justify-between bg-[#0e1218]/90 border <%= borderColor %> rounded-2xl p-4 gap-6 transition-all duration-300 hover:bg-[#12171f] <%= glowEffect %>" data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId %>">
+                <% sortedApps.forEach(app => { %>
+                    <!-- الخط العرضي (يتم التحكم بألوانه برمجياً بناءً على الدرجة المحددة) -->
+                    <div class="line-item flex flex-col xl:flex-row items-center justify-between bg-[#0e1218]/90 border rounded-2xl p-4 gap-6 transition-all duration-300 hover:bg-[#12171f]" 
+                         data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId %>"
+                         data-score="<%= app.totalScore %>"
+                         data-name="<%= app.name %>"
+                         data-nationalid="<%= app.nationalId || 'غير متوفر' %>"
+                         data-copyid="<%= app.copyId || 'غير متوفر' %>"
+                         data-discordid="<%= app.id %>">
                         
                         <!-- 1. معلومات الطالب الأساسية -->
                         <div class="flex-1 w-full xl:w-auto">
                             <div class="flex items-center gap-3 mb-2">
                                 <h3 class="font-black text-xl text-white"><%= app.name %></h3>
-                                <% if(isException) { %>
-                                    <span class="bg-indigo-500/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded text-[10px] font-bold">✨ نجاح استثنائي</span>
-                                <% } %>
+                                <span class="status-badge px-2 py-0.5 rounded text-[10px] font-bold tracking-wider uppercase"></span>
                             </div>
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-[10px] font-mono text-gray-400 bg-black/30 p-2 rounded-lg border border-white/5">
                                 <div>💬 Discord: <strong class="text-gray-200 select-all"><%= app.id %></strong></div>
@@ -62,58 +69,31 @@
                             </div>
                         </div>
 
-                        <!-- 2. تفاصيل الدرجات (بوكسات صغيرة مصفوفة) -->
+                        <!-- 2. تفاصيل الدرجات -->
                         <div class="flex flex-wrap sm:flex-nowrap gap-2 w-full xl:w-auto justify-center bg-[#080a0e] p-2.5 rounded-xl border border-[#1a2029]">
-                            <div class="text-center px-3 border-l border-white/5 last:border-0">
+                            <div class="text-center px-4 border-l border-white/5">
                                 <span class="block text-[10px] text-gray-500 mb-1">استيقاف</span>
                                 <strong class="text-white text-sm font-mono"><%= app.stopsScore %></strong><span class="text-[10px] text-gray-600">/20</span>
                             </div>
-                            <div class="text-center px-3 border-l border-white/5 last:border-0">
+                            <div class="text-center px-4 border-l border-white/5">
                                 <span class="block text-[10px] text-gray-500 mb-1">تفاوض</span>
                                 <strong class="text-white text-sm font-mono"><%= app.negScore %></strong><span class="text-[10px] text-gray-600">/10</span>
                             </div>
-                            <div class="text-center px-3 border-l border-white/5 last:border-0">
+                            <div class="text-center px-4 border-l border-white/5">
                                 <span class="block text-[10px] text-gray-500 mb-1">عمليات</span>
                                 <strong class="text-white text-sm font-mono"><%= app.opsScore %></strong><span class="text-[10px] text-gray-600">/10</span>
                             </div>
-                            <div class="text-center px-3">
+                            <div class="text-center px-4">
                                 <span class="block text-[10px] text-gray-500 mb-1">أنظمة</span>
                                 <strong class="text-white text-sm font-mono"><%= app.genScore %></strong><span class="text-[10px] text-gray-600">/10</span>
                             </div>
                         </div>
 
                         <!-- 3. النتيجة النهائية -->
-                        <div class="text-center min-w-[90px]">
+                        <div class="text-center min-w-[120px] bg-black/20 p-3 rounded-xl border border-white/5">
                             <span class="text-[10px] text-gray-500 font-bold block mb-1 uppercase tracking-wider">Final Score</span>
-                            <span class="text-3xl font-black font-mono <%= scoreColor %>"><%= app.totalScore %></span>
+                            <span class="score-display text-3xl font-black font-mono"><%= app.totalScore %></span>
                         </div>
-
-                        <!-- 4. أزرار التحكم والقرارات -->
-                        <% if(user.permissions.canApproveReject) { %>
-                            <div class="flex flex-col sm:flex-row xl:flex-col gap-2 w-full xl:w-48">
-                                <!-- زر الاعتماد / الرفض بناءً على الأهلية -->
-                                <% if(isQualified) { %>
-                                    <button onclick="commitFinal('<%= app.id %>', '<%= app.name %>', 'graduated')" class="btn btn-accept !py-2 w-full text-[11px]">🎓 اعتماد التخرج</button>
-                                <% } else { %>
-                                    <button onclick="commitFinal('<%= app.id %>', '<%= app.name %>', 'failed')" class="btn btn-reject !py-2 w-full text-[11px]">✖ طي قيد (رسوب)</button>
-                                <% } %>
-
-                                <!-- زر الاستثناء (يظهر فقط للي درجاتهم تحت 40) -->
-                                <% if(!isPassed) { %>
-                                    <% if(isException) { %>
-                                        <button onclick="toggleAppException('<%= app.id %>', '<%= app.name %>', 'remove')" class="btn bg-orange-600/10 text-orange-400 border border-orange-500/20 hover:bg-orange-600 hover:text-white !py-2 w-full text-[11px] transition">
-                                            إلغاء الاستثناء
-                                        </button>
-                                    <% } else { %>
-                                        <button onclick="toggleAppException('<%= app.id %>', '<%= app.name %>', 'add')" class="btn bg-indigo-600/10 text-indigo-400 border border-indigo-500/20 hover:bg-indigo-600 hover:text-white !py-2 w-full text-[11px] transition">
-                                            ✨ منح نجاح استثنائي
-                                        </button>
-                                    <% } %>
-                                <% } %>
-                            </div>
-                        <% } else { %>
-                            <div class="text-center bg-[#161b22] py-2 px-4 rounded-xl text-[10px] text-gray-500 font-bold">🔒 صلاحية القيادة</div>
-                        <% } %>
 
                     </div>
                 <% }) %>
@@ -121,9 +101,41 @@
         <% } %>
     </main>
 
+    <!-- النافذة المنبثقة لتصدير البيانات -->
+    <div id="exportModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-[#0e1218] border border-indigo-500/40 w-full max-w-3xl rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh] animate-modal">
+            <div class="bg-[#12171f] px-6 py-4 border-b border-[#222b38] flex justify-between items-center rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📄</span>
+                    <div>
+                        <h3 class="text-lg font-black text-white">سجل بيانات الناجحين</h3>
+                        <p class="text-xs text-indigo-400 mt-0.5 font-mono" id="exportCountDisplay">عدد الناجحين: 0</p>
+                    </div>
+                </div>
+                <button onclick="closeExportModal()" class="w-8 h-8 rounded-lg bg-[#1a2029] hover:bg-red-600/80 text-gray-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-hidden flex flex-col">
+                <p class="text-xs text-gray-400 mb-3 font-bold">هذه القائمة تحتوي فقط على من اجتازوا درجة النجاح المحددة. يمكنك نسخها مباشرة.</p>
+                <textarea id="exportTextarea" readonly class="w-full flex-1 bg-[#080a0e] border border-[#222b38] rounded-xl p-4 text-sm text-gray-300 font-mono resize-none focus:outline-none focus:border-indigo-500/50 leading-relaxed"></textarea>
+            </div>
+
+            <div class="bg-[#12171f] px-6 py-4 border-t border-[#222b38] flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closeExportModal()" class="btn bg-[#1a2029] text-gray-400 hover:text-white border border-[#222b38]">إغلاق</button>
+                <button onclick="copyExportData()" class="btn !bg-indigo-600 hover:!bg-indigo-500 text-white px-8">📋 نسخ جميع البيانات</button>
+            </div>
+        </div>
+    </div>
+
     <%- include('partials/footer') %>
 
     <script>
+        // تشغيل التحديث فور تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            updatePassStatus();
+        });
+
+        // فلترة البحث النصي
         function filterLines() {
             const input = document.getElementById('searchInput').value.toLowerCase();
             const lines = document.querySelectorAll('.line-item');
@@ -132,48 +144,95 @@
             });
         }
 
-        // دالة الاستثناء الذكية
-        async function toggleAppException(id, name, action) {
-            const msg = action === 'add' 
-                ? `هل أنت متأكد من منح المتدرب (${name}) نجاحاً استثنائياً لتأهيله للتخرج؟` 
-                : `هل أنت متأكد من سحب الاستثناء من المتدرب (${name}) وإعادته كراسب؟`;
-            
-            if (confirm(msg)) {
-                try {
-                    const res = await fetch('/api/toggle-exception', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id, action })
-                    });
-                    const result = await res.json();
-                    if (result.success) location.reload();
-                    else alert('⚠️ خطأ: ' + result.error);
-                } catch (error) {
-                    alert('⚠️ تعذر الاتصال بالسيرفر.');
+        // تحديث حالة النجاح والرسوب وتغيير الألوان ديناميكياً
+        function updatePassStatus() {
+            const passScore = parseInt(document.getElementById('passScoreInput').value) || 40;
+            const lines = document.querySelectorAll('.line-item');
+
+            lines.forEach(line => {
+                const score = parseFloat(line.getAttribute('data-score')) || 0;
+                const isPassed = score >= passScore;
+                
+                const scoreDisplay = line.querySelector('.score-display');
+                const badge = line.querySelector('.status-badge');
+
+                // مسح الكلاسات القديمة
+                line.className = line.className.replace(/border-emerald-500\/50|border-red-500\/50|shadow-\[0_0_15px_rgba\(16,185,129,0\.1\)\]|shadow-\[0_0_15px_rgba\(239,68,68,0\.1\)\]/g, '').trim();
+                scoreDisplay.className = scoreDisplay.className.replace(/text-emerald-400|text-red-500/g, '').trim();
+                badge.className = badge.className.replace(/bg-emerald-500\/20 text-emerald-400 border-emerald-500\/30|bg-red-500\/20 text-red-400 border-red-500\/30/g, '').trim();
+
+                // تطبيق الكلاسات الجديدة بناءً على النتيجة
+                if (isPassed) {
+                    line.classList.add('border-emerald-500/50', 'shadow-[0_0_15px_rgba(16,185,129,0.1)]');
+                    scoreDisplay.classList.add('text-emerald-400');
+                    badge.classList.add('bg-emerald-500/20', 'text-emerald-400', 'border-emerald-500/30');
+                    badge.innerText = '✔ مجتاز للتأهيل';
+                } else {
+                    line.classList.add('border-red-500/50');
+                    scoreDisplay.classList.add('text-red-500');
+                    badge.classList.add('bg-red-500/20', 'text-red-400', 'border-red-500/30');
+                    badge.innerText = '✖ غير مجتاز';
                 }
-            }
+            });
         }
 
-        // دالة الاعتماد النهائي لإنهاء مسيرة المتدرب
-        async function commitFinal(id, name, decision) {
-            const msg = decision === 'graduated'
-                ? `🎓 هل تعتمد تخرج المتدرب (${name}) وإغلاق ملفه كضابط جديد؟`
-                : `✖ هل تعتمد رسوب المتدرب (${name}) وطي قيده نهائياً؟`;
+        // منطق نافذة التصدير
+        function openExportModal() {
+            const passScore = parseInt(document.getElementById('passScoreInput').value) || 40;
+            const lines = document.querySelectorAll('.line-item');
+            let exportData = "";
+            let passedCount = 0;
 
-            if (confirm(msg)) {
-                try {
-                    const res = await fetch('/api/final-decision', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ id, decision })
-                    });
-                    const result = await res.json();
-                    if (result.success) location.reload();
-                    else alert('⚠️ خطأ: ' + result.error);
-                } catch (error) {
-                    alert('⚠️ تعذر الاتصال بالسيرفر.');
+            lines.forEach(line => {
+                const score = parseFloat(line.getAttribute('data-score')) || 0;
+                if (score >= passScore) {
+                    passedCount++;
+                    const name = line.getAttribute('data-name');
+                    const natId = line.getAttribute('data-nationalid');
+                    const copyId = line.getAttribute('data-copyid');
+                    const discordId = line.getAttribute('data-discordid');
+                    
+                    // تنسيق النص المراد نسخه
+                    exportData += `الاسم: ${name} | الرقم الوطني: ${natId} | Copy ID: ${copyId} | Discord: ${discordId}\n`;
+                    exportData += `-----------------------------------------------------------------------\n`;
                 }
+            });
+
+            if (passedCount === 0) {
+                exportData = "لا يوجد ناجحين بناءً على درجة الاجتياز المحددة حالياً.";
             }
+
+            document.getElementById('exportCountDisplay').innerText = `إجمالي المجتازين: ${passedCount}`;
+            document.getElementById('exportTextarea').value = exportData;
+            
+            document.getElementById('exportModal').classList.remove('hidden');
+            document.getElementById('exportModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.add('hidden');
+            document.getElementById('exportModal').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function copyExportData() {
+            const textarea = document.getElementById('exportTextarea');
+            if(textarea.value.includes("لا يوجد ناجحين")) return;
+            
+            textarea.select();
+            textarea.setSelectionRange(0, 99999); // للموبايل
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const btn = document.querySelector('#exportModal .btn-accept, #exportModal .bg-indigo-600');
+                const originalText = btn.innerText;
+                btn.innerText = "✔ تم النسخ بنجاح";
+                btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
+                }, 2000);
+            });
         }
     </script>
 </body>
