@@ -1,5 +1,5 @@
 const express = require('express');
-const session = require('express-session');
+const cookieSession = require('cookie-session');
 const passport = require('passport');
 const DiscordStrategy = require('passport-discord').Strategy;
 const cors = require('cors');
@@ -39,7 +39,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.use(session({ secret: 'secret-military-academy', resave: false, saveUninitialized: false }));
+// استخدام نظام الجلسات المشفرة ليتوافق مع سيرفرات Vercel بشكل مثالي
+app.use(cookieSession({
+    name: 'academy-session',
+    keys: ['secret-military-academy-key-2026'],
+    maxAge: 24 * 60 * 60 * 1000 // 24 ساعة بالضبط (يوم واحد)
+}));
 app.use(passport.initialize());
 app.use(passport.session());
 
