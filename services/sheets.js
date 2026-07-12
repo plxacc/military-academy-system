@@ -316,7 +316,7 @@ async function advancedGradeApplicant(discordId, section, detailsText, finalScor
 
         const logMsg = `🎯 **نوع الإجراء:** رصد درجات الميدان\n` +
                        `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `👮‍♂️ **بيانات المدرب (المدرب):**\n` +
+                       `👮‍♂️ **بيانات المدرب :**\n` +
                        `👤 **اسم الديسكورد:** ${graderName}\n` +
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `🎯 **بيانات المتدرب :**\n` +
@@ -515,8 +515,9 @@ async function deleteGuideQuestion(questionId) {
     }
 }
 
-// لا تنسى إضافتهم في التصدير آخر سطر بالملف:
-// module.exports = { ..., getGuideQuestions, addGuideQuestion, deleteGuideQuestion };
+// دوال فارغة للحفاظ على استقرار السيرفر ومنع أخطاء التصدير
+async function updateApplicationStage(discordId, newStage, newStatus) {}
+async function gradeApplicant(discordId, section, score, graderName) {}
 
 // التصدير الشامل والكامل لجميع دوال النظام بدون أي نقص
 module.exports = { 
