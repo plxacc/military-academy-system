@@ -1,14 +1,6 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
-const { GoogleSpreadsheet } = require('google-spreadsheet');
-const { JWT } = require('google-auth-library');
 
-// 👇 ضف هذا المتغير هنا لحل مشكلة الكاش 👇
-let memoryCache = {}; 
-
-// 1. تنظيف مفتاح قوقل السري ليتوافق مع سيرفرات Vercel
-let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
-// ... (باقي الكود كما هو)
 // 1. تنظيف مفتاح قوقل السري ليتوافق مع سيرفرات Vercel
 let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
 if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
@@ -25,7 +17,19 @@ const serviceAccountAuth = new JWT({
 
 // 3. ⚠️ السطر الأهم اللي كان يسبب خطأ 403: تمرير تصريح الدخول للشيت
 const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
+// تعريف متغيرات الذاكرة المؤقتة (الكاش) ودالة تنظيفها اللي كانت مفقودة
+const memoryCache = {
+    rawApps: null,
+    academyApps: null,
+    lastFetchTime: 0
+};
+const CACHE_TTL = 30 * 1000; // مدة حفظ الكاش (30 ثانية)
 
+function clearCache() {
+    memoryCache.rawApps = null;
+    memoryCache.academyApps = null;
+    memoryCache.lastFetchTime = 0;
+}
 // ---------------------------------------------------------
 // من هنا تبدأ دوالك القديمة بدون أي تغيير (getRawApplications إلخ..)
 // 🚀 نظام إرسال اللوقات للديسكورد عبر Webhook
