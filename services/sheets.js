@@ -30,6 +30,19 @@ function clearCache() {
     memoryCache.academyApps = null;
     memoryCache.lastFetchTime = 0;
 }
+async function sendDiscordLog(message) {
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+    if (!webhookUrl) return;
+    try {
+        await fetch(webhookUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: message })
+        });
+    } catch (err) {
+        console.log("⚠️ فشل إرسال اللوق للديسكورد:", err.message);
+    }
+}
 
 // ---------------------------------------------------------
 // من هنا تبدأ دوالك القديمة بدون أي تغيير (getRawApplications إلخ..)
