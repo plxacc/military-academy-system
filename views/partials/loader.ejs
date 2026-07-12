@@ -1,11 +1,10 @@
-<!-- views/partials/loader.ejs -->
 <div id="globalLoader" class="fixed inset-0 z-[99999] flex flex-col items-center justify-center bg-[#05070a]/85 backdrop-blur-xl transition-opacity duration-300 opacity-0 pointer-events-none">
     <div class="relative flex flex-col items-center scale-90 sm:scale-100">
-        <!-- درع الكلية مع تأثير النبض وحلقة الدوران -->
-        <div class="relative w-24 h-24 rounded-3xl bg-gradient-to-br from-orange-600 to-amber-700 flex items-center justify-center shadow-[0_0_50px_rgba(249,115,22,0.4)] border border-orange-400/50 mb-8 z-10">
-            <span class="text-5xl animate-pulse">🛡️</span>
-            <!-- حلقة تدور حول الدرع -->
-            <div class="absolute inset-0 rounded-3xl border-4 border-transparent border-t-white/60 border-b-white/60 animate-[spin_1.5s_linear_infinite]"></div>
+        <!-- الشعار مع تأثير النبض وحلقة الدوران -->
+        <div class="relative w-28 h-28 flex items-center justify-center mb-8 z-10">
+            <img src="/images/logo.png" alt="شعار الكلية" class="w-20 h-20 object-contain animate-pulse drop-shadow-[0_0_25px_rgba(249,115,22,0.5)] z-10">
+            <!-- حلقة تدور حول الشعار -->
+            <div class="absolute inset-0 rounded-full border-4 border-transparent border-t-orange-500/80 border-b-orange-500/80 animate-[spin_1.5s_linear_infinite]"></div>
         </div>
         
         <h3 class="text-white font-black tracking-widest text-2xl mb-3">الكلية العسكرية</h3>
@@ -17,7 +16,6 @@
 </div>
 
 <script>
-    // سكربت ذكي يعترض الضغطات ويظهر التحميل فوراً
     document.addEventListener('DOMContentLoaded', () => {
         const loader = document.getElementById('globalLoader');
         
@@ -31,28 +29,22 @@
             loader.classList.add('opacity-0', 'pointer-events-none');
         }
 
-        // إخفاء التحميل أول ما تفتح الصفحة
         hideLoader();
 
-        // إخفاء التحميل في حال ضغط زر "الرجوع" في المتصفح لتفادي التعليق
         window.addEventListener('pageshow', (e) => {
             if (e.persisted) hideLoader();
         });
 
-        // مراقبة جميع الروابط في الموقع
         document.querySelectorAll('a').forEach(link => {
             link.addEventListener('click', function(e) {
                 const href = this.getAttribute('href');
                 const target = this.getAttribute('target');
-                
-                // التفعيل فقط للروابط الداخلية اللي تنقل لصفحة ثانية وتتطلب سحب بيانات
                 if (href && href.startsWith('/') && !href.startsWith('#') && target !== '_blank' && !href.includes('logout')) {
                     showLoader();
                 }
             });
         });
 
-        // إظهار اللودر عند إرسال أي فورم للقيادة
         document.querySelectorAll('form').forEach(form => {
             form.addEventListener('submit', () => showLoader());
         });
