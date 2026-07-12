@@ -196,6 +196,8 @@ async function rejectRawApplicant(rawId, name, answers, officerName) {
     const existingRows = await academySheet.getRows();
     const existingRow = existingRows.find(r => String(r.get('Copy_ID')).trim() === String(copyId).trim());
     
+    const nationalId = existingRow ? (existingRow.get('National_ID') || 'غير متوفر') : 'غير متوفر';
+
     if (!existingRow) {
         await academySheet.addRow({
             Discord_ID: String(discordId).trim(),
@@ -213,7 +215,20 @@ async function rejectRawApplicant(rawId, name, answers, officerName) {
         await existingRow.save();
     }
     clearCache();
-    await sendDiscordLog(`❌ **رفض تقديم**\n👮‍♂️ **المدرب:** ${officerName}\n👤 **المتقدم:** ${name}\n📋 **كوبي ايدي:** \`${copyId}\``);
+
+    const logMsg = `🛑 **نوع الإجراء:** رفض تقديم جديد\n` +
+                   `━━━━━━━━━━━━━━━━━━━━\n` +
+                   `👮‍♂️ **بيانات المنفذ:**\n` +
+                   `👤 **اسم الديسكورد:** ${officerName}\n` +
+                   `━━━━━━━━━━━━━━━━━━━━\n` +
+                   `🎯 **بيانات المُنفذ عليه (المتقدم):**\n` +
+                   `👤 **الاسم:** ${name}\n` +
+                   `💬 **الديسكورد:** \`${discordId}\`\n` +
+                   `📋 **كوبي ايدي:** \`${copyId}\`\n` +
+                   `🪪 **الرقم الوطني:** \`${nationalId}\`\n` +
+                   `━━━━━━━━━━━━━━━━━━━━\n` +
+                   `📝 **التفاصيل:** تم رفض طلب الالتحاق نهائياً.`;
+    await sendDiscordLog(logMsg);
 }
 
 // قرار المقابلة (قبول/رفض) مع تسجيل من أجرى المقابلة
@@ -224,7 +239,11 @@ async function decideInterview(discordId, decisionType, officerName, interviewer
     const row = rows.find(r => String(r.get('Discord_ID')).trim() === String(discordId).trim() || String(r.get('Copy_ID')).trim() === String(discordId).trim());
     
     if (row) {
+        const appName = row.get('Name') || 'غير متوفر';
+        const appCopyId = row.get('Copy_ID') || 'غير متوفر';
+        const appNatId = row.get('National_ID') || 'غير متوفر';
         const dateNow = new Date().toLocaleDateString('en-GB');
+        
         let newStage = '';
         let newStatus = '';
         let logMessage = '';
@@ -245,8 +264,21 @@ async function decideInterview(discordId, decisionType, officerName, interviewer
         row.assign({ Stage: newStage, Status: newStatus, Graded_By: updatedLogs });
         await row.save();
         
-        const decisionMsg = decisionType === 'accept' ? `✔ تم قبوله لميدان التدريب\n🗣️ **المُقابل:** ${interviewerName}` : '✖ تم رفضه في المقابلة الشخصية';
-        await sendDiscordLog(`🎙️ **قرار مقابلة شخصية**\n👮‍♂️ **المُعتمد:** ${officerName}\n👤 **المتقدم:** \`${discordId}\`\n📋 **القرار:** ${decisionMsg}`);
+        const decisionMsg = decisionType === 'accept' ? `✔ تم اجتياز المقابلة المبدئية مع (${interviewerName}) ونقله لميدان التدريب.` : `✖ رسوب في المقابلة الشخصية والرفض من الإكمال.`;
+
+        const logMsg = `🎙️ **نوع الإجراء:** قرار المقابلة الشخصية\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `👮‍♂️ **بيانات المنفذ (المُعتمد):**\n` +
+                       `👤 **اسم الديسكورد:** ${officerName}\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `🎯 **بيانات المُنفذ عليه (المرشح):**\n` +
+                       `👤 **الاسم:** ${appName}\n` +
+                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
+                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `📝 **التفاصيل:** ${decisionMsg}`;
+        await sendDiscordLog(logMsg);
     }
     clearCache();
 }
@@ -259,6 +291,9 @@ async function advancedGradeApplicant(discordId, section, detailsText, finalScor
     const row = rows.find(r => r.get('Discord_ID') === discordId || r.get('Copy_ID') === discordId);
 
     if (row) {
+        const appName = row.get('Name') || 'غير متوفر';
+        const appCopyId = row.get('Copy_ID') || 'غير متوفر';
+        const appNatId = row.get('National_ID') || 'غير متوفر';
         const sectionAr = section === 'stops' ? 'استيقافات' : section === 'neg' ? 'تفاوض' : section === 'ops' ? 'عمليات' : 'أنظمة';
         let currentLogs = row.get('Graded_By') || '';
         
@@ -279,13 +314,23 @@ async function advancedGradeApplicant(discordId, section, detailsText, finalScor
         row.assign({ Graded_By: `${currentLogs} [${sectionAr}: تم الرصد]`.trim() });
         await row.save();
 
-        await sendDiscordLog(`🎯 **رصد درجات الميدان**\n👮‍♂️ **المدرب/المدرب:** ${graderName}\n👤 **المتدرب:** <@${discordId}> (\`${discordId}\`)\n📊 **القسم:** ${sectionAr}\n📝 **التفاصيل:** ${detailsText}\n⭐ **النتيجة المسجلة:** **${finalScore}**`);
+        const logMsg = `🎯 **نوع الإجراء:** رصد درجات الميدان\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `👮‍♂️ **بيانات المنفذ (المدرب):**\n` +
+                       `👤 **اسم الديسكورد:** ${graderName}\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `🎯 **بيانات المُنفذ عليه (المتدرب):**\n` +
+                       `👤 **الاسم:** ${appName}\n` +
+                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
+                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `📊 **القسم:** ${sectionAr} | **الدرجة المسجلة:** **${finalScore}**\n` +
+                       `📝 **تفاصيل الرصد:** ${detailsText}`;
+        await sendDiscordLog(logMsg);
     }
     clearCache();
 }
-
-async function updateApplicationStage(discordId, newStage, newStatus) {}
-async function gradeApplicant(discordId, section, score, graderName) {}
 
 // إرسال المتدرب للرصد النهائي (للقيادة)
 async function sendToFinalDecision(discordId, officerName) {
@@ -295,6 +340,11 @@ async function sendToFinalDecision(discordId, officerName) {
     const row = rows.find(r => r.get('Discord_ID') === discordId || r.get('Copy_ID') === discordId);
 
     if (row) {
+        const appName = row.get('Name') || 'غير متوفر';
+        const appCopyId = row.get('Copy_ID') || 'غير متوفر';
+        const appNatId = row.get('National_ID') || 'غير متوفر';
+        const totalScore = row.get('Total_Score') || 0;
+
         row.assign({
             Stage: 'final',
             Status: 'بانتظار الاعتماد النهائي'
@@ -307,8 +357,20 @@ async function sendToFinalDecision(discordId, officerName) {
         row.assign({ Graded_By: `${currentLogs} ${logText}`.trim() });
         await row.save();
 
-        const totalScore = row.get('Total_Score') || 0;
-        await sendDiscordLog(`🚀 **إرسال للرصد النهائي**\n👮‍♂️ **بواسطة:** ${officerName}\n👤 **المتدرب:** <@${discordId}>\n📊 **المجموع:** **${totalScore}/50**\n⏳ بانتظار مراجعة القيادة.`);
+        const logMsg = `🚀 **نوع الإجراء:** الرفع للتقييم النهائي\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `👮‍♂️ **بيانات المنفذ:**\n` +
+                       `👤 **اسم الديسكورد:** ${officerName}\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `🎯 **بيانات المُنفذ عليه (المتدرب):**\n` +
+                       `👤 **الاسم:** ${appName}\n` +
+                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
+                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `📊 **المجموع الكلي للدرجات:** **${totalScore}/50**\n` +
+                       `📝 **التفاصيل:** تم اكتمال رصد درجات الميدان ورفع الملف للقيادة للاعتماد.`;
+        await sendDiscordLog(logMsg);
     }
     clearCache();
 }
@@ -321,20 +383,41 @@ async function toggleException(discordId, action, officerName) {
     const row = rows.find(r => r.get('Discord_ID') === discordId || r.get('Copy_ID') === discordId);
 
     if (row) {
+        const appName = row.get('Name') || 'غير متوفر';
+        const appCopyId = row.get('Copy_ID') || 'غير متوفر';
+        const appNatId = row.get('National_ID') || 'غير متوفر';
         const dateNow = new Date().toLocaleDateString('en-GB');
+        
         let currentLogs = row.get('Graded_By') || '';
         let logText = '';
+        let actionDesc = '';
 
         if (action === 'add') {
             row.assign({ Status: 'ناجح استثنائياً' });
             logText = `[✨ مُنح نجاح استثنائي بواسطة: ${officerName} (${dateNow})]`;
+            actionDesc = '✨ تم منح المتدرب حالة (نجاح استثنائي) لتأهيله للتخرج.';
         } else {
-            row.assign({ Status: 'بانتظار الاعتماد النهائي' }); // يرجع لحالته الطبيعية
+            row.assign({ Status: 'بانتظار الاعتماد النهائي' });
             logText = `[❌ أُلغي الاستثناء بواسطة: ${officerName} (${dateNow})]`;
+            actionDesc = '❌ تم إلغاء حالة الاستثناء وإعادة المتدرب لحالة الرسوب.';
         }
 
         row.assign({ Graded_By: `${currentLogs} ${logText}`.trim() });
         await row.save();
+
+        const logMsg = `⚠️ **نوع الإجراء:** تعديل حالة استثنائية\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `👮‍♂️ **بيانات المنفذ (القيادة):**\n` +
+                       `👤 **اسم الديسكورد:** ${officerName}\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `🎯 **بيانات المُنفذ عليه (المتدرب):**\n` +
+                       `👤 **الاسم:** ${appName}\n` +
+                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
+                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `📝 **التفاصيل:** ${actionDesc}`;
+        await sendDiscordLog(logMsg);
     }
     clearCache();
 }
@@ -347,7 +430,11 @@ async function finalDecision(discordId, decisionType, officerName) {
     const row = rows.find(r => r.get('Discord_ID') === discordId || r.get('Copy_ID') === discordId);
 
     if (row) {
+        const appName = row.get('Name') || 'غير متوفر';
+        const appCopyId = row.get('Copy_ID') || 'غير متوفر';
+        const appNatId = row.get('National_ID') || 'غير متوفر';
         const dateNow = new Date().toLocaleDateString('en-GB');
+        
         let newStage = decisionType === 'graduated' ? 'graduated' : 'failed';
         let newStatus = decisionType === 'graduated' ? 'متخرج ومقبول نهائياً' : 'مرفوض نهائياً - طي قيد';
         let logText = decisionType === 'graduated' ? `[🎓 اُعتمد تخرجه بواسطة: ${officerName} (${dateNow})]` : `[✖ طُوي قيده بواسطة: ${officerName} (${dateNow})]`;
@@ -361,12 +448,24 @@ async function finalDecision(discordId, decisionType, officerName) {
         });
         await row.save();
         
-        const discordMsg = decisionType === 'graduated' ? '🎓 **تم اعتماد التخرج بنجاح**' : '✖ **تم طي القيد (رسوب)**';
-        await sendDiscordLog(`👑 **قرار القيادة النهائي**\n👮‍♂️ **المُعتمد:** ${officerName}\n👤 **المتدرب:** <@${discordId}>\n📋 **القرار:** ${discordMsg}`);
+        const discordMsg = decisionType === 'graduated' ? '🎓 **تم اعتماد التخرج بنجاح وانضمامه للسلك العسكري.**' : '✖ **تم اعتماد طي القيد (رسوب) وإغلاق الملف.**';
+        
+        const logMsg = `👑 **نوع الإجراء:** قرار القيادة النهائي\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `👮‍♂️ **بيانات المنفذ (القيادة):**\n` +
+                       `👤 **اسم الديسكورد:** ${officerName}\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `🎯 **بيانات المُنفذ عليه:**\n` +
+                       `👤 **الاسم:** ${appName}\n` +
+                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
+                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
+                       `━━━━━━━━━━━━━━━━━━━━\n` +
+                       `📝 **التفاصيل:** ${discordMsg}`;
+        await sendDiscordLog(logMsg);
     }
     clearCache();
 }
-
 // 🚀 نظام دليل الكلية: سحب الأسئلة من الشيت الجديد
 async function getGuideQuestions() {
     try {
