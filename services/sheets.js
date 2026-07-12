@@ -1,51 +1,38 @@
 const { GoogleSpreadsheet } = require('google-spreadsheet');
 const { JWT } = require('google-auth-library');
 
-// 1. تنظيف مفتاح قوقل السري ليتوافق مع سيرفرات Vercel
+// 1. تنظيف المفاتيح من أي مسافات مخفية (مهم جداً لبيئة Vercel)
+const sheetId = (process.env.GOOGLE_SHEET_ID || '').trim();
+const clientEmail = (process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL || '').trim();
 let privateKey = process.env.GOOGLE_PRIVATE_KEY || '';
+
 if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
     privateKey = privateKey.slice(1, -1);
 }
-privateKey = privateKey.replace(/\\n/g, '\n');
+privateKey = privateKey.replace(/\\n/g, '\n').trim();
 
 // 2. إعداد تصريح الدخول (البطاقة العسكرية للبوت)
 const serviceAccountAuth = new JWT({
-    email: process.env.GOOGLE_SERVICE_ACCOUNT_EMAIL,
+    email: clientEmail,
     key: privateKey,
     scopes: ['https://www.googleapis.com/auth/spreadsheets'],
 });
 
-// 3. ⚠️ السطر الأهم اللي كان يسبب خطأ 403: تمرير تصريح الدخول للشيت
-const doc = new GoogleSpreadsheet(process.env.GOOGLE_SHEET_ID, serviceAccountAuth);
-// تعريف متغيرات الذاكرة المؤقتة (الكاش) ودالة تنظيفها اللي كانت مفقودة
-const memoryCache = {
-    rawApps: null,
-    academyApps: null,
-    lastFetchTime: 0
-};
-const CACHE_TTL = 30 * 1000; // مدة حفظ الكاش (30 ثانية)
+// 3. تمرير تصريح الدخول للشيت
+const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
+
+// تعريف الكاش للذاكرة
+const memoryCache = { rawApps: null, academyApps: null, lastFetchTime: 0 };
+const CACHE_TTL = 30 * 1000;
 
 function clearCache() {
     memoryCache.rawApps = null;
     memoryCache.academyApps = null;
     memoryCache.lastFetchTime = 0;
 }
+
 // ---------------------------------------------------------
 // من هنا تبدأ دوالك القديمة بدون أي تغيير (getRawApplications إلخ..)
-// 🚀 نظام إرسال اللوقات للديسكورد عبر Webhook
-async function sendDiscordLog(message) {
-    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-    if (!webhookUrl) return; 
-    try {
-        await fetch(webhookUrl, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: message })
-        });
-    } catch (err) {
-        console.log("⚠️ فشل إرسال اللوق للديسكورد:", err.message);
-    }
-}
 
 // 1. سحب التقديمات الخام
 async function getRawApplications() {
