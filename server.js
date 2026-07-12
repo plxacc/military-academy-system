@@ -40,10 +40,11 @@ app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
 // استخدام نظام الجلسات المشفرة ليتوافق مع سيرفرات Vercel بشكل مثالي
+// استخدام نظام الجلسات المشفرة ليتوافق مع سيرفرات Vercel بشكل مثالي
 app.use(cookieSession({
     name: 'academy-session',
     keys: ['secret-military-academy-key-2026'],
-    maxAge: 24 * 60 * 60 * 1000 // 24 ساعة بالضبط (يوم واحد)
+    maxAge: 7 * 24 * 60 * 60 * 1000 // الجلسة تحفظ لمدة 7 أيام متواصلة
 }));
 app.use(passport.initialize());
 app.use(passport.session());
