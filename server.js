@@ -46,6 +46,19 @@ app.use(cookieSession({
     keys: ['secret-military-academy-key-2026'],
     maxAge: 7 * 24 * 60 * 60 * 1000 // الجلسة تحفظ لمدة 7 أيام متواصلة
 }));
+// 👇 الكود السحري لحل مشكلة التعليق اللانهائي مع Vercel و Passport 👇
+app.set('trust proxy', 1);
+
+app.use((req, res, next) => {
+    if (req.session && !req.session.regenerate) {
+        req.session.regenerate = (cb) => { cb() }
+    }
+    if (req.session && !req.session.save) {
+        req.session.save = (cb) => { cb() }
+    }
+    next();
+});
+
 app.use(passport.initialize());
 app.use(passport.session());
 
