@@ -23,7 +23,14 @@ const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
 
 // تعريف الكاش للذاكرة
 const memoryCache = { rawApps: null, academyApps: null, lastFetchTime: 0 };
-const CACHE_TTL = 30 * 1000;
+// تم تقليله إلى ثانية واحدة فقط لضمان التحديث اللحظي بين العساكر ومنع التضارب
+const CACHE_TTL = 1 * 1000; 
+
+function clearCache() {
+    memoryCache.rawApps = null;
+    memoryCache.academyApps = null;
+    memoryCache.lastFetchTime = 0;
+}
 
 function clearCache() {
     memoryCache.rawApps = null;
