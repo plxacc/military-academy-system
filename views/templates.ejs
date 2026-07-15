@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <title>إدارة الرسائل | الكلية العسكرية</title>
+    <title>مركز المراسلات | الكلية العسكرية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
 </head>
@@ -15,99 +15,76 @@
             <div class="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-indigo-900/20 to-transparent opacity-50"></div>
             <div class="relative z-10">
                 <span class="inline-block bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-mono font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">
-                    AUTOMATED COMM SYSTEM
+                    COMMUNICATIONS CENTER
                 </span>
-                <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">نظام المراسلات التلقائية المباشرة (DM)</h2>
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">مركز المراسلات والتوجيه الآلي</h2>
                 <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">
-                    إدارة قوالب الرسائل وإرسال الإشعارات المباشرة للمتقدمين عبر البوت الخاص بالكلية لكل مرحلة من مراحل القبول.
+                    من هنا يمكنك إعداد النماذج التلقائية التي تُرسل فور قبول العسكري، بالإضافة إلى إرسال رسائل بث عامة (Broadcast) لأي مجموعة.
                 </p>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
-            <!-- القسم 1: المقابلات -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-6 flex flex-col shadow-lg relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-orange-500 to-transparent"></div>
-                <h3 class="text-xl font-black text-white mb-1 flex items-center gap-2"><span>🎙️</span> رسائل المقابلات</h3>
-                <p class="text-xs text-gray-500 mb-4 font-mono">المرشحين لإجراء المقابلة الشخصية</p>
-                
-                <textarea id="msg-interview" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-orange-500/50 outline-none mb-3" placeholder="اكتب رسالة استدعاء المقابلة هنا..."><%= templates.interview %></textarea>
-                <button onclick="saveTemp('interview')" class="btn bg-[#161b22] hover:bg-[#1f2630] border border-[#222b38] text-gray-300 w-full !py-2 mb-6">💾 حفظ كقالب افتراضي</button>
-
-                <div class="flex-1 bg-[#05070a] rounded-xl border border-[#1f2630] p-4 mb-4 overflow-y-auto max-h-48">
-                    <h4 class="text-xs font-bold text-gray-400 mb-3 border-b border-[#1f2630] pb-2">القائمة المستهدفة (<%= interviewUsers.length %>):</h4>
-                    <% if(interviewUsers.length === 0) { %>
-                        <p class="text-xs text-gray-600 text-center mt-4">لا يوجد مرشحين حالياً.</p>
-                    <% } else { %>
-                        <div class="flex flex-col gap-2">
-                            <% interviewUsers.forEach(u => { %>
-                                <div class="text-[10px] font-mono text-gray-300 bg-[#0d1117] p-2 rounded-lg border border-[#1f2630] flex justify-between">
-                                    <span class="font-bold truncate"><%= u.name %></span>
-                                    <span class="text-orange-400">ID: <%= u.copyId %></span>
-                                </div>
-                            <% }) %>
-                        </div>
-                    <% } %>
+            <!-- القسم الأول: قوالب الإرسال التلقائي -->
+            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 relative shadow-lg">
+                <div class="flex items-center gap-4 mb-8 border-b border-[#1f2630] pb-4">
+                    <span class="text-3xl">⚙️</span>
+                    <div>
+                        <h3 class="text-xl font-black text-white">إعداد القوالب التلقائية</h3>
+                        <p class="text-xs text-gray-500 mt-1">تُدمج هذه النصوص مع رسالة القبول وترسل آلياً</p>
+                    </div>
                 </div>
-                
-                <button onclick="sendBulk('interview', interviewIds)" class="btn !bg-orange-600 hover:!bg-orange-500 w-full !py-3 shadow-[0_0_15px_rgba(249,115,22,0.3)]">🚀 إرسال الرسالة للجميع</button>
+
+                <div class="space-y-6">
+                    <div>
+                        <label class="text-xs font-bold text-orange-400 mb-2 block">نموذج القبول للمقابلة (المرحلة 1):</label>
+                        <textarea id="tpl-interview" class="w-full h-20 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-orange-500" placeholder="مثال: يرجى التوجه للانتظار غداً الساعة 9 م..."><%= templates.interview %></textarea>
+                        <button onclick="saveTemp('interview', 'tpl-interview')" class="btn bg-[#161b22] hover:bg-orange-600 border border-[#222b38] text-white w-full mt-2 !py-2 text-xs">💾 حفظ قالب المقابلة</button>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-emerald-400 mb-2 block">نموذج دخول الميدان (المرحلة 2):</label>
+                        <textarea id="tpl-preliminary" class="w-full h-20 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500" placeholder="مثال: يرجى لبس الزي الرياضي والتواجد في الميدان..."><%= templates.preliminary %></textarea>
+                        <button onclick="saveTemp('preliminary', 'tpl-preliminary')" class="btn bg-[#161b22] hover:bg-emerald-600 border border-[#222b38] text-white w-full mt-2 !py-2 text-xs">💾 حفظ قالب الميدان</button>
+                    </div>
+                    <div>
+                        <label class="text-xs font-bold text-amber-400 mb-2 block">نموذج التخرج والاعتماد (المرحلة 3):</label>
+                        <textarea id="tpl-final" class="w-full h-20 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-amber-500" placeholder="مثال: يرجى التوجه لاستلام الرتبة والبدلة العسكرية..."><%= templates.final %></textarea>
+                        <button onclick="saveTemp('final', 'tpl-final')" class="btn bg-[#161b22] hover:bg-amber-600 border border-[#222b38] text-white w-full mt-2 !py-2 text-xs">💾 حفظ قالب التخرج</button>
+                    </div>
+                </div>
             </div>
 
-            <!-- القسم 2: القبول المبدئي -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-6 flex flex-col shadow-lg relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-emerald-500 to-transparent"></div>
-                <h3 class="text-xl font-black text-white mb-1 flex items-center gap-2"><span>🛡️</span> رسائل الميدان</h3>
-                <p class="text-xs text-gray-500 mb-4 font-mono">المقبولين مبدئياً لتدريب الميدان</p>
-                
-                <textarea id="msg-preliminary" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500/50 outline-none mb-3" placeholder="اكتب رسالة القبول المبدئي هنا..."><%= templates.preliminary %></textarea>
-                <button onclick="saveTemp('preliminary')" class="btn bg-[#161b22] hover:bg-[#1f2630] border border-[#222b38] text-gray-300 w-full !py-2 mb-6">💾 حفظ كقالب افتراضي</button>
-
-                <div class="flex-1 bg-[#05070a] rounded-xl border border-[#1f2630] p-4 mb-4 overflow-y-auto max-h-48">
-                    <h4 class="text-xs font-bold text-gray-400 mb-3 border-b border-[#1f2630] pb-2">القائمة المستهدفة (<%= prelimUsers.length %>):</h4>
-                    <% if(prelimUsers.length === 0) { %>
-                        <p class="text-xs text-gray-600 text-center mt-4">لا يوجد متدربين حالياً.</p>
-                    <% } else { %>
-                        <div class="flex flex-col gap-2">
-                            <% prelimUsers.forEach(u => { %>
-                                <div class="text-[10px] font-mono text-gray-300 bg-[#0d1117] p-2 rounded-lg border border-[#1f2630] flex justify-between">
-                                    <span class="font-bold truncate"><%= u.name %></span>
-                                    <span class="text-emerald-400">ID: <%= u.copyId %></span>
-                                </div>
-                            <% }) %>
-                        </div>
-                    <% } %>
+            <!-- القسم الثاني: البث العام (Broadcast) -->
+            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 relative shadow-lg">
+                <div class="flex items-center gap-4 mb-8 border-b border-[#1f2630] pb-4">
+                    <span class="text-3xl">📢</span>
+                    <div>
+                        <h3 class="text-xl font-black text-white">نظام الإرسال العام (Broadcast)</h3>
+                        <p class="text-xs text-gray-500 mt-1">إرسال رسالة مخصصة لجميع أفراد الفئة المحددة</p>
+                    </div>
                 </div>
-                
-                <button onclick="sendBulk('preliminary', prelimIds)" class="btn !bg-emerald-600 hover:!bg-emerald-500 w-full !py-3 shadow-[0_0_15px_rgba(16,185,129,0.3)]">🚀 إرسال الرسالة للجميع</button>
-            </div>
 
-            <!-- القسم 3: الاعتماد النهائي -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-6 flex flex-col shadow-lg relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-amber-500 to-transparent"></div>
-                <h3 class="text-xl font-black text-white mb-1 flex items-center gap-2"><span>👑</span> رسائل القيادة</h3>
-                <p class="text-xs text-gray-500 mb-4 font-mono">المرشحين للفرز والاعتماد النهائي</p>
-                
-                <textarea id="msg-final" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-amber-500/50 outline-none mb-3" placeholder="اكتب رسالة الاعتماد هنا..."><%= templates.final %></textarea>
-                <button onclick="saveTemp('final')" class="btn bg-[#161b22] hover:bg-[#1f2630] border border-[#222b38] text-gray-300 w-full !py-2 mb-6">💾 حفظ كقالب افتراضي</button>
+                <div class="space-y-5">
+                    <div>
+                        <label class="text-xs font-bold text-gray-300 mb-2 block">1. اختر الفئة المستهدفة:</label>
+                        <select id="targetGroup" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-white focus:border-indigo-500 outline-none">
+                            <option value="raw">📝 تقديمات الشرطة الجديدة (<%= rawApps.length %>)</option>
+                            <option value="interview">🎙️ المرشحين للمقابلات (<%= interviewUsers.length %>)</option>
+                            <option value="preliminary">🛡️ المقبولين مبدئياً للميدان (<%= prelimUsers.length %>)</option>
+                            <option value="final">👑 بانتظار الاعتماد النهائي (<%= finalUsers.length %>)</option>
+                        </select>
+                    </div>
 
-                <div class="flex-1 bg-[#05070a] rounded-xl border border-[#1f2630] p-4 mb-4 overflow-y-auto max-h-48">
-                    <h4 class="text-xs font-bold text-gray-400 mb-3 border-b border-[#1f2630] pb-2">القائمة المستهدفة (<%= finalUsers.length %>):</h4>
-                    <% if(finalUsers.length === 0) { %>
-                        <p class="text-xs text-gray-600 text-center mt-4">لا يوجد ملفات للفرز حالياً.</p>
-                    <% } else { %>
-                        <div class="flex flex-col gap-2">
-                            <% finalUsers.forEach(u => { %>
-                                <div class="text-[10px] font-mono text-gray-300 bg-[#0d1117] p-2 rounded-lg border border-[#1f2630] flex justify-between">
-                                    <span class="font-bold truncate"><%= u.name %></span>
-                                    <span class="text-amber-400">ID: <%= u.copyId %></span>
-                                </div>
-                            <% }) %>
-                        </div>
-                    <% } %>
+                    <div>
+                        <label class="text-xs font-bold text-gray-300 mb-2 block">2. اكتب رسالة البث العام:</label>
+                        <textarea id="broadcastMsg" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-4 text-sm text-gray-200 font-mono resize-none focus:border-indigo-500" placeholder="اكتب إعلانك أو توجيهك هنا..."></textarea>
+                    </div>
+
+                    <button onclick="sendBroadcast()" class="btn !bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 w-full !py-3.5 shadow-[0_0_20px_rgba(79,70,229,0.4)] text-lg font-black tracking-widest mt-4">
+                        🚀 إرسال الرسالة للمجموعة المحددة
+                    </button>
                 </div>
-                
-                <button onclick="sendBulk('final', finalIds)" class="btn !bg-amber-600 hover:!bg-amber-500 w-full !py-3 shadow-[0_0_15px_rgba(245,158,11,0.3)]">🚀 إرسال الرسالة للجميع</button>
             </div>
 
         </div>
@@ -116,49 +93,53 @@
     <%- include('partials/footer') %>
 
     <script>
-        // تمرير البيانات من السيرفر بشكل آمن ومخفي عن لجان فحص المحرر
-const interviewIds = JSON.parse('<%- JSON.stringify(interviewUsers.map(u => u.id)) %>');
-const prelimIds = JSON.parse('<%- JSON.stringify(prelimUsers.map(u => u.id)) %>');
-const finalIds = JSON.parse('<%- JSON.stringify(finalUsers.map(u => u.id)) %>'); 
-        async function saveTemp(type) {
-            const msg = document.getElementById(`msg-${type}`).value.trim();
-            if(!msg) return alert("لا يمكن حفظ رسالة فارغة!");
-            
+        // تمرير الايديات من السيرفر بشكل آمن
+        const groupData = {
+            raw: JSON.parse('<%- JSON.stringify(rawApps.map(u => u.copyId)) %>'),
+            interview: JSON.parse('<%- JSON.stringify(interviewUsers.map(u => u.copyId)) %>'),
+            preliminary: JSON.parse('<%- JSON.stringify(prelimUsers.map(u => u.copyId)) %>'),
+            final: JSON.parse('<%- JSON.stringify(finalUsers.map(u => u.copyId)) %>')
+        };
+
+        async function saveTemp(type, textareaId) {
+            const msg = document.getElementById(textareaId).value.trim();
             try {
                 const res = await fetch('/api/templates/save', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ type, message: msg })
                 });
-                const data = await res.json();
-                if(data.success) alert("✅ تم حفظ القالب بنجاح في قاعدة البيانات.");
+                if((await res.json()).success) alert("✅ تم تحديث القالب التلقائي.");
                 else alert("⚠️ خطأ في الحفظ.");
-            } catch (err) { alert("⚠️ تعذر الاتصال بالسيرفر."); }
+            } catch (err) { alert("⚠️ تعذر الاتصال."); }
         }
 
-        async function sendBulk(type, usersArray) {
-            if(usersArray.length === 0) return alert("لا يوجد أشخاص في هذه القائمة لإرسال الرسائل لهم!");
-            
-            const msg = document.getElementById(`msg-${type}`).value.trim();
-            if(!msg) return alert("يرجى كتابة الرسالة أو حفظ القالب أولاً!");
+        async function sendBroadcast() {
+            const groupKey = document.getElementById('targetGroup').value;
+            const copyIds = groupData[groupKey];
+            const msg = document.getElementById('broadcastMsg').value.trim();
 
-            if(confirm(`🚨 تأكيد: هل أنت متأكد من إرسال هذه الرسالة كـ(خاص DM) لعدد (${usersArray.length}) شخص دفعة واحدة؟`)) {
-                
-                // إظهار اللودر (اذا كنت تستخدمه)
+            if(!msg) return alert("❌ يرجى كتابة الرسالة أولاً!");
+            if(copyIds.length === 0) return alert("❌ لا يوجد أشخاص في هذه الفئة لإرسال الرسالة لهم!");
+
+            if(confirm(`🚨 تأكيد: سيتم إرسال رسالة خاصة (DM) لعدد (${copyIds.length}) عسكري. هل أنت متأكد؟`)) {
                 if(typeof showLoader === 'function') showLoader();
 
                 try {
                     const res = await fetch('/api/templates/send', {
                         method: 'POST',
                         headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ users: usersArray, message: msg })
+                        body: JSON.stringify({ copyIds, message: msg })
                     });
                     const data = await res.json();
                     
                     if(typeof hideLoader === 'function') hideLoader();
 
                     if(data.success) {
-                        alert(`✅ اكتملت المهمة!\nتم الإرسال بنجاح لـ: ${data.successCount}\nفشل الإرسال لـ: ${data.failCount} (قد يكون مقفل الخاص)`);
+                        let resultMsg = `✅ اكتملت المهمة!\n✔ تم الإرسال لـ: ${data.successCount}\n❌ فشل الإرسال لـ: ${data.failCount}`;
+                        if(data.failCount > 0) resultMsg += `\n⚠️ سبب الفشل الدقيق من ديسكورد: ${data.errorLog}`;
+                        alert(resultMsg);
+                        document.getElementById('broadcastMsg').value = ''; // تفريغ الخانة
                     } else {
                         alert(`⚠️ خطأ: ${data.error}`);
                     }

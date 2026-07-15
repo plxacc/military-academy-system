@@ -485,7 +485,7 @@ async function getGuideQuestions() {
     try {
         await doc.loadInfo();
         const sheet = doc.sheetsByTitle['Academy_Guide'];
-        if (!sheet) return [];
+        if (!sheet) return []; 
 
         const rows = await sheet.getRows();
         return rows.map(row => ({

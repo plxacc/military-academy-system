@@ -385,16 +385,20 @@ if (process.env.NODE_ENV !== 'production') {
 // 🚀 مسارات نظام الرسائل والنماذج التلقائية
 // ==========================================
 
-// 1. عرض صفحة النماذج
+// ==========================================
+// 🚀 نظام الرسائل التلقائية والبث العام
+// ==========================================
+const { getTemplates, saveTemplate, getRawApplications } = require('./services/sheets'); // تأكد من استدعاء دوال الشيت
+
 app.get('/templates', async (req, res) => {
     if (!req.isAuthenticated() || !(req.user.permissions.canAcceptApplications || req.user.permissions.canApproveReject)) {
-        return res.redirect('/dashboard'); // حماية: للقيادة والمشرفين فقط
+        return res.redirect('/dashboard');
     }
     
+    const rawApps = await getRawApplications(); // المتقدمين الجدد
     const apps = await getApplications();
     const templates = await getTemplates();
     
-    // فلترة العساكر حسب المرحلة
     const interviewUsers = apps.filter(a => a.stage === 'interview' || a.status === 'مقبول للمقابلة');
     const prelimUsers = apps.filter(a => a.stage === 'preliminary' || a.status.includes('مقبول مبدئيا'));
     const finalUsers = apps.filter(a => a.status.includes('بانتظار الاعتماد النهائي'));
@@ -402,6 +406,7 @@ app.get('/templates', async (req, res) => {
     res.render('templates', { 
         user: req.user, 
         templates, 
+        rawApps, // تمرير التقديمات الجديدة
         interviewUsers, 
         prelimUsers, 
         finalUsers,
@@ -409,51 +414,54 @@ app.get('/templates', async (req, res) => {
     });
 });
 
-// 2. حفظ التعديل على النموذج
 app.post('/api/templates/save', async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ error: "غير مصرح" });
-    try {
-        await saveTemplate(req.body.type, req.body.message);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+    try { await saveTemplate(req.body.type, req.body.message); res.json({ success: true }); } 
+    catch (err) { res.status(500).json({ error: err.message }); }
 });
 
-// 3. إرسال الرسائل الخاصة (DM) عن طريق البوت
 app.post('/api/templates/send', async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ error: "غير مصرح" });
     
-    const { users, message } = req.body;
-    const botToken = process.env.DISCORD_BOT_TOKEN; // ⚠️ تأكد أن توكن البوت موجود في .env
+    const { copyIds, message } = req.body;
+    const botToken = process.env.DISCORD_BOT_TOKEN;
     
-    if (!botToken) return res.status(500).json({ error: "توكن البوت غير موجود في السيرفر!" });
+    if (!botToken) return res.status(500).json({ error: "لم يتم العثور على توكن البوت!" });
 
     let successCount = 0;
     let failCount = 0;
+    let errorLog = "";
 
-    for (const userId of users) {
+    for (const copyId of copyIds) {
+        if (!copyId || copyId.length < 17) continue; // تخطي الآيديات الوهمية
         try {
-            // 1. فتح قناة خاصة (DM) مع المستخدم
-            const dmChannel = await axios.post(`https://discord.com/api/v10/users/@me/channels`, 
-                { recipient_id: userId }, 
-                { headers: { Authorization: `Bot ${botToken}` } }
-            );
+            const dmRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ recipient_id: copyId })
+            });
+            const dmData = await dmRes.json();
             
-            // 2. إرسال الرسالة
-            await axios.post(`https://discord.com/api/v10/channels/${dmChannel.data.id}/messages`, 
-                { content: message }, 
-                { headers: { Authorization: `Bot ${botToken}` } }
-            );
-            successCount++;
+            if (!dmRes.ok || !dmData.id) {
+                failCount++;
+                errorLog = dmData.message || "معرف غير صحيح";
+                continue;
+            }
+
+            const msgRes = await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify({ content: message })
+            });
+
+            if (msgRes.ok) successCount++;
+            else { failCount++; errorLog = (await msgRes.json()).message; }
             
-            // تأخير بسيط لتجنب حظر الديسكورد (Rate Limit)
-            await new Promise(resolve => setTimeout(resolve, 300)); 
-        } catch (error) {
-            console.error(`فشل إرسال لـ ${userId}`);
-            failCount++;
-        }
+            await new Promise(resolve => setTimeout(resolve, 200)); // حماية من الحظر
+        } catch (error) { failCount++; }
     }
 
-    res.json({ success: true, successCount, failCount });
+    res.json({ success: true, successCount, failCount, errorLog });
 });
 // تصدير التطبيق ليتمكن Vercel من تشغيله كـ Serverless Function
 module.exports = app;
