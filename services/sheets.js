@@ -176,7 +176,10 @@ async function acceptFromRawToAcademy(rawId, name, answers, officerName, discord
         await existingRow.save();
     }
     clearCache();
-
+    // -- إرسال رسالة القبول الآلية على الخاص --
+    const templates = await getTemplates();
+    const dmMessage = `🎉 **تم قبولك مبدئياً لإجراء المقابلة الشخصية**\n\n${templates.interview || 'الرجاء التوجه لغرف الانتظار.'}`;
+    await sendDiscordDM(finalCopyId, dmMessage);
     // إرسال اللوق للديسكورد بالاكتفاء بالبيانات الأساسية فقط
     await sendDiscordLog(`✅ **قبول جديد للمقابلة**\n👮‍♂️ **المدرب:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
 }
@@ -249,6 +252,9 @@ async function decideInterview(discordId, decisionType, officerName, interviewer
         let logMessage = '';
 
         if (decisionType === 'accept') {
+            const templates = await getTemplates();
+        const dmMessage = `🛡️ **تم اجتياز المقابلة وقبولك في ميدان التدريب**\n\n${templates.preliminary || 'الرجاء انتظار تعليمات المدربين.'}`;
+        sendDiscordDM(appCopyId, dmMessage); // إرسال بدون تعطيل النظام
             newStage = 'preliminary';
             newStatus = 'مقبول مبدئياً - ميدان التدريب';
             logMessage = `[✔ اجتاز المقابلة مع: ${interviewerName} | اعتماد: ${officerName} (${dateNow})]`;
@@ -422,7 +428,7 @@ async function toggleException(discordId, action, officerName) {
     clearCache();
 }
 
-// دالة الاعتماد النهائي (تخرج أو طي قيد)
+// دالة الاعتماد النهائي (تخرج أو طي قيد) وإرسال التهنئة التلقائية
 async function finalDecision(discordId, decisionType, officerName) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -457,12 +463,20 @@ async function finalDecision(discordId, decisionType, officerName) {
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `🎯 **بيانات المتدرب:**\n` +
                        `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `💬 **الديسكورد:** <@${discordId}>\n` +
                        `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
                        `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `📝 **التفاصيل:** ${discordMsg}`;
         await sendDiscordLog(logMsg);
+
+        // 👇 الكود الذي استفسرت عنه تم وضعه هنا ليرسل التهنئة التلقائية فور التخرج 👇
+        if (decisionType === 'graduated') {
+            const templates = await getTemplates();
+            const dmMessage = `👑 **ألف مبروك! تم اعتماد تخرجه النهائي وانضمامك للشرطة**\n\n${templates.final || 'تمنياتنا لك بالتوفيق في مسيرتك العسكرية.'}`;
+            await sendDiscordDM(appCopyId, dmMessage);
+        }
+        // 👆 👆
     }
     clearCache();
 }
@@ -522,6 +536,32 @@ async function gradeApplicant(discordId, section, score, graderName) {}
 // ==========================================
 // 🚀 نظام إدارة قوالب الرسائل التلقائية
 // ==========================================
+// 🚀 دالة الإرسال على الخاص (DM) للعساكر
+async function sendDiscordDM(copyId, messageContent) {
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+    if (!botToken) return console.log("⚠️ توكن البوت غير موجود!");
+    
+    try {
+        // 1. فتح قناة خاصة مع العسكري باستخدام الـ Copy ID
+        const dmRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ recipient_id: String(copyId).trim() })
+        });
+        const dmData = await dmRes.json();
+        
+        if (!dmData.id) return console.log("⚠️ فشل فتح الخاص مع:", copyId, dmData);
+
+        // 2. إرسال الرسالة
+        await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
+            body: JSON.stringify({ content: messageContent })
+        });
+    } catch (err) {
+        console.log("⚠️ خطأ في إرسال الـ DM:", err.message);
+    }
+}
 
 async function getTemplates() {
     try {
