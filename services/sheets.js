@@ -238,7 +238,7 @@ async function rejectRawApplicant(rawId, name, answers, officerName) {
     await sendDiscordLog(logMsg);
 }
 
-// قرار المقابلة (قبول/رفض) مع تسجيل من أجرى المقابلة
+// قرار المقابلة (قبول/رفض) وإرسال رسالة التوجيه التلقائية
 async function decideInterview(discordId, decisionType, officerName, interviewerName = "") {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -255,29 +255,26 @@ async function decideInterview(discordId, decisionType, officerName, interviewer
         let newStatus = '';
         let logMessage = '';
 
+        // 1. تحديد المرحلة بناءً على القرار (هذا الجزء اللي انحذف بالغلط ورجعناه)
         if (decisionType === 'accept') {
-            const templates = await getTemplates();
-            const customText = templates.preliminary || 'يسرنا إعلامك بأنه تم قبولك مبدئياً. يرجى التوجه لمقر الأكاديمية.';
-            sendDiscordDM(appCopyId, {
-                title: "🎓 إشعار قبول مبدئي",
-                color: 0x10B981, // لون أخضر
-                description: `مرحباً **${appName}**،\n\n${customText}`
-            });
+            newStage = 'preliminary';
+            newStatus = 'مقبول مبدئياً - ميدان التدريب';
+            logMessage = `[✔ اجتاز المقابلة مع: ${interviewerName} | اعتماد: ${officerName} (${dateNow})]`;
         } else {
-            sendDiscordDM(appCopyId, {
-                title: "❌ إشعار إداري",
-                color: 0xEF4444, // لون أحمر
-                description: `مرحباً **${appName}**،\n\nنعتذر منك، **لم تجتز** المقابلة الشخصية.\nنتمنى لك التوفيق في المرات القادمة.`
-            });
+            newStage = 'interview_rejected';
+            newStatus = 'مرفوض في المقابلة الشخصية';
+            logMessage = `[✖ رفض مقابلة بواسطة: ${officerName} (${dateNow})]`;
         }
+
+        // 2. تحديث بيانات العسكري في الشيت
         let currentLogs = row.get('Graded_By') || '';
         const updatedLogs = `${currentLogs} ${logMessage}`.trim();
 
         row.assign({ Stage: newStage, Status: newStatus, Graded_By: updatedLogs });
         await row.save();
         
+        // 3. إرسال اللوق لغرفة القيادة
         const decisionMsg = decisionType === 'accept' ? `✔ تم اجتياز المقابلة المبدئية مع (${interviewerName}) ونقله لميدان التدريب.` : `✖ رسوب في المقابلة الشخصية والرفض من الإكمال.`;
-
         const logMsg = `🎙️ **نوع الإجراء:** قرار المقابلة الشخصية\n` +
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `👮‍♂️ **بيانات المدرب (المُعتمد):**\n` +
@@ -285,16 +282,32 @@ async function decideInterview(discordId, decisionType, officerName, interviewer
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `🎯 **بيانات المتدرب (المرشح):**\n` +
                        `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `💬 **الديسكورد:** <@${discordId}>\n` +
                        `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
                        `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `📝 **التفاصيل:** ${decisionMsg}`;
         await sendDiscordLog(logMsg);
+
+        // 4. إرسال رسالة الخاص (DM) بنظام الـ Embed الفخم
+        if (decisionType === 'accept') {
+            const templates = await getTemplates();
+            const customText = templates.preliminary || 'يسرنا إعلامك بأنه تم قبولك مبدئياً. يرجى التوجه لمقر الأكاديمية.';
+            await sendDiscordDM(appCopyId, {
+                title: "🎓 إشعار قبول مبدئي",
+                color: 0x10B981, // أخضر
+                description: `مرحباً **${appName}**،\n\n${customText}`
+            });
+        } else {
+            await sendDiscordDM(appCopyId, {
+                title: "❌ إشعار إداري",
+                color: 0xEF4444, // أحمر
+                description: `مرحباً **${appName}**،\n\nنعتذر منك، **لم تجتز** المقابلة الشخصية.\nنتمنى لك التوفيق في المرات القادمة.`
+            });
+        }
     }
     clearCache();
 }
-
 // رصد الدرجات المتقدم
 async function advancedGradeApplicant(discordId, section, detailsText, finalScore, graderName, isSupervisorOrLeader) {
     await doc.loadInfo();
