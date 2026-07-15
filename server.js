@@ -7,7 +7,7 @@ const path = require('path');
 const axios = require('axios');
 const { getRawApplications, getApplications, getTemplates, saveTemplate } = require('./services/sheets');require('dotenv').config();
 
-const { getUserPermissions } = require('./config/roles');
+const { getUserPermissions } = require('./config/roles'); 
 // استدعاء جميع دوال الشيت في أعلى الملف بشكل سليم
 // استدعاء جميع دوال الشيت وتضمين دوال دليل الكلية الجديدة
 const { 
