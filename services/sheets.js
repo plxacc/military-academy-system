@@ -176,10 +176,14 @@ async function acceptFromRawToAcademy(rawId, name, answers, officerName, discord
         await existingRow.save();
     }
     clearCache();
-    // -- إرسال رسالة القبول الآلية على الخاص --
+    // -- إرسال رسالة القبول للمقابلة بنظام Embed --
     const templates = await getTemplates();
-    const dmMessage = `🎉 **تم قبولك مبدئياً لإجراء المقابلة الشخصية**\n\n${templates.interview || 'الرجاء التوجه لغرف الانتظار.'}`;
-    await sendDiscordDM(finalCopyId, dmMessage);
+    const customText = templates.interview || 'الرجاء التوجه لغرف الانتظار في الديسكورد.';
+    await sendDiscordDM(finalCopyId, {
+        title: "🎙️ إشعار قبول للمقابلة",
+        color: 0xF59E0B, // لون برتقالي
+        description: `مرحباً **${finalName}**،\n\n${customText}`
+    });
     // إرسال اللوق للديسكورد بالاكتفاء بالبيانات الأساسية فقط
     await sendDiscordLog(`✅ **قبول جديد للمقابلة**\n👮‍♂️ **المدرب:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
 }
@@ -253,17 +257,19 @@ async function decideInterview(discordId, decisionType, officerName, interviewer
 
         if (decisionType === 'accept') {
             const templates = await getTemplates();
-        const dmMessage = `🛡️ **تم اجتياز المقابلة وقبولك في ميدان التدريب**\n\n${templates.preliminary || 'الرجاء انتظار تعليمات المدربين.'}`;
-        sendDiscordDM(appCopyId, dmMessage); // إرسال بدون تعطيل النظام
-            newStage = 'preliminary';
-            newStatus = 'مقبول مبدئياً - ميدان التدريب';
-            logMessage = `[✔ اجتاز المقابلة مع: ${interviewerName} | اعتماد: ${officerName} (${dateNow})]`;
+            const customText = templates.preliminary || 'يسرنا إعلامك بأنه تم قبولك مبدئياً. يرجى التوجه لمقر الأكاديمية.';
+            sendDiscordDM(appCopyId, {
+                title: "🎓 إشعار قبول مبدئي",
+                color: 0x10B981, // لون أخضر
+                description: `مرحباً **${appName}**،\n\n${customText}`
+            });
         } else {
-            newStage = 'interview_rejected';
-            newStatus = 'مرفوض في المقابلة الشخصية';
-            logMessage = `[✖ رفض مقابلة بواسطة: ${officerName} (${dateNow})]`;
+            sendDiscordDM(appCopyId, {
+                title: "❌ إشعار إداري",
+                color: 0xEF4444, // لون أحمر
+                description: `مرحباً **${appName}**،\n\nنعتذر منك، **لم تجتز** المقابلة الشخصية.\nنتمنى لك التوفيق في المرات القادمة.`
+            });
         }
-
         let currentLogs = row.get('Graded_By') || '';
         const updatedLogs = `${currentLogs} ${logMessage}`.trim();
 
@@ -379,6 +385,23 @@ async function sendToFinalDecision(discordId, officerName) {
         await sendDiscordLog(logMsg);
     }
     clearCache();
+    // 👇 إرسال التهنئة أو الرفض النهائي 👇
+        if (decisionType === 'graduated') {
+            const templates = await getTemplates();
+            const customText = templates.final || 'نبارك لك اجتيازك مرحلة الأكاديمية بنجاح! صدر القرار بتجنيدك رسمياً.';
+            await sendDiscordDM(appCopyId, {
+                title: "🏅 إشعار تجنيد وقبول نهائي",
+                color: 0x3B82F6, // لون أزرق
+                description: `مرحباً **${appName}**،\n\n${customText}`
+            });
+        } else {
+            await sendDiscordDM(appCopyId, {
+                title: "❌ إشعار إداري",
+                color: 0xEF4444, // لون أحمر
+                description: `مرحباً **${appName}**،\n\nنعتذر منك، **لم تجتز** دورة الأكاديمية العسكرية بنجاح.\n\n**السبب:** رسوب أكاديمية\nنتمنى لك التوفيق في المرات القادمة.`
+            });
+        }
+        // 👆 👆
 }
 
 // دالة منح أو إلغاء النجاح الاستثنائي
@@ -533,16 +556,13 @@ async function deleteGuideQuestion(questionId) {
 async function updateApplicationStage(discordId, newStage, newStatus) {}
 async function gradeApplicant(discordId, section, score, graderName) {}
 
-// ==========================================
-// 🚀 نظام إدارة قوالب الرسائل التلقائية
-// ==========================================
-// 🚀 دالة الإرسال على الخاص (DM) للعساكر
-async function sendDiscordDM(copyId, messageContent) {
+// 🚀 دالة الإرسال على الخاص (DM) بنظام الـ Embed الفخم
+async function sendDiscordDM(copyId, embedConfig) {
     const botToken = process.env.DISCORD_BOT_TOKEN;
     if (!botToken) return console.log("⚠️ توكن البوت غير موجود!");
     
     try {
-        // 1. فتح قناة خاصة مع العسكري باستخدام الـ Copy ID
+        // 1. فتح قناة خاصة مع العسكري
         const dmRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
             method: 'POST',
             headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
@@ -550,19 +570,28 @@ async function sendDiscordDM(copyId, messageContent) {
         });
         const dmData = await dmRes.json();
         
-        if (!dmData.id) return console.log("⚠️ فشل فتح الخاص مع:", copyId, dmData);
+        if (!dmData.id) return console.log("⚠️ فشل فتح الخاص مع:", copyId);
 
-        // 2. إرسال الرسالة
+        // 2. تجهيز شكل الرسالة (Embed)
+        const payload = {
+            embeds: [{
+                title: embedConfig.title,
+                description: embedConfig.description,
+                color: embedConfig.color, // لون الخط الجانبي
+                footer: { text: "القيادة العامة للشرطة - مدينة جسس" }
+            }]
+        };
+
+        // 3. إرسال الرسالة
         await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
             method: 'POST',
             headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: messageContent })
+            body: JSON.stringify(payload)
         });
     } catch (err) {
         console.log("⚠️ خطأ في إرسال الـ DM:", err.message);
     }
 }
-
 async function getTemplates() {
     try {
         await doc.loadInfo();
