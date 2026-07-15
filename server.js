@@ -30,7 +30,6 @@ const {
 } = require('./services/sheets');
 
 const app = express();
-const app = express();
 app.use(cors());
 
 // زيادة حجم البيانات المسموح به لمنع خطأ (تعذر الاتصال بالسيرفر)
