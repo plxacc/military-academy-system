@@ -5,11 +5,11 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
-const { getRawApplications, getApplications, getTemplates, saveTemplate } = require('./services/sheets');require('dotenv').config();
+require('dotenv').config();
 
 const { getUserPermissions } = require('./config/roles'); 
-// استدعاء جميع دوال الشيت في أعلى الملف بشكل سليم
-// استدعاء جميع دوال الشيت وتضمين دوال دليل الكلية الجديدة
+
+// استدعاء جميع دوال الشيت بشكل سليم ومرة واحدة فقط
 const { 
     getRawApplications, 
     getApplications, 
@@ -22,11 +22,14 @@ const {
     sendToFinalDecision,
     toggleException,
     finalDecision,
-    getGuideQuestions,      // ✨ ضفنا هذي هنا
-    addGuideQuestion,       // ✨ وهذي
-    deleteGuideQuestion     // ✨ وهذي
+    getGuideQuestions,
+    addGuideQuestion,
+    deleteGuideQuestion,
+    getTemplates,      // ✨ تم دمجها هنا لمنع التكرار
+    saveTemplate       // ✨ تم دمجها هنا لمنع التكرار
 } = require('./services/sheets');
 
+const app = express();
 const app = express();
 app.use(cors());
 
