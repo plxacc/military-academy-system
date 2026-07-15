@@ -519,6 +519,49 @@ async function deleteGuideQuestion(questionId) {
 async function updateApplicationStage(discordId, newStage, newStatus) {}
 async function gradeApplicant(discordId, section, score, graderName) {}
 
+// ==========================================
+// 🚀 نظام إدارة قوالب الرسائل التلقائية
+// ==========================================
+
+async function getTemplates() {
+    try {
+        await doc.loadInfo();
+        const sheet = doc.sheetsByTitle['Academy_Templates'];
+        if (!sheet) return { interview: '', preliminary: '', final: '' };
+        
+        const rows = await sheet.getRows();
+        let templates = { interview: '', preliminary: '', final: '' };
+        
+        rows.forEach(r => {
+            const type = r.get('Type');
+            const msg = r.get('Message');
+            if (type === 'interview') templates.interview = msg;
+            if (type === 'preliminary') templates.preliminary = msg;
+            if (type === 'final') templates.final = msg;
+        });
+        return templates;
+    } catch (err) {
+        console.log("⚠️ خطأ في قراءة القوالب:", err.message);
+        return { interview: '', preliminary: '', final: '' };
+    }
+}
+
+async function saveTemplate(type, message) {
+    await doc.loadInfo();
+    const sheet = doc.sheetsByTitle['Academy_Templates'];
+    if (!sheet) throw new Error("شيت Academy_Templates غير موجود!");
+
+    const rows = await sheet.getRows();
+    const existingRow = rows.find(r => r.get('Type') === type);
+
+    if (existingRow) {
+        existingRow.assign({ Message: message });
+        await existingRow.save();
+    } else {
+        await sheet.addRow({ Type: type, Message: message });
+    }
+}
+
 // التصدير الشامل والكامل لجميع دوال النظام بدون أي نقص
 module.exports = { 
     getRawApplications, 
@@ -534,5 +577,7 @@ module.exports = {
     finalDecision,
     getGuideQuestions,      // تأكدنا من تصديرها هنا
     addGuideQuestion,       // وهنا
-    deleteGuideQuestion     // وهنا
+    deleteGuideQuestion, 
+    getTemplates,
+    saveTemplate    // وهنا
 };

@@ -22,6 +22,9 @@
             <a href="/preliminary" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 <%= currentPage === 'preliminary' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>"> المقبولين مبدئياً</a>
             <a href="/final" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 <%= currentPage === 'final' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>"> الرصد النهائي</a>
             <a href="/guide" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 <%= currentPage === 'guide' ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'text-blue-400 hover:text-white hover:bg-[#1a212c]' %>"> دليل الكلية</a>
+            <% if(user && user.permissions && user.permissions.canApproveReject) { %>
+                <a href="/templates" class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-300 <%= currentPage === 'templates' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">إدارة المراسلات</a>
+            <% } %>
         </nav>
 
         <!-- أقصى اليسار: صورة الديسكورد، الاسم، وزر تسجيل الخروج -->

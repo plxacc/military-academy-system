@@ -5,6 +5,7 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
+const { getTemplates, saveTemplate } = require('./services/sheets');
 require('dotenv').config();
 
 const { getUserPermissions } = require('./config/roles');
@@ -128,13 +129,13 @@ app.get('/dashboard', async (req, res) => {
     { name: "باسل صخر", role: "عريف", duty: "مدرب استيقافات" },
     { name: "امين العبادي", role: "جندي أول", duty: "مدرب عمليات" },
     { name: "مالك البتار", role: "جندي", duty: "مدرب التفاوض" },
-    { name: "ايدا مارتينيز", role: "جندي", duty: "مدربة استيقافات" },
     { name: "غوار المغوار", role: "جندي", duty: "مدرب استيقافات" },
     { name: "ضرغام حلتاوي", role: "جندي", duty: "مدرب عمليات" },
     { name: "فهمي النمس", role: "جندي", duty: "مدرب (لم يتم التحديد)" },
     { name: "جساس الشايب", role: "جندي", duty: "مدرب (لم يتم التحديد)" },
     { name: "حمد فولاد", role: "جندي", duty: "مدرب (لم يتم التحديد)" },
     { name: "ود خالد" , role: "جندي" , duty: "مدربة (لم يتم التحديد)" }
+    //{ name: "ايدا مارتينيز", role: "جندي", duty: "مدربة استيقافات" },
 ];
 
     res.render('dashboard', { 
@@ -380,5 +381,79 @@ if (process.env.NODE_ENV !== 'production') {
     });
 }
 
+// ==========================================
+// 🚀 مسارات نظام الرسائل والنماذج التلقائية
+// ==========================================
+
+// 1. عرض صفحة النماذج
+app.get('/templates', async (req, res) => {
+    if (!req.isAuthenticated() || !(req.user.permissions.canAcceptApplications || req.user.permissions.canApproveReject)) {
+        return res.redirect('/dashboard'); // حماية: للقيادة والمشرفين فقط
+    }
+    
+    const apps = await getApplications();
+    const templates = await getTemplates();
+    
+    // فلترة العساكر حسب المرحلة
+    const interviewUsers = apps.filter(a => a.stage === 'interview' || a.status === 'مقبول للمقابلة');
+    const prelimUsers = apps.filter(a => a.stage === 'preliminary' || a.status.includes('مقبول مبدئيا'));
+    const finalUsers = apps.filter(a => a.status.includes('بانتظار الاعتماد النهائي'));
+
+    res.render('templates', { 
+        user: req.user, 
+        templates, 
+        interviewUsers, 
+        prelimUsers, 
+        finalUsers,
+        currentPage: 'templates' 
+    });
+});
+
+// 2. حفظ التعديل على النموذج
+app.post('/api/templates/save', async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "غير مصرح" });
+    try {
+        await saveTemplate(req.body.type, req.body.message);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// 3. إرسال الرسائل الخاصة (DM) عن طريق البوت
+app.post('/api/templates/send', async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "غير مصرح" });
+    
+    const { users, message } = req.body;
+    const botToken = process.env.DISCORD_BOT_TOKEN; // ⚠️ تأكد أن توكن البوت موجود في .env
+    
+    if (!botToken) return res.status(500).json({ error: "توكن البوت غير موجود في السيرفر!" });
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const userId of users) {
+        try {
+            // 1. فتح قناة خاصة (DM) مع المستخدم
+            const dmChannel = await axios.post(`https://discord.com/api/v10/users/@me/channels`, 
+                { recipient_id: userId }, 
+                { headers: { Authorization: `Bot ${botToken}` } }
+            );
+            
+            // 2. إرسال الرسالة
+            await axios.post(`https://discord.com/api/v10/channels/${dmChannel.data.id}/messages`, 
+                { content: message }, 
+                { headers: { Authorization: `Bot ${botToken}` } }
+            );
+            successCount++;
+            
+            // تأخير بسيط لتجنب حظر الديسكورد (Rate Limit)
+            await new Promise(resolve => setTimeout(resolve, 300)); 
+        } catch (error) {
+            console.error(`فشل إرسال لـ ${userId}`);
+            failCount++;
+        }
+    }
+
+    res.json({ success: true, successCount, failCount });
+});
 // تصدير التطبيق ليتمكن Vercel من تشغيله كـ Serverless Function
 module.exports = app;
