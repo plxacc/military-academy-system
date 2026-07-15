@@ -5,8 +5,7 @@ const DiscordStrategy = require('passport-discord').Strategy;
 const cors = require('cors');
 const path = require('path');
 const axios = require('axios');
-const { getTemplates, saveTemplate } = require('./services/sheets');
-require('dotenv').config();
+const { getRawApplications, getApplications, getTemplates, saveTemplate } = require('./services/sheets');require('dotenv').config();
 
 const { getUserPermissions } = require('./config/roles');
 // استدعاء جميع دوال الشيت في أعلى الملف بشكل سليم
@@ -383,13 +382,6 @@ if (process.env.NODE_ENV !== 'production') {
 
 // ==========================================
 // 🚀 مسارات نظام الرسائل والنماذج التلقائية
-// ==========================================
-
-// ==========================================
-// 🚀 نظام الرسائل التلقائية والبث العام
-// ==========================================
-const { getTemplates, saveTemplate, getRawApplications } = require('./services/sheets'); // تأكد من استدعاء دوال الشيت
-
 app.get('/templates', async (req, res) => {
     if (!req.isAuthenticated() || !(req.user.permissions.canAcceptApplications || req.user.permissions.canApproveReject)) {
         return res.redirect('/dashboard');
