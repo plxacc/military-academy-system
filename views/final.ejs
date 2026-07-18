@@ -208,11 +208,11 @@
                 if (score >= passScore) {
                     passedCount++;
                     // يمكنك استبدال ${passedCount} بـ ${totalCounter} إذا أردت ترقيم مستمر للكل
-                    passedData += `${passedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${appCopyId}>\n`;
+                    passedData += `${passedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${copyId}>\n`;
                 } else {
                     failedCount++;
                     // يمكنك استبدال ${failedCount} بـ ${totalCounter} إذا أردت ترقيم مستمر للكل
-                    failedData += `${failedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${appCopyId}>\n`;
+                    failedData += `${failedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${copyId}>\n`;
                 }
             });
 
