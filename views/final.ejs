@@ -186,7 +186,7 @@
             });
         }
 
-       // منطق نافذة التصدير الشامل والمخفف (ناجح + راسب مع منشن الديسكورد بدون شرطت)
+// منطق نافذة التصدير الشامل والمخفف (ناجح + راسب مع منشن الديسكورد الصحيح)
         function openExportModal() {
             const passScore = parseInt(document.getElementById('passScoreInput').value) || 40;
             const lines = document.querySelectorAll('.line-item');
@@ -195,19 +195,23 @@
             let failedData = "✖ **=== [ قائمة غير المجتازين ] ===** ✖\n";
             let passedCount = 0;
             let failedCount = 0;
+            let totalCounter = 0; // عداد عام إذا كنت تبي الترقيم يستمر خلف بعضه
 
             lines.forEach(line => {
+                totalCounter++; // يزداد مع كل شخص يمر عليه الكود
                 const score = parseFloat(line.getAttribute('data-score')) || 0;
                 const name = line.getAttribute('data-name');
                 const natId = line.getAttribute('data-nationalid');
                 const copyId = line.getAttribute('data-copyid');
-                const discordId = line.getAttribute('data-discordid');
+                const discordId = line.getAttribute('data-discordid'); // التأكد من قراءة الآيدي الصحيح للمنشن
                 
                 if (score >= passScore) {
                     passedCount++;
+                    // يمكنك استبدال ${passedCount} بـ ${totalCounter} إذا أردت ترقيم مستمر للكل
                     passedData += `${passedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${discordId}>\n`;
                 } else {
                     failedCount++;
+                    // يمكنك استبدال ${failedCount} بـ ${totalCounter} إذا أردت ترقيم مستمر للكل
                     failedData += `${failedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${discordId}>\n`;
                 }
             });
@@ -223,29 +227,6 @@
             document.getElementById('exportModal').classList.remove('hidden');
             document.getElementById('exportModal').classList.add('flex');
             document.body.style.overflow = 'hidden';
-        }
-
-        function closeExportModal() {
-            document.getElementById('exportModal').classList.add('hidden');
-            document.getElementById('exportModal').classList.remove('flex');
-            document.body.style.overflow = 'auto';
-        }
-
-        function copyExportData() {
-            const textarea = document.getElementById('exportTextarea');
-            textarea.select();
-            textarea.setSelectionRange(0, 99999); // للموبايل
-            navigator.clipboard.writeText(textarea.value).then(() => {
-                const btn = document.querySelector('#exportModal .btn-accept, #exportModal .bg-indigo-600');
-                const originalText = btn.innerText;
-                btn.innerText = "✔ تم النسخ بنجاح";
-                btn.classList.replace('bg-indigo-600', 'bg-emerald-600');
-                
-                setTimeout(() => {
-                    btn.innerText = originalText;
-                    btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
-                }, 2000);
-            });
         }
 
         // دالة الاعتماد النهائي المطورة مع إشعار الإرسال
