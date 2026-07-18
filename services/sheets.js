@@ -389,7 +389,7 @@ async function sendToFinalDecision(discordId, officerName) {
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `🎯 **بيانات المتدرب :**\n` +
                        `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
+                       `💬 **الديسكورد:** <@${discordId}>\n` +
                        `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
                        `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
                        `━━━━━━━━━━━━━━━━━━━━\n` +
