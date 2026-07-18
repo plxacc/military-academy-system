@@ -298,11 +298,14 @@ app.get('/preliminary', async (req, res) => {
     res.render('preliminary', { user: req.user, applications: filtered, currentPage: 'preliminary' });
 });
 
-// 5. صفحة الرصد النهائي
+// 5. صفحة الرصد النهائي (القيادة)
 app.get('/final', async (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/discord');
     const apps = await getApplications();
-    const filtered = apps.filter(a => a.stage === 'final' || a.stage === 'نهائي' || a.totalScore > 0);
+    
+    // تم إزالة شرط totalScore > 0 لكي لا يظهر المتدرب هنا إلا إذا رُفع للقيادة رسمياً!
+    const filtered = apps.filter(a => a.stage === 'final' || a.status === 'بانتظار الاعتماد النهائي');
+    
     res.render('final', { user: req.user, applications: filtered, currentPage: 'final' });
 });
 // مسار الرصد الميداني المتقدم (بالتفاصيل والمقاييس الرياضية)

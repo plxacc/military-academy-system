@@ -19,7 +19,7 @@
                 </span>
                 <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">مركز المراسلات والتوجيه الآلي</h2>
                 <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">
-                    من هنا يمكنك إعداد النماذج التلقائية التي تُرسل فور قبول العسكري، بالإضافة إلى إرسال رسائل بث عامة (Broadcast) لأي مجموعة.
+                    من هنا يمكنك إعداد النماذج التلقائية التي تُرسل فور قبول العسكري، بالإضافة إلى إرسال رسائل بث عامة (Broadcast) لأي مجموعة أو لأشخاص محددين.
                 </p>
             </div>
         </div>
@@ -68,12 +68,19 @@
                 <div class="space-y-5">
                     <div>
                         <label class="text-xs font-bold text-gray-300 mb-2 block">1. اختر الفئة المستهدفة:</label>
-                        <select id="targetGroup" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-white focus:border-indigo-500 outline-none">
+                        <select id="targetGroup" onchange="toggleCustomInput()" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-white focus:border-indigo-500 outline-none">
                             <option value="raw">📝 تقديمات الشرطة الجديدة (<%= rawApps.length %>)</option>
                             <option value="interview">🎙️ المرشحين للمقابلات (<%= interviewUsers.length %>)</option>
                             <option value="preliminary">🛡️ المقبولين مبدئياً للميدان (<%= prelimUsers.length %>)</option>
                             <option value="final">👑 بانتظار الاعتماد النهائي (<%= finalUsers.length %>)</option>
+                            <option value="custom">🎯 إرسال مخصص (للمرفوضين أو أفراد محددين)</option>
                         </select>
+                    </div>
+
+                    <!-- مربع الإدخال اليدوي (يظهر فقط عند اختيار "إرسال مخصص") -->
+                    <div id="customInputContainer" class="hidden">
+                        <label class="text-xs font-bold text-indigo-400 mb-2 block">الصق الأيديات (Copy IDs) هنا كل آيدي في سطر:</label>
+                        <textarea id="customCopyIds" class="w-full h-24 bg-[#12171f] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-indigo-500" placeholder="123456789012345678&#10;876543210987654321"></textarea>
                     </div>
 
                     <div>
@@ -101,6 +108,17 @@
             final: JSON.parse('<%- JSON.stringify(finalUsers.map(u => u.copyId)) %>')
         };
 
+        // إظهار/إخفاء مربع الإدخال اليدوي بناءً على الاختيار
+        function toggleCustomInput() {
+            const group = document.getElementById('targetGroup').value;
+            const customContainer = document.getElementById('customInputContainer');
+            if (group === 'custom') {
+                customContainer.classList.remove('hidden');
+            } else {
+                customContainer.classList.add('hidden');
+            }
+        }
+
         async function saveTemp(type, textareaId) {
             const msg = document.getElementById(textareaId).value.trim();
             try {
@@ -116,7 +134,18 @@
 
         async function sendBroadcast() {
             const groupKey = document.getElementById('targetGroup').value;
-            const copyIds = groupData[groupKey];
+            let copyIds = [];
+
+            // تحديد قائمة الأيديات بناءً على الخيار
+            if (groupKey === 'custom') {
+                const rawText = document.getElementById('customCopyIds').value;
+                // تقسيم النص حسب الأسطر واستخراج الأيديات الصالحة فقط
+                copyIds = rawText.split('\n').map(id => id.trim()).filter(id => id.length >= 17);
+                if(copyIds.length === 0) return alert("❌ يرجى لصق 'Copy ID' واحد صحيح على الأقل!");
+            } else {
+                copyIds = groupData[groupKey];
+            }
+
             const msg = document.getElementById('broadcastMsg').value.trim();
 
             if(!msg) return alert("❌ يرجى كتابة الرسالة أولاً!");
@@ -139,7 +168,10 @@
                         let resultMsg = `✅ اكتملت المهمة!\n✔ تم الإرسال لـ: ${data.successCount}\n❌ فشل الإرسال لـ: ${data.failCount}`;
                         if(data.failCount > 0) resultMsg += `\n⚠️ سبب الفشل الدقيق من ديسكورد: ${data.errorLog}`;
                         alert(resultMsg);
-                        document.getElementById('broadcastMsg').value = ''; // تفريغ الخانة
+                        
+                        // تفريغ الخانات بعد الإرسال الناجح
+                        document.getElementById('broadcastMsg').value = ''; 
+                        if(groupKey === 'custom') document.getElementById('customCopyIds').value = '';
                     } else {
                         alert(`⚠️ خطأ: ${data.error}`);
                     }

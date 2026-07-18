@@ -9,7 +9,7 @@
 <body class="min-h-screen flex flex-col selection:bg-indigo-500 selection:text-white">
     <%- include('partials/navbar') %>
 
-    <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
+    <main class="max-w-[90rem] mx-auto px-6 py-10 flex-1 w-full">
         <!-- الهيدر ولوحة التحكم الديناميكية -->
         <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-[#1f2630] pb-5">
             <div>
@@ -25,7 +25,7 @@
                 
                 <!-- زر التصدير -->
                 <button onclick="openExportModal()" class="btn !bg-indigo-600 hover:!bg-indigo-500 !border-indigo-400/50 text-white !py-2.5 h-[42px] whitespace-nowrap w-full sm:w-auto shadow-[0_0_15px_rgba(79,70,229,0.3)]">
-                    📄 تصدير بيانات الناجحين
+                    📄 تصدير البيانات (ناجح/راسب)
                 </button>
                 
                 <!-- البحث -->
@@ -42,12 +42,12 @@
             <div class="bg-[#0e1218]/90 border border-dashed border-[#222b38] rounded-2xl p-16 text-center text-gray-500 backdrop-blur-md">
                 <span class="text-4xl block mb-3">👑</span>
                 <p class="text-lg font-bold">لا يوجد ملفات بانتظار الاعتماد النهائي حالياً.</p>
-                <p class="text-xs mt-2">يجب على المدربين إنهاء الرصد في الميدان وإرسال التقييم النهائي لتظهر الملفات هنا.</p>
+                <p class="text-xs mt-2">يجب على المدربين إنهاء الرصد في الميدان وإرسال التقييم للقيادة لتظهر الملفات هنا.</p>
             </div>
         <% } else { %>
             <div id="linesContainer" class="flex flex-col gap-4 mb-16">
                 <% sortedApps.forEach(app => { %>
-                    <!-- الخط العرضي (يتم التحكم بألوانه برمجياً بناءً على الدرجة المحددة) -->
+                    <!-- الخط العرضي -->
                     <div class="line-item flex flex-col xl:flex-row items-center justify-between bg-[#0e1218]/90 border rounded-2xl p-4 gap-6 transition-all duration-300 hover:bg-[#12171f]" 
                          data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId %>"
                          data-score="<%= app.totalScore %>"
@@ -90,9 +90,19 @@
                         </div>
 
                         <!-- 3. النتيجة النهائية -->
-                        <div class="text-center min-w-[120px] bg-black/20 p-3 rounded-xl border border-white/5">
-                            <span class="text-[10px] text-gray-500 font-bold block mb-1 uppercase tracking-wider">Final Score</span>
+                        <div class="text-center min-w-[100px] bg-black/20 p-3 rounded-xl border border-white/5">
+                            <span class="text-[10px] text-gray-500 font-bold block mb-1 uppercase tracking-wider">Total</span>
                             <span class="score-display text-3xl font-black font-mono"><%= app.totalScore %></span>
+                        </div>
+
+                        <!-- 4. أزرار الاعتماد (التخرج / طي القيد) -->
+                        <div class="flex flex-col sm:flex-row gap-2 w-full xl:w-auto border-t xl:border-t-0 xl:border-r border-[#1f2630] pt-3 xl:pt-0 xl:pr-3">
+                            <button onclick="makeFinalDecision('<%= app.id %>', 'graduated', this)" class="btn bg-emerald-600 hover:bg-emerald-500 text-white !py-2 text-xs font-bold w-full sm:w-32 shadow-[0_0_15px_rgba(16,185,129,0.3)]">
+                                🎓 اعتماد التخرج
+                            </button>
+                            <button onclick="makeFinalDecision('<%= app.id %>', 'failed', this)" class="btn bg-red-600 hover:bg-red-500 text-white !py-2 text-xs font-bold w-full sm:w-32 shadow-[0_0_15px_rgba(239,68,68,0.3)]">
+                                ✖ طي القيد
+                            </button>
                         </div>
 
                     </div>
@@ -103,20 +113,20 @@
 
     <!-- النافذة المنبثقة لتصدير البيانات -->
     <div id="exportModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
-        <div class="bg-[#0e1218] border border-indigo-500/40 w-full max-w-3xl rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh] animate-modal">
+        <div class="bg-[#0e1218] border border-indigo-500/40 w-full max-w-4xl rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh] animate-modal">
             <div class="bg-[#12171f] px-6 py-4 border-b border-[#222b38] flex justify-between items-center rounded-t-2xl">
                 <div class="flex items-center gap-3">
                     <span class="text-2xl">📄</span>
                     <div>
-                        <h3 class="text-lg font-black text-white">سجل بيانات الناجحين</h3>
-                        <p class="text-xs text-indigo-400 mt-0.5 font-mono" id="exportCountDisplay">عدد الناجحين: 0</p>
+                        <h3 class="text-lg font-black text-white">سجل بيانات التخرج (ناجح/راسب)</h3>
+                        <p class="text-xs text-indigo-400 mt-0.5 font-mono" id="exportCountDisplay">يتم الحساب...</p>
                     </div>
                 </div>
                 <button onclick="closeExportModal()" class="w-8 h-8 rounded-lg bg-[#1a2029] hover:bg-red-600/80 text-gray-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
             </div>
             
             <div class="p-6 flex-1 overflow-hidden flex flex-col">
-                <p class="text-xs text-gray-400 mb-3 font-bold">هذه القائمة تحتوي فقط على من اجتازوا درجة النجاح المحددة. يمكنك نسخها مباشرة.</p>
+                <p class="text-xs text-gray-400 mb-3 font-bold">تم إضافة المنشن <span class="text-indigo-400">&lt;@ID&gt;</span> للنسخ المباشر في الديسكورد.</p>
                 <textarea id="exportTextarea" readonly class="w-full flex-1 bg-[#080a0e] border border-[#222b38] rounded-xl p-4 text-sm text-gray-300 font-mono resize-none focus:outline-none focus:border-indigo-500/50 leading-relaxed"></textarea>
             </div>
 
@@ -176,34 +186,42 @@
             });
         }
 
-        // منطق نافذة التصدير
+        // منطق نافذة التصدير الشامل (ناجح + راسب مع منشن الديسكورد)
         function openExportModal() {
             const passScore = parseInt(document.getElementById('passScoreInput').value) || 40;
             const lines = document.querySelectorAll('.line-item');
-            let exportData = "";
+            
+            let passedData = "🎓 === [ قائمة المجتازين للتأهيل ] === 🎓\n\n";
+            let failedData = "✖ === [ قائمة غير المجتازين ] === ✖\n\n";
             let passedCount = 0;
+            let failedCount = 0;
 
             lines.forEach(line => {
                 const score = parseFloat(line.getAttribute('data-score')) || 0;
+                const name = line.getAttribute('data-name');
+                const natId = line.getAttribute('data-nationalid');
+                const copyId = line.getAttribute('data-copyid');
+                const discordId = line.getAttribute('data-discordid');
+                
+                // إضافة المنشن <@id> للنسخ المباشر في الديسكورد
+                const formattedText = `الاسم: ${name} | الرقم الوطني: ${natId} | Copy ID: ${copyId} | Discord: <@${discordId}>\n`;
+
                 if (score >= passScore) {
                     passedCount++;
-                    const name = line.getAttribute('data-name');
-                    const natId = line.getAttribute('data-nationalid');
-                    const copyId = line.getAttribute('data-copyid');
-                    const discordId = line.getAttribute('data-discordid');
-                    
-                    // تنسيق النص المراد نسخه
-                    exportData += `الاسم: ${name} | الرقم الوطني: ${natId} | Copy ID: ${copyId} | Discord: ${discordId}\n`;
-                    exportData += `-----------------------------------------------------------------------\n`;
+                    passedData += formattedText;
+                } else {
+                    failedCount++;
+                    failedData += formattedText;
                 }
             });
 
-            if (passedCount === 0) {
-                exportData = "لا يوجد ناجحين بناءً على درجة الاجتياز المحددة حالياً.";
-            }
+            if (passedCount === 0) passedData += "لا يوجد مجتازين بناءً على درجة الاجتياز المحددة حالياً.\n\n";
+            if (failedCount === 0) failedData += "لا يوجد غير مجتازين.\n\n";
 
-            document.getElementById('exportCountDisplay').innerText = `إجمالي المجتازين: ${passedCount}`;
-            document.getElementById('exportTextarea').value = exportData;
+            document.getElementById('exportCountDisplay').innerText = `المجتازين: ${passedCount} | غير المجتازين: ${failedCount}`;
+            
+            // دمج القائمتين مع فاصل بينهم
+            document.getElementById('exportTextarea').value = passedData + "\n-----------------------------------------------------------------------\n\n" + failedData;
             
             document.getElementById('exportModal').classList.remove('hidden');
             document.getElementById('exportModal').classList.add('flex');
@@ -218,8 +236,6 @@
 
         function copyExportData() {
             const textarea = document.getElementById('exportTextarea');
-            if(textarea.value.includes("لا يوجد ناجحين")) return;
-            
             textarea.select();
             textarea.setSelectionRange(0, 99999); // للموبايل
             navigator.clipboard.writeText(textarea.value).then(() => {
@@ -233,6 +249,50 @@
                     btn.classList.replace('bg-emerald-600', 'bg-indigo-600');
                 }, 2000);
             });
+        }
+
+        // دالة الاعتماد النهائي المطورة مع إشعار الإرسال
+        async function makeFinalDecision(id, decision, buttonElement) {
+            const isGraduated = decision === 'graduated';
+            const confirmMsg = isGraduated ? 
+                '🚨 تأكيد: هل أنت متأكد من تخرج هذا المتدرب وإرسال رسالة التهنئة بالخاص؟' : 
+                '🚨 تأكيد: هل أنت متأكد من طي قيد هذا المتدرب وإرسال رسالة الرفض بالخاص؟';
+
+            if (!confirm(confirmMsg)) return;
+
+            // 1. تغيير شكل الزر فوراً لمنع الضغط المزدوج
+            const originalHtml = buttonElement.innerHTML;
+            buttonElement.innerHTML = '<span class="animate-pulse">⏳ جاري الإرسال...</span>';
+            buttonElement.disabled = true;
+
+            try {
+                const res = await fetch('/api/final-decision', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ id: id, decision: decision }) 
+                });
+                const data = await res.json();
+                
+                if (data.success) {
+                    // 2. تجميد الزر وتغيير لونه ليعلمك أنه تم الإرسال بنجاح
+                    buttonElement.innerHTML = '✅ تم الإرسال';
+                    buttonElement.classList.replace('bg-emerald-600', 'bg-gray-600');
+                    buttonElement.classList.replace('bg-red-600', 'bg-gray-600');
+                    buttonElement.classList.remove('hover:bg-emerald-500', 'hover:bg-red-500');
+                    buttonElement.style.cursor = 'not-allowed';
+                    
+                    // تنبيه نجاح الإرسال
+                    alert(isGraduated ? "🎓 تم اعتماد التخرج وإرسال النموذج بنجاح!" : "❌ تم طي القيد وإرسال النموذج بنجاح!");
+                } else {
+                    alert("⚠️ خطأ في الإرسال: " + data.error);
+                    buttonElement.innerHTML = originalHtml;
+                    buttonElement.disabled = false;
+                }
+            } catch (err) {
+                alert("⚠️ تعذر الاتصال بالسيرفر. تأكد من اتصالك.");
+                buttonElement.innerHTML = originalHtml;
+                buttonElement.disabled = false;
+            }
         }
     </script>
 </body>
