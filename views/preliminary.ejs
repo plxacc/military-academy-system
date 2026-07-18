@@ -386,10 +386,10 @@
             });
         }
 
-        // ------------------ منطق استخراج بيانات الميدان ------------------
+        // ------------------ منطق استخراج بيانات الميدان المخفف لمنع تحويله لملف ------------------
         function openExportModal() {
             const cards = document.querySelectorAll('.card-tactical');
-            let exportData = "🛡️ === [ قائمة متدربي الميدان الحاليين ] === 🛡️\n\n";
+            let exportData = "🛡️ **[ قائمة متدربي الميدان الحاليين ]** 🛡️\n\n";
             let count = 0;
 
             cards.forEach(card => {
@@ -399,8 +399,8 @@
                 const copyId = card.getAttribute('data-copyid');
                 const discordId = card.getAttribute('data-discordid');
                 
-                exportData += `الاسم: ${name} | الرقم الوطني: ${natId} | Copy ID: ${copyId} | Discord: <@${discordId}>\n`;
-                exportData += `-----------------------------------------------------------------------\n`;
+                // سطر واحد مختصر جداً لكل متدرب لتوفير الحروف في الديسكورد
+                exportData += `${count}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${discordId}>\n`;
             });
 
             if (count === 0) {

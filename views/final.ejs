@@ -186,13 +186,13 @@
             });
         }
 
-        // منطق نافذة التصدير الشامل (ناجح + راسب مع منشن الديسكورد)
+       // منطق نافذة التصدير الشامل والمخفف (ناجح + راسب مع منشن الديسكورد بدون شرطت)
         function openExportModal() {
             const passScore = parseInt(document.getElementById('passScoreInput').value) || 40;
             const lines = document.querySelectorAll('.line-item');
             
-            let passedData = "🎓 === [ قائمة المجتازين للتأهيل ] === 🎓\n\n";
-            let failedData = "✖ === [ قائمة غير المجتازين ] === ✖\n\n";
+            let passedData = "🎓 **=== [ قائمة المجتازين للتأهيل ] ===** 🎓\n";
+            let failedData = "✖ **=== [ قائمة غير المجتازين ] ===** ✖\n";
             let passedCount = 0;
             let failedCount = 0;
 
@@ -203,25 +203,22 @@
                 const copyId = line.getAttribute('data-copyid');
                 const discordId = line.getAttribute('data-discordid');
                 
-                // إضافة المنشن <@id> للنسخ المباشر في الديسكورد
-                const formattedText = `الاسم: ${name} | الرقم الوطني: ${natId} | Copy ID: ${copyId} | Discord: <@${discordId}>\n`;
-
                 if (score >= passScore) {
                     passedCount++;
-                    passedData += formattedText;
+                    passedData += `${passedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${discordId}>\n`;
                 } else {
                     failedCount++;
-                    failedData += formattedText;
+                    failedData += `${failedCount}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${discordId}>\n`;
                 }
             });
 
-            if (passedCount === 0) passedData += "لا يوجد مجتازين بناءً على درجة الاجتياز المحددة حالياً.\n\n";
-            if (failedCount === 0) failedData += "لا يوجد غير مجتازين.\n\n";
+            if (passedCount === 0) passedData += "لا يوجد مجتازين حالياً.\n";
+            if (failedCount === 0) failedData += "لا يوجد غير مجتازين.\n";
 
             document.getElementById('exportCountDisplay').innerText = `المجتازين: ${passedCount} | غير المجتازين: ${failedCount}`;
             
-            // دمج القائمتين مع فاصل بينهم
-            document.getElementById('exportTextarea').value = passedData + "\n-----------------------------------------------------------------------\n\n" + failedData;
+            // دمج القائمتين بشكل نظيف بدون الشرطات الزائدة
+            document.getElementById('exportTextarea').value = passedData + "\n" + failedData;
             
             document.getElementById('exportModal').classList.remove('hidden');
             document.getElementById('exportModal').classList.add('flex');
