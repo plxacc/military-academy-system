@@ -24,12 +24,11 @@
                 <h2 class="text-3xl font-black text-white mt-1">🎯 ميدان التدريب والرصد</h2>
             </div>
             <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
-                <!-- زر الاستخراج الجديد -->
                 <button onclick="openExportModal()" class="btn !bg-teal-600 hover:!bg-teal-500 !border-teal-400/50 text-white !py-2.5 h-[42px] whitespace-nowrap w-full sm:w-auto shadow-[0_0_15px_rgba(20,184,166,0.3)]">
                     📄 استخراج بيانات الميدان
                 </button>
                 <div class="relative flex-1 w-full sm:w-64">
-                    <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="🔍 ابحث بالاسم أو الأيدي..." class="search-input focus:border-teal-500 h-[42px]">
+                    <input type="text" id="searchInput" oninput="filterCards()" placeholder="🔍 ابحث بالاسم أو الأيدي..." class="search-input focus:border-teal-500 h-[42px]">
                 </div>
             </div>
         </div>
@@ -42,7 +41,6 @@
         <% } else { %>
             <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 <% applications.forEach(app => { %>
-                    <!-- أضفنا خصائص الـ data هنا عشان زر الاستخراج يقرأها -->
                     <div class="card-tactical" 
                          data-search="<%= app.name %> <%= app.id %> <%= app.copyId %>"
                          data-name="<%= app.name %>"
@@ -229,15 +227,15 @@
                     <div class="space-y-4">
                         <div class="flex flex-col">
                             <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف المروري (من 20):</label>
-                            <input type="number" id="s1" max="20" min="0" oninput="calcStops()" class="search-input">
+                            <input type="number" id="s1" max="20" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف الجنائي (من 8):</label>
-                            <input type="number" id="s2" max="8" min="0" oninput="calcStops()" class="search-input">
+                            <input type="number" id="s2" max="8" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف الإجباري (من 22):</label>
-                            <input type="number" id="s3" max="22" min="0" oninput="calcStops()" class="search-input">
+                            <input type="number" id="s3" max="22" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
                         </div>
                     </div>
                 `;
@@ -312,8 +310,15 @@
                 detailsText = `رصد ${currentSection === 'ops' ? 'العمليات' : 'الأنظمة'} للعشر أسئلة`;
             }
 
-            const btn = document.getElementById('submitGradeBtn');
-            btn.innerText = '⏳ جاري الحفظ...'; btn.disabled = true;
+            closeModal(); // إغلاق المودال مباشرة عند الضغط
+
+            // إظهار شاشة تحميل تمنع المستخدم من الضغط وتخفف الضغط على السيرفر
+            Swal.fire({
+                title: '⏳ جاري الحفظ والتحديث...',
+                text: 'الرجاء الانتظار لحين مزامنة الدرجات مع قاعدة البيانات.',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
 
             try {
                 const response = await fetch('/api/advanced-grade', {
@@ -327,28 +332,26 @@
                     })
                 });
                 const result = await response.json();
+                
                 if (result.success) {
                     Swal.fire({
                         icon: 'success',
-                        title: 'تم الرصد بنجاح!',
-                        text: 'تم حفظ الدرجة في قوقل شيت وتحديث النظام.',
+                        title: 'تم الرصد بنجاح! ✔️',
+                        text: 'جاري تحديث المجموع التراكمي للمتدرب...',
                         confirmButtonColor: '#0d9488',
-                        timer: 2000,
+                        timer: 2500, // ✨ التأخير لمدة ثانيتين ونصف لضمان تحديث المجموع في قوقل شيت
                         showConfirmButton: false
                     }).then(() => {
-                        setTimeout(() => { location.reload(); }, 500); // تأخير الحفظ لضمان الاستقرار
+                        window.location.reload(); 
                     });
                 } else {
                     Swal.fire('خطأ', result.error, 'error');
-                    btn.disabled = false; btn.innerText = 'حفظ الرصد النهائي';
                 }
             } catch (error) {
                 Swal.fire('مشكلة في الاتصال', 'تعذر الاتصال بالسيرفر.', 'error');
-                btn.disabled = false; btn.innerText = 'حفظ الرصد النهائي';
             }
         }
 
-        // إرسال المتدرب للرصد النهائي بتنبيه احترافي
         function sendToFinal(discordId, name) {
             Swal.fire({
                 title: 'رفع للقيادة؟',
@@ -361,6 +364,7 @@
                 cancelButtonText: 'إلغاء'
             }).then(async (result) => {
                 if (result.isConfirmed) {
+                    Swal.fire({ title: '⏳ جاري الإرسال...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
                     try {
                         const response = await fetch('/api/send-final', {
                             method: 'POST',
@@ -386,7 +390,7 @@
             });
         }
 
-        // ------------------ منطق استخراج بيانات الميدان المخفف لمنع تحويله لملف ------------------
+        // ------------------ منطق استخراج بيانات الميدان ------------------
         function openExportModal() {
             const cards = document.querySelectorAll('.card-tactical');
             let exportData = "🛡️ **[ قائمة متدربي الميدان الحاليين ]** 🛡️\n\n";
@@ -399,8 +403,7 @@
                 const copyId = card.getAttribute('data-copyid');
                 const discordId = card.getAttribute('data-discordid');
                 
-                // تعديل المنشن ليقرأ ايدي الديسكورد ليتفعل باللون الأزرق
-               exportData += `${count}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${copyId}>\n`;
+                exportData += `${count}. الاسم: ${name} | الهوية: ${natId} | كوبي ايدي: \`${copyId}\` | منشن: <@${copyId}>\n`;
             });
 
             if (count === 0) {
