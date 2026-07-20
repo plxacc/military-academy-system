@@ -43,20 +43,37 @@
                     <div class="card-tactical" 
                          data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId %>"
                          data-name="<%= app.name %>"
-                         data-discordname="<%= app.id %>"
+                         data-discordid="<%= app.id %>"
                          data-copyid="<%= app.copyId || 'غير متوفر' %>"
                          data-nationalid="<%= app.nationalId || 'غير متوفر' %>">
                         
                         <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-teal-500 to-emerald-600"></div>
                         
                         <div>
-                            <div class="card-header mb-4">
+                            <!-- رأس الكرت -->
+                            <div class="card-header mb-3">
                                 <div>
-                                    <h3 class="card-title"><%= app.name %></h3>
-                                    <span class="card-id">ID: <%= app.copyId || app.id %></span>
+                                    <h3 class="card-title text-lg"><%= app.name %></h3>
                                 </div>
                                 <span class="badge bg-teal-500/10 text-teal-400 border border-teal-500/20">ميدان الرصد</span>
                             </div>
+
+                            <!-- 🚀 تم إضافة مربع البيانات التفصيلية هنا مثل صفحة المقابلات -->
+                            <div class="bg-[#12171f]/80 border border-[#1a2029] rounded-xl p-3 mb-4 space-y-2 text-[11px] font-mono shadow-inner">
+                                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                                    <span class="text-gray-400">💬 Discord ID:</span>
+                                    <span class="text-white font-bold select-all"><%= app.id %></span>
+                                </div>
+                                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                                    <span class="text-gray-400">📋 Copy ID:</span>
+                                    <span class="text-white font-bold select-all"><%= app.copyId || 'غير متوفر' %></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">🪪 الرقم الوطني:</span>
+                                    <span class="text-teal-400 font-bold select-all"><%= app.nationalId || 'غير متوفر' %></span>
+                                </div>
+                            </div>
+                            <!-- 🚀 نهاية مربع البيانات -->
 
                             <div class="bg-[#080a0e]/90 p-4 rounded-xl border border-[#1a2029] mb-4 flex justify-between items-center shadow-inner">
                                 <span class="text-xs text-gray-400 font-bold">المجموع التراكمي:</span>
@@ -158,7 +175,7 @@
             </div>
             
             <div class="p-6 flex-1 overflow-hidden flex flex-col">
-                <p class="text-xs text-gray-400 mb-3 font-bold">تم إضافة المنشن <span class="text-teal-400">&lt;@ID&gt;</span> للنسخ المباشر في الديسكورد.</p>
+                <p class="text-xs text-gray-400 mb-3 font-bold">تم تنسيق البيانات بنجاح وجاهزة للنسخ.</p>
                 <textarea id="exportTextarea" readonly class="w-full flex-1 bg-[#080a0e] border border-[#222b38] rounded-xl p-4 text-sm text-gray-300 font-mono resize-none focus:outline-none focus:border-teal-500/50 leading-relaxed"></textarea>
             </div>
 
@@ -210,7 +227,6 @@
             container.innerHTML = '';
             document.getElementById('modalFinalScore').innerText = '0';
 
-            // محتوى المودال
             if (section === 'stops') {
                 document.getElementById('modalTitle').innerText = 'رصد درجات الاستيقافات';
                 document.getElementById('modalIcon').innerText = '🚓';
@@ -273,7 +289,6 @@
             document.body.style.overflow = 'auto';
         }
 
-        // --- نظام جبر الكسور الذكي ---
         function calcStops() {
             const v1 = Math.min(20, Math.max(0, Number(document.getElementById('s1').value) || 0));
             const v2 = Math.min(8, Math.max(0, Number(document.getElementById('s2').value) || 0));
@@ -340,14 +355,12 @@
                     return Swal.fire('خطأ', 'لا تملك صلاحية!', 'error');
                 }
 
-                // تجاهل الأخطاء الوهمية طالما العملية انرسلت
                 Swal.fire({
                     icon: 'success', title: 'تم الرصد بنجاح! ✔️', text: 'جاري التحديث...',
                     confirmButtonColor: '#0d9488', timer: 2000, showConfirmButton: false
                 }).then(() => { window.location.reload(); });
 
             } catch (error) {
-                // حتى لو انقطع الاتصال نعتبره نجاح لتفادي إزعاج المدرب
                 Swal.fire({
                     icon: 'success', title: 'تم الرصد بنجاح! ✔️', text: 'جاري التحديث...',
                     confirmButtonColor: '#0d9488', timer: 2000, showConfirmButton: false
@@ -355,7 +368,6 @@
             }
         }
 
-        // إرسال المتدرب للرصد النهائي (مع إخفاء خطأ الاستضافة الوهمي)
         function sendToFinal(discordId, name) {
             Swal.fire({
                 title: 'رفع للقيادة؟',
@@ -380,14 +392,12 @@
                             return Swal.fire('خطأ', 'لا تملك صلاحية!', 'error');
                         }
 
-                        // إجبار النظام على النجاح وتجاهل الخطأ الوهمي
                         Swal.fire({
                             icon: 'success', title: 'تم الرفع!', text: 'تم إرسال الملف للقيادة بنجاح.',
                             showConfirmButton: false, timer: 2000
                         }).then(() => location.reload());
 
                     } catch (error) {
-                        // إجبار النظام على النجاح وتجاهل الخطأ الوهمي
                         Swal.fire({
                             icon: 'success', title: 'تم الرفع!', text: 'تم إرسال الملف للقيادة بنجاح.',
                             showConfirmButton: false, timer: 2000
@@ -397,7 +407,6 @@
             });
         }
 
-        // ------------------ منطق استخراج بيانات الميدان (الاسم، الرقم الوطني، اسم الديسكورد، كوبي ايدي، منشن) ------------------
         function openExportModal() {
             const cards = document.querySelectorAll('.card-tactical');
             let exportData = "🛡️ **[ قائمة متدربي الميدان الحاليين ]** 🛡️\n\n";
@@ -408,7 +417,7 @@
                 const name = card.getAttribute('data-name');
                 const natId = card.getAttribute('data-nationalid');
                 const copyId = card.getAttribute('data-copyid');
-                const discordName = card.getAttribute('data-discordname'); // يقابل app.id اللي هو اسم الديسكورد
+                const discordName = card.getAttribute('data-discordid');
                 
                 exportData += `${count}. الاسم: ${name} | الرقم الوطني: ${natId} | اسم الديسكورد: ${discordName} | كوبي ايدي: \`${copyId}\` | منشن: <@${copyId}>\n`;
             });
