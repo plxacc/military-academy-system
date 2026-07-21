@@ -5,96 +5,143 @@
     <title>مركز المراسلات | الكلية العسكرية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
+    <!-- مكتبة التنبيهات الفخمة SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-popup { background: #0e1218 !important; border: 1px solid #222b38 !important; border-radius: 1.5rem !important; color: #fff !important; }
+        .swal2-title { color: #fff !important; }
+        .swal2-html-container { color: #9ca3af !important; }
+        .template-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .template-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#05070a] selection:bg-indigo-500 selection:text-white font-sans">
     <%- include('partials/navbar') %>
 
     <main class="max-w-[90rem] mx-auto px-6 py-12 flex-1 w-full">
         
+        <!-- الهيدر الفخم -->
         <div class="relative rounded-[2.5rem] bg-[#0d1117] border border-[#1f2630] p-10 md:p-12 mb-12 shadow-2xl overflow-hidden">
             <div class="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-indigo-900/20 to-transparent opacity-50"></div>
-            <div class="relative z-10">
-                <span class="inline-block bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-mono font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">
-                    COMMUNICATIONS CENTER
-                </span>
-                <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">مركز المراسلات والتوجيه الآلي</h2>
-                <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">
-                    من هنا يمكنك إعداد النماذج التلقائية التي تُرسل فور قبول العسكري، بالإضافة إلى إرسال رسائل بث عامة (Broadcast) لأي مجموعة أو لأشخاص محددين.
-                </p>
+            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                <div>
+                    <span class="inline-block bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 text-xs font-mono font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">
+                        COMMUNICATIONS CENTER
+                    </span>
+                    <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">مركز المراسلات والتوجيه</h2>
+                    <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">
+                        قم بإدارة النماذج التلقائية للقبول والرفض، أو إرسال توجيهات عامة (Broadcast) لأي دفعة بضغطة زر.
+                    </p>
+                </div>
+                <div class="text-6xl opacity-80 drop-shadow-[0_0_15px_rgba(79,70,229,0.3)]">📡</div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            
-            <!-- القسم الأول: قوالب الإرسال التلقائي -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 relative shadow-lg">
-                <div class="flex items-center gap-4 mb-8 border-b border-[#1f2630] pb-4">
-                    <span class="text-3xl">⚙️</span>
-                    <div>
-                        <h3 class="text-xl font-black text-white">إعداد القوالب التلقائية</h3>
-                        <p class="text-xs text-gray-500 mt-1">تُدمج هذه النصوص مع رسالة القبول وترسل آلياً</p>
-                    </div>
+        <!-- قسم قوالب القبول -->
+        <div class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-2xl">📥</span>
+                <h3 class="text-2xl font-black text-white">نماذج الاعتماد والقبول</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                
+                <!-- قالب المقابلة -->
+                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
+                    <div class="absolute top-0 right-0 w-full h-1 bg-orange-500 rounded-t-2xl"></div>
+                    <label class="text-sm font-bold text-orange-400 mb-3 block">1. نموذج قبول المقابلة:</label>
+                    <textarea id="tpl-interview" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-orange-500" placeholder="مثال: يرجى التوجه للانتظار غداً الساعة 9 م..."><%= templates.interview %></textarea>
+                    <button onclick="saveTemp('interview', 'tpl-interview', '#f97316')" class="btn bg-[#161b22] hover:bg-orange-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب المقابلة</button>
                 </div>
 
-                <div class="space-y-6">
-                    <div>
-                        <label class="text-xs font-bold text-orange-400 mb-2 block">نموذج القبول للمقابلة (المرحلة 1):</label>
-                        <textarea id="tpl-interview" class="w-full h-20 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-orange-500" placeholder="مثال: يرجى التوجه للانتظار غداً الساعة 9 م..."><%= templates.interview %></textarea>
-                        <button onclick="saveTemp('interview', 'tpl-interview')" class="btn bg-[#161b22] hover:bg-orange-600 border border-[#222b38] text-white w-full mt-2 !py-2 text-xs">💾 حفظ قالب المقابلة</button>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-emerald-400 mb-2 block">نموذج دخول الميدان (المرحلة 2):</label>
-                        <textarea id="tpl-preliminary" class="w-full h-20 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500" placeholder="مثال: يرجى لبس الزي الرياضي والتواجد في الميدان..."><%= templates.preliminary %></textarea>
-                        <button onclick="saveTemp('preliminary', 'tpl-preliminary')" class="btn bg-[#161b22] hover:bg-emerald-600 border border-[#222b38] text-white w-full mt-2 !py-2 text-xs">💾 حفظ قالب الميدان</button>
-                    </div>
-                    <div>
-                        <label class="text-xs font-bold text-amber-400 mb-2 block">نموذج التخرج والاعتماد (المرحلة 3):</label>
-                        <textarea id="tpl-final" class="w-full h-20 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-amber-500" placeholder="مثال: يرجى التوجه لاستلام الرتبة والبدلة العسكرية..."><%= templates.final %></textarea>
-                        <button onclick="saveTemp('final', 'tpl-final')" class="btn bg-[#161b22] hover:bg-amber-600 border border-[#222b38] text-white w-full mt-2 !py-2 text-xs">💾 حفظ قالب التخرج</button>
-                    </div>
+                <!-- قالب الميدان -->
+                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
+                    <div class="absolute top-0 right-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
+                    <label class="text-sm font-bold text-emerald-400 mb-3 block">2. نموذج القبول للميدان:</label>
+                    <textarea id="tpl-preliminary" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500" placeholder="مثال: يرجى لبس الزي الرياضي والتواجد في الميدان..."><%= templates.preliminary %></textarea>
+                    <button onclick="saveTemp('preliminary', 'tpl-preliminary', '#10b981')" class="btn bg-[#161b22] hover:bg-emerald-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب الميدان</button>
+                </div>
+
+                <!-- قالب التخرج -->
+                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
+                    <div class="absolute top-0 right-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
+                    <label class="text-sm font-bold text-blue-400 mb-3 block">3. نموذج التخرج (النهائي):</label>
+                    <textarea id="tpl-final" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-blue-500" placeholder="مثال: نبارك لك اجتياز الأكاديمية بنجاح..."><%= templates.final %></textarea>
+                    <button onclick="saveTemp('final', 'tpl-final', '#3b82f6')" class="btn bg-[#161b22] hover:bg-blue-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب التخرج</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- قسم قوالب الرفض -->
+        <div class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-2xl">🚫</span>
+                <h3 class="text-2xl font-black text-white">نماذج الرفض وطي القيد</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- رفض المقابلة -->
+                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
+                    <div class="absolute top-0 right-0 w-full h-1 bg-red-500 rounded-t-2xl"></div>
+                    <label class="text-sm font-bold text-red-400 mb-3 block">نموذج السقوط في المقابلة:</label>
+                    <textarea id="tpl-reject-interview" class="w-full h-24 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-red-500" placeholder="مثال: نعتذر منك لعدم اجتيازك المقابلة الشخصية..."><%= templates.reject_interview || 'نعتذر منك، لم تجتز المقابلة الشخصية.' %></textarea>
+                    <button onclick="saveTemp('reject_interview', 'tpl-reject-interview', '#ef4444')" class="btn bg-[#161b22] hover:bg-red-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ رسالة رفض المقابلة</button>
+                </div>
+
+                <!-- طي القيد النهائي -->
+                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
+                    <div class="absolute top-0 right-0 w-full h-1 bg-rose-700 rounded-t-2xl"></div>
+                    <label class="text-sm font-bold text-rose-400 mb-3 block">نموذج طي القيد (الرسوب في الأكاديمية):</label>
+                    <textarea id="tpl-reject-final" class="w-full h-24 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-rose-500" placeholder="مثال: يؤسفنا إعلامك بطي قيدك لعدم اجتياز الميدان..."><%= templates.reject_final || 'نعتذر منك، لم تجتز دورة الأكاديمية العسكرية بنجاح.' %></textarea>
+                    <button onclick="saveTemp('reject_final', 'tpl-reject-final', '#be123c')" class="btn bg-[#161b22] hover:bg-rose-700 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ رسالة طي القيد</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- القسم الثالث: البث العام (Broadcast) -->
+        <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 lg:p-10 relative shadow-lg">
+            <div class="flex items-center gap-4 mb-8 border-b border-[#1f2630] pb-4">
+                <span class="text-3xl">📢</span>
+                <div>
+                    <h3 class="text-xl font-black text-white">نظام الإرسال العام (Broadcast)</h3>
+                    <p class="text-xs text-gray-500 mt-1">أرسل توجيهات أو إعلانات لدفعة كاملة أو لأشخاص محددين بضغطة زر.</p>
                 </div>
             </div>
 
-            <!-- القسم الثاني: البث العام (Broadcast) -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 relative shadow-lg">
-                <div class="flex items-center gap-4 mb-8 border-b border-[#1f2630] pb-4">
-                    <span class="text-3xl">📢</span>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- إعدادات الفئة -->
+                <div class="space-y-6">
                     <div>
-                        <h3 class="text-xl font-black text-white">نظام الإرسال العام (Broadcast)</h3>
-                        <p class="text-xs text-gray-500 mt-1">إرسال رسالة مخصصة لجميع أفراد الفئة المحددة</p>
-                    </div>
-                </div>
-
-                <div class="space-y-5">
-                    <div>
-                        <label class="text-xs font-bold text-gray-300 mb-2 block">1. اختر الفئة المستهدفة:</label>
-                        <select id="targetGroup" onchange="toggleCustomInput()" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-white focus:border-indigo-500 outline-none">
+                        <label class="text-sm font-bold text-gray-300 mb-2 block">1. اختر الفئة المستهدفة:</label>
+                        <select id="targetGroup" onchange="toggleCustomInput()" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3.5 text-sm text-white focus:border-indigo-500 outline-none shadow-inner cursor-pointer">
                             <option value="raw">📝 تقديمات الشرطة الجديدة (<%= rawApps.length %>)</option>
                             <option value="interview">🎙️ المرشحين للمقابلات (<%= interviewUsers.length %>)</option>
-                            <option value="preliminary">🛡️ المقبولين مبدئياً للميدان (<%= prelimUsers.length %>)</option>
+                            <option value="preliminary">🛡️ متدربين الميدان (<%= prelimUsers.length %>)</option>
                             <option value="final">👑 بانتظار الاعتماد النهائي (<%= finalUsers.length %>)</option>
-                            <option value="custom">🎯 إرسال مخصص (للمرفوضين أو أفراد محددين)</option>
+                            <option value="custom">🎯 إرسال مخصص (للمرفوضين أو أشخاص محددين)</option>
                         </select>
                     </div>
 
-                    <!-- مربع الإدخال اليدوي (يظهر فقط عند اختيار "إرسال مخصص") -->
-                    <div id="customInputContainer" class="hidden">
-                        <label class="text-xs font-bold text-indigo-400 mb-2 block">الصق الأيديات (Copy IDs) هنا كل آيدي في سطر:</label>
-                        <textarea id="customCopyIds" class="w-full h-24 bg-[#12171f] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-indigo-500" placeholder="123456789012345678&#10;876543210987654321"></textarea>
+                    <div id="customInputContainer" class="hidden animate-fade-in">
+                        <label class="text-sm font-bold text-indigo-400 mb-2 block">الصق الأيديات (Copy IDs) كل آيدي في سطر:</label>
+                        <textarea id="customCopyIds" class="w-full h-32 bg-[#12171f] border border-indigo-500/30 rounded-xl p-4 text-sm text-gray-300 font-mono resize-none focus:border-indigo-500 shadow-inner" placeholder="123456789012345678&#10;876543210987654321"></textarea>
+                        <p class="text-[10px] text-gray-500 mt-2">سيقوم النظام بفلترة المسافات واستخراج الأيديات الصحيحة تلقائياً.</p>
                     </div>
+                </div>
 
-                    <div>
-                        <label class="text-xs font-bold text-gray-300 mb-2 block">2. اكتب رسالة البث العام:</label>
-                        <textarea id="broadcastMsg" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-4 text-sm text-gray-200 font-mono resize-none focus:border-indigo-500" placeholder="اكتب إعلانك أو توجيهك هنا..."></textarea>
-                    </div>
-
-                    <button onclick="sendBroadcast()" class="btn !bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 w-full !py-3.5 shadow-[0_0_20px_rgba(79,70,229,0.4)] text-lg font-black tracking-widest mt-4">
-                        🚀 إرسال الرسالة للمجموعة المحددة
+                <!-- نص الرسالة -->
+                <div class="flex flex-col">
+                    <label class="text-sm font-bold text-gray-300 mb-2 block">2. اكتب رسالة البث العام:</label>
+                    <textarea id="broadcastMsg" class="w-full flex-1 min-h-[160px] bg-[#0d1117] border border-[#222b38] rounded-xl p-5 text-sm text-gray-200 font-mono resize-none focus:border-indigo-500 shadow-inner" placeholder="اكتب إعلانك أو توجيهك هنا..."></textarea>
+                    
+                    <button onclick="sendBroadcast()" class="btn !bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 w-full !py-4 shadow-[0_0_20px_rgba(79,70,229,0.4)] text-base font-black tracking-widest mt-6 transition-all transform hover:scale-[1.02]">
+                        🚀 إرسال الرسالة الآن
                     </button>
                 </div>
             </div>
-
         </div>
+
     </main>
 
     <%- include('partials/footer') %>
@@ -108,7 +155,6 @@
             final: JSON.parse('<%- JSON.stringify(finalUsers.map(u => u.copyId)) %>')
         };
 
-        // إظهار/إخفاء مربع الإدخال اليدوي بناءً على الاختيار
         function toggleCustomInput() {
             const group = document.getElementById('targetGroup').value;
             const customContainer = document.getElementById('customInputContainer');
@@ -119,67 +165,110 @@
             }
         }
 
-        async function saveTemp(type, textareaId) {
+        async function saveTemp(type, textareaId, colorHex) {
             const msg = document.getElementById(textareaId).value.trim();
+            
+            Swal.fire({
+                title: '⏳ جاري الحفظ...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
             try {
                 const res = await fetch('/api/templates/save', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
                     body: JSON.stringify({ type, message: msg })
                 });
-                if((await res.json()).success) alert("✅ تم تحديث القالب التلقائي.");
-                else alert("⚠️ خطأ في الحفظ.");
-            } catch (err) { alert("⚠️ تعذر الاتصال."); }
+                
+                if((await res.json()).success) {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'تم الحفظ!',
+                        text: 'تم تحديث القالب التلقائي بنجاح.',
+                        confirmButtonColor: colorHex,
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                } else {
+                    Swal.fire('خطأ', 'حدث مشكلة أثناء الحفظ', 'error');
+                }
+            } catch (err) { 
+                Swal.fire('مشكلة في الاتصال', 'تعذر الاتصال بالسيرفر.', 'error');
+            }
         }
 
         async function sendBroadcast() {
             const groupKey = document.getElementById('targetGroup').value;
             let copyIds = [];
 
-            // تحديد قائمة الأيديات بناءً على الخيار
             if (groupKey === 'custom') {
                 const rawText = document.getElementById('customCopyIds').value;
-                // تقسيم النص حسب الأسطر واستخراج الأيديات الصالحة فقط
                 copyIds = rawText.split('\n').map(id => id.trim()).filter(id => id.length >= 17);
-                if(copyIds.length === 0) return alert("❌ يرجى لصق 'Copy ID' واحد صحيح على الأقل!");
+                if(copyIds.length === 0) {
+                    return Swal.fire('تنبيه', "يرجى لصق 'Copy ID' واحد صحيح على الأقل!", 'warning');
+                }
             } else {
                 copyIds = groupData[groupKey];
             }
 
             const msg = document.getElementById('broadcastMsg').value.trim();
 
-            if(!msg) return alert("❌ يرجى كتابة الرسالة أولاً!");
-            if(copyIds.length === 0) return alert("❌ لا يوجد أشخاص في هذه الفئة لإرسال الرسالة لهم!");
+            if(!msg) return Swal.fire('تنبيه', "يرجى كتابة نص الرسالة أولاً!", 'warning');
+            if(copyIds.length === 0) return Swal.fire('تنبيه', "لا يوجد أشخاص في هذه الفئة لإرسال الرسالة لهم!", 'warning');
 
-            if(confirm(`🚨 تأكيد: سيتم إرسال رسالة خاصة (DM) لعدد (${copyIds.length}) عسكري. هل أنت متأكد؟`)) {
-                if(typeof showLoader === 'function') showLoader();
-
-                try {
-                    const res = await fetch('/api/templates/send', {
-                        method: 'POST',
-                        headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ copyIds, message: msg })
-                    });
-                    const data = await res.json();
+            Swal.fire({
+                title: 'تأكيد البث العام 🚀',
+                text: `سيتم إرسال رسالة خاصة (DM) لعدد (${copyIds.length}) شخص. هل أنت متأكد؟`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#4f46e5',
+                cancelButtonColor: '#374151',
+                confirmButtonText: 'نعم، أرسل للجميع',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
                     
-                    if(typeof hideLoader === 'function') hideLoader();
+                    Swal.fire({
+                        title: '⏳ جاري الإرسال...',
+                        html: 'يرجى عدم إغلاق الصفحة لحين انتهاء البث.',
+                        allowOutsideClick: false,
+                        didOpen: () => { Swal.showLoading(); }
+                    });
 
-                    if(data.success) {
-                        let resultMsg = `✅ اكتملت المهمة!\n✔ تم الإرسال لـ: ${data.successCount}\n❌ فشل الإرسال لـ: ${data.failCount}`;
-                        if(data.failCount > 0) resultMsg += `\n⚠️ سبب الفشل الدقيق من ديسكورد: ${data.errorLog}`;
-                        alert(resultMsg);
+                    try {
+                        const res = await fetch('/api/templates/send', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({ copyIds, message: msg })
+                        });
+                        const data = await res.json();
                         
-                        // تفريغ الخانات بعد الإرسال الناجح
-                        document.getElementById('broadcastMsg').value = ''; 
-                        if(groupKey === 'custom') document.getElementById('customCopyIds').value = '';
-                    } else {
-                        alert(`⚠️ خطأ: ${data.error}`);
+                        if(data.success) {
+                            let resultHtml = `
+                                <div class="text-right space-y-2 mt-4">
+                                    <p class="text-emerald-400 font-bold">✔ نجاح الإرسال: ${data.successCount} شخص</p>
+                                    <p class="text-red-400 font-bold">✖ فشل الإرسال: ${data.failCount} شخص</p>
+                                </div>
+                            `;
+                            
+                            Swal.fire({
+                                icon: 'success',
+                                title: 'تم اكتمال البث! 📢',
+                                html: resultHtml,
+                                confirmButtonColor: '#4f46e5'
+                            });
+                            
+                            document.getElementById('broadcastMsg').value = ''; 
+                            if(groupKey === 'custom') document.getElementById('customCopyIds').value = '';
+                        } else {
+                            Swal.fire('خطأ', `⚠️ ${data.error}`, 'error');
+                        }
+                    } catch (err) { 
+                        Swal.fire('خطأ', "⚠️ تعذر إرسال الرسائل.", 'error');
                     }
-                } catch (err) { 
-                    if(typeof hideLoader === 'function') hideLoader();
-                    alert("⚠️ تعذر إرسال الرسائل."); 
                 }
-            }
+            });
         }
     </script>
 </body>
