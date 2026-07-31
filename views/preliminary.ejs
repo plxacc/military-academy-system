@@ -237,19 +237,19 @@
                     <div class="space-y-4">
                         <div class="flex flex-col">
                             <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف المروري (من 20):</label>
-                            <input type="number" id="s1" max="20" min="0" oninput="calcStops()" class="search-input">
+                            <input type="number" id="s1" max="20" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف الجنائي (من 8):</label>
-                            <input type="number" id="s2" max="8" min="0" oninput="calcStops()" class="search-input">
+                            <input type="number" id="s2" max="8" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
                         </div>
                         <div class="flex flex-col">
                             <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف الإجباري (من 22):</label>
-                            <input type="number" id="s3" max="22" min="0" oninput="calcStops()" class="search-input">
+                            <input type="number" id="s3" max="22" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
                         </div>
                     </div>
                 `;
-              } else if (section === 'neg') {
+            } else if (section === 'neg') {
                 document.getElementById('modalTitle').innerText = 'رصد درجات التفاوض';
                 document.getElementById('modalIcon').innerText = '🗣️';
                 let html = '<div class="grid grid-cols-1 gap-3">';
@@ -311,6 +311,26 @@
                 sum += val;
             }
             document.getElementById('modalFinalScore').innerText = sum;
+        }
+        
+        // حساب مجموع الاستيقافات المجبور فوراً (من 20)
+        function calcStops() {
+            const s1 = Math.min(20, Math.max(0, Number(document.getElementById('s1')?.value) || 0));
+            const s2 = Math.min(8, Math.max(0, Number(document.getElementById('s2')?.value) || 0));
+            const s3 = Math.min(22, Math.max(0, Number(document.getElementById('s3')?.value) || 0));
+
+            const totalOutOf50 = s1 + s2 + s3;
+            const rawScaled = (totalOutOf50 / 50) * 20;
+
+            const intPart = Math.floor(rawScaled);
+            const fraction = Number((rawScaled - intPart).toFixed(2));
+            
+            const finalScore = (fraction >= 0.40) ? intPart + 1 : intPart;
+
+            const scoreDisplay = document.getElementById('modalFinalScore');
+            if (scoreDisplay) {
+                scoreDisplay.innerText = finalScore;
+            }
         }
 
         // حساب مجموع الأنظمة العامة (5 أسئلة من 2)
