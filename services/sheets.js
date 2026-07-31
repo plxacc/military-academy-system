@@ -357,7 +357,7 @@ async function advancedGradeApplicant(discordId, section, detailsText, finalScor
     clearCache();
 }
 
-// إرسال المتدرب للرصد النهائي (للقيادة)
+// إرسال المتدرب للرصد النهائي (للقيادة) - نسخة مصححة
 async function sendToFinalDecision(discordId, officerName) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -398,23 +398,7 @@ async function sendToFinalDecision(discordId, officerName) {
         await sendDiscordLog(logMsg);
     }
     clearCache();
-    // 👇 إرسال التهنئة أو الرفض النهائي 👇
-        if (decisionType === 'graduated') {
-            const templates = await getTemplates();
-            const customText = templates.final || 'نبارك لك اجتيازك مرحلة الأكاديمية بنجاح! صدر القرار بتجنيدك رسمياً.';
-            await sendDiscordDM(appCopyId, {
-                title: "🏅 إشعار تجنيد وقبول نهائي",
-                color: 0x3B82F6, // لون أزرق
-                description: `مرحباً **${appName}**،\n\n${customText}`
-            });
-        } else {
-            await sendDiscordDM(appCopyId, {
-                title: "❌ إشعار إداري",
-                color: 0xEF4444, // لون أحمر
-                description: `مرحباً **${appName}**،\n\nنعتذر منك، **لم تجتز** دورة الأكاديمية العسكرية بنجاح.\n\n**السبب:** رسوب أكاديمية\nنتمنى لك التوفيق في المرات القادمة.`
-            });
-        }
-        // 👆 👆
+    // 🛑 تم إزالة الكود المنسوخ بالخطأ من هنا لضمان عمل الدالة
 }
 
 // دالة منح أو إلغاء النجاح الاستثنائي
@@ -569,7 +553,7 @@ async function deleteGuideQuestion(questionId) {
 async function updateApplicationStage(discordId, newStage, newStatus) {}
 async function gradeApplicant(discordId, section, score, graderName) {}
 
-// 🚀 دالة الإرسال على الخاص (DM) بنظام الـ Embed الفخم
+// 🚀 دالة الإرسال على الخاص (DM) بنظام الـ Embed الفخم مع كشف الأخطاء
 async function sendDiscordDM(copyId, embedConfig) {
     const botToken = process.env.DISCORD_BOT_TOKEN;
     if (!botToken) return console.log("⚠️ توكن البوت غير موجود!");
@@ -581,28 +565,39 @@ async function sendDiscordDM(copyId, embedConfig) {
             headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
             body: JSON.stringify({ recipient_id: String(copyId).trim() })
         });
+        
         const dmData = await dmRes.json();
         
-        if (!dmData.id) return console.log("⚠️ فشل فتح الخاص مع:", copyId);
+        // كشف إذا الديسكورد رفض يفتح خاص (مثل إذا العسكري مقفل الرسايل أو مبند البوت)
+        if (!dmRes.ok || !dmData.id) {
+            return console.log("❌ ديسكورد رفض فتح محادثة مع:", copyId, " | السبب:", JSON.stringify(dmData));
+        }
 
         // 2. تجهيز شكل الرسالة (Embed)
         const payload = {
             embeds: [{
                 title: embedConfig.title,
                 description: embedConfig.description,
-                color: embedConfig.color, // لون الخط الجانبي
+                color: embedConfig.color, 
                 footer: { text: "القيادة العامة للشرطة - مدينة جسس" }
             }]
         };
 
         // 3. إرسال الرسالة
-        await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
+        const msgRes = await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
             method: 'POST',
             headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         });
+
+        // كشف إذا تمت المحادثة بس الديسكورد رفض إرسال الرسالة داخلها
+        if (!msgRes.ok) {
+            const errData = await msgRes.json();
+            console.log("❌ فشل إرسال الرسالة للمستخدم:", copyId, " | السبب:", JSON.stringify(errData));
+        }
+
     } catch (err) {
-        console.log("⚠️ خطأ في إرسال الـ DM:", err.message);
+        console.log("⚠️ خطأ برمجي داخلي في دالة الإرسال:", err.message);
     }
 }
 async function getTemplates() {
