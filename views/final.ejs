@@ -265,26 +265,25 @@
         function makeFinalDecision(id, decision, buttonElement) {
             const isGraduated = decision === 'graduated';
             const actionText = isGraduated ? 'اعتماد تخرج' : 'طي قيد';
-            const templateText = isGraduated ? 'نموذج التخرج' : 'نموذج الرفض';
             const confirmColor = isGraduated ? '#059669' : '#dc2626';
 
             Swal.fire({
                 title: `تأكيد ${actionText}؟`,
-                text: `هل أنت متأكد من القرار؟ سيتم إرسال ${templateText} الموجود في مركز المراسلات آلياً إلى العسكري في الخاص.`,
+                text: `هل أنت متأكد من اتخاذ القرار في النظام؟ (لن يتم إرسال رسالة خاصة تلقائياً).`,
                 icon: 'warning',
                 showCancelButton: true,
                 confirmButtonColor: confirmColor,
                 cancelButtonColor: '#374151',
-                confirmButtonText: `نعم، أرسل ${templateText}`,
+                confirmButtonText: `نعم، اعتمد ${actionText}`,
                 cancelButtonText: 'إلغاء'
             }).then(async (result) => {
                 if (result.isConfirmed) {
                     
                     const originalHtml = buttonElement.innerHTML;
-                    buttonElement.innerHTML = '<span class="animate-pulse">⏳ جاري الإرسال...</span>';
+                    buttonElement.innerHTML = '<span class="animate-pulse">⏳ جاري الاعتماد...</span>';
                     buttonElement.disabled = true;
 
-                    Swal.fire({ title: '⏳ جاري تنفيذ القرار وإرسال النموذج...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                    Swal.fire({ title: '⏳ جاري تنفيذ القرار في قاعدة البيانات...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
 
                     try {
                         const res = await fetch('/api/final-decision', {
@@ -299,8 +298,8 @@
                             return Swal.fire('خطأ', 'لا تملك صلاحية لتنفيذ هذا القرار!', 'error');
                         }
 
-                        // تحويل الزر إلى رمادي ومكتوب عليه تم الإرسال
-                        buttonElement.innerHTML = '✅ تم إرسال النموذج';
+                        // تحويل الزر إلى تم الاعتماد
+                        buttonElement.innerHTML = '✅ تم الاعتماد';
                         buttonElement.classList.replace('bg-emerald-600', 'bg-gray-700');
                         buttonElement.classList.replace('bg-red-600', 'bg-gray-700');
                         buttonElement.classList.replace('hover:bg-emerald-500', 'hover:bg-gray-600');
@@ -311,15 +310,14 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'تم الاعتماد بنجاح!',
-                            text: `تم ${actionText} وإرسال ${templateText} للعسكري بنجاح.`,
+                            text: `تم ${actionText} في النظام بنجاح. يمكنك المراسلة يدوياً من مركز المراسلات.`,
                             confirmButtonColor: confirmColor,
-                            timer: 3000,
+                            timer: 2500,
                             showConfirmButton: false
                         });
 
                     } catch (err) {
-                        // تجاهل وهمي لخطأ السيرفر لأن العملية تكتمل في الخلفية
-                        buttonElement.innerHTML = '✅ تم إرسال النموذج';
+                        buttonElement.innerHTML = '✅ تم الاعتماد';
                         buttonElement.classList.replace('bg-emerald-600', 'bg-gray-700');
                         buttonElement.classList.replace('bg-red-600', 'bg-gray-700');
                         buttonElement.style.cursor = 'not-allowed';
@@ -327,9 +325,9 @@
                         Swal.fire({
                             icon: 'success',
                             title: 'تم الاعتماد بنجاح!',
-                            text: `تم ${actionText} وإرسال ${templateText} للعسكري بنجاح.`,
+                            text: `تم ${actionText} في النظام بنجاح.`,
                             confirmButtonColor: confirmColor,
-                            timer: 3000,
+                            timer: 2500,
                             showConfirmButton: false
                         });
                     }

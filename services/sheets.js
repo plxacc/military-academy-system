@@ -174,17 +174,7 @@ async function acceptFromRawToAcademy(rawId, name, answers, officerName, discord
         await existingRow.save();
     }
     clearCache();
-    
-    // إرسال رسالة الميدان
-    const templates = await getTemplates();
-    const customText = templates.preliminary || 'يسرنا إعلامك بأنه تم قبولك مبدئياً. يرجى التوجه لميدان الكلية.';
-    await sendDiscordDM(finalCopyId, {
-        title: "🎓 إشعار قبول مبدئي للميدان",
-        color: 0x10B981, 
-        description: `مرحباً **${finalName}**،\n\n${customText}`
-    });
-    
-    await sendDiscordLog(`✅ **قبول مبدئي للميدان**\n👮‍♂️ **المسؤول:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
+      await sendDiscordLog(`✅ **قبول مبدئي للميدان**\n👮‍♂️ **المسؤول:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
 }
 
 // 4. رفض التقديم وإرسال اللوق
@@ -488,14 +478,7 @@ async function finalDecision(discordId, decisionType, officerName) {
                        `━━━━━━━━━━━━━━━━━━━━\n` +
                        `📝 **التفاصيل:** ${discordMsg}`;
         await sendDiscordLog(logMsg);
-
-        // 👇 الكود الذي استفسرت عنه تم وضعه هنا ليرسل التهنئة التلقائية فور التخرج 👇
-        if (decisionType === 'graduated') {
-            const templates = await getTemplates();
-            const dmMessage = `👑 **ألف مبروك! تم اعتماد تخرجه النهائي وانضمامك للشرطة**\n\n${templates.final || 'تمنياتنا لك بالتوفيق في مسيرتك العسكرية.'}`;
-            await sendDiscordDM(appCopyId, dmMessage);
-        }
-        // 👆 👆
+        
     }
     clearCache();
 }

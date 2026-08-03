@@ -270,15 +270,21 @@ app.post('/api/templates/save', async (req, res) => {
 });
 
 app.post('/api/templates/send', async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "غير مصرح" });
+    
     const { copyIds, message } = req.body;
     const botToken = process.env.DISCORD_BOT_TOKEN;
+    
     if (!botToken) return res.status(500).json({ error: "لم يتم العثور على توكن البوت!" });
 
-    let successCount = 0; let failCount = 0; let errorLog = "";
+    let successCount = 0; 
+    let failCount = 0; 
+    let errorLog = "";
 
     for (const copyId of copyIds) {
         if (!copyId || copyId.length < 17) continue; 
         try {
+            // 1. فتح قناة الخاص
             const dmRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
@@ -286,20 +292,37 @@ app.post('/api/templates/send', async (req, res) => {
             });
             const dmData = await dmRes.json();
             
-            if (!dmRes.ok || !dmData.id) { failCount++; errorLog = dmData.message || "معرف غير صحيح"; continue; }
+            if (!dmRes.ok || !dmData.id) { 
+                failCount++; 
+                console.log(`❌ فشل فتح خاص لـ ${copyId}:`, dmData.message || "خطأ غير معروف");
+                continue; 
+            }
 
+            // 2. إرسال الرسالة داخل القناة
             const msgRes = await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
                 body: JSON.stringify({ content: message })
             });
 
-            if (msgRes.ok) successCount++;
-            else { failCount++; errorLog = (await msgRes.json()).message; }
+            if (msgRes.ok) {
+                successCount++;
+            } else { 
+                failCount++; 
+                const errJson = await msgRes.json();
+                errorLog = errJson.message;
+                console.log(`❌ فشل إرسال نص لـ ${copyId}:`, errJson.message);
+            }
             
-            await new Promise(resolve => setTimeout(resolve, 200)); 
-        } catch (error) { failCount++; }
+            // ⏳ زيادة فترة التوقف إلى 600 ملي ثانية لتفادي حظر سبام ديسكورد (Rate Limit)
+            await new Promise(resolve => setTimeout(resolve, 600)); 
+            
+        } catch (error) { 
+            failCount++; 
+            console.log(`⚠️ خطأ استثنائي أثناء إرسال رسالة لـ ${copyId}:`, error.message);
+        }
     }
+    
     res.json({ success: true, successCount, failCount, errorLog });
 });
 
