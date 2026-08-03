@@ -138,16 +138,14 @@ async function getApplications() {
     } catch (error) { return []; }
 }
 
-// 3. النقل وإرسال لوق الديسكورد
-// النقل الذكي والمباشر (بدون فلسفة): يرفع 4 بيانات أساسية فقط للشيت
+// النقل الذكي والمباشر: يقبل التقديم ويرسله للميدان فوراً
 async function acceptFromRawToAcademy(rawId, name, answers, officerName, discordId, nationalId, age) {
     await doc.loadInfo();
     const academySheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
     
-    // سحب البيانات المباشرة
     const finalDiscordId = String(discordId).trim();
     const finalName = String(name).trim();
-    const finalCopyId = String(rawId).trim(); // هذا اللي بينحفظ في عمود Copy_ID
+    const finalCopyId = String(rawId).trim(); 
     const finalNationalId = String(nationalId).trim();
 
     const existingRows = await academySheet.getRows();
@@ -157,35 +155,36 @@ async function acceptFromRawToAcademy(rawId, name, answers, officerName, discord
         await academySheet.addRow({
             Discord_ID: finalDiscordId,
             Name: finalName,
-            Copy_ID: finalCopyId,     // العمود الجديد اللي ضفناه
+            Copy_ID: finalCopyId,
             National_ID: finalNationalId,
-            Stage: 'interview',
-            Status: 'مقبول للمقابلة',
+            Stage: 'preliminary',       // 👈 تحول للميدان مباشرة
+            Status: 'مقبول مبدئيا',     // 👈 الحالة الجديدة
             Stops_Score: 0, Neg_Score: 0, Ops_Score: 0, Gen_Score: 0, Total_Score: 0, 
-            Graded_By: '[✔ تمت المراجعة]',
+            Graded_By: '[✔ قبول مبدئي للميدان]',
             Final_Decision: 'معلق'
         });
     } else {
         existingRow.assign({ 
             Discord_ID: finalDiscordId,
             National_ID: finalNationalId,
-            Stage: 'interview', 
-            Status: 'مقبول للمقابلة',
-            Graded_By: '[✔ تمت المراجعة]'
+            Stage: 'preliminary', 
+            Status: 'مقبول مبدئيا',
+            Graded_By: '[✔ قبول مبدئي للميدان]'
         });
         await existingRow.save();
     }
     clearCache();
-    // -- إرسال رسالة القبول للمقابلة بنظام Embed --
+    
+    // إرسال رسالة الميدان
     const templates = await getTemplates();
-    const customText = templates.interview || 'الرجاء التوجه لغرف الانتظار في الديسكورد.';
+    const customText = templates.preliminary || 'يسرنا إعلامك بأنه تم قبولك مبدئياً. يرجى التوجه لميدان الكلية.';
     await sendDiscordDM(finalCopyId, {
-        title: "🎙️ إشعار قبول للمقابلة",
-        color: 0xF59E0B, // لون برتقالي
+        title: "🎓 إشعار قبول مبدئي للميدان",
+        color: 0x10B981, 
         description: `مرحباً **${finalName}**،\n\n${customText}`
     });
-    // إرسال اللوق للديسكورد بالاكتفاء بالبيانات الأساسية فقط
-    await sendDiscordLog(`✅ **قبول جديد للمقابلة**\n👮‍♂️ **المدرب:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
+    
+    await sendDiscordLog(`✅ **قبول مبدئي للميدان**\n👮‍♂️ **المسؤول:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
 }
 
 // 4. رفض التقديم وإرسال اللوق

@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <title>ميدان الرصد | الكلية العسكرية</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="/css/style.css">
+    <!-- مكتبة التنبيهات الفخمة SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-popup { background: #0e1218 !important; border: 1px solid #222b38 !important; border-radius: 1.5rem !important; color: #fff !important; }
+        .swal2-title { color: #fff !important; }
+        .swal2-html-container { color: #9ca3af !important; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col selection:bg-teal-500 selection:text-white">
+    <%- include('partials/navbar') %>
+
+    <main class="max-w-7xl mx-auto px-6 py-10 flex-1 w-full">
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-8 border-b border-[#1f2630] pb-5">
+            <div>
+                <span class="text-teal-500 font-mono text-xs font-bold uppercase tracking-widest">STAGE 03 // FIELD ACADEMY</span>
+                <h2 class="text-3xl font-black text-white mt-1">🎯 ميدان التدريب والرصد</h2>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full md:w-auto">
+                <button onclick="openExportModal()" class="btn !bg-teal-600 hover:!bg-teal-500 !border-teal-400/50 text-white !py-2.5 h-[42px] whitespace-nowrap w-full sm:w-auto shadow-[0_0_15px_rgba(20,184,166,0.3)]">
+                    📄 استخراج بيانات الميدان
+                </button>
+                <div class="relative flex-1 w-full sm:w-64">
+                    <input type="text" id="searchInput" oninput="filterCards()" placeholder="🔍 ابحث بالاسم أو الأيدي..." class="search-input focus:border-teal-500 h-[42px]">
+                </div>
+            </div>
+        </div>
+
+        <% if(applications.length === 0) { %>
+            <div class="bg-[#0e1218]/90 border border-dashed border-[#222b38] rounded-2xl p-16 text-center text-gray-500 backdrop-blur-md">
+                <span class="text-4xl block mb-3">🛡️</span>
+                <p class="text-lg font-bold">لا يوجد متدربين في الميدان حالياً.</p>
+            </div>
+        <% } else { %>
+            <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                <% applications.forEach(app => { %>
+                    <div class="card-tactical" 
+                         data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId %>"
+                         data-name="<%= app.name %>"
+                         data-discordid="<%= app.id %>"
+                         data-copyid="<%= app.copyId || 'غير متوفر' %>"
+                         data-nationalid="<%= app.nationalId || 'غير متوفر' %>">
+                        
+                        <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-teal-500 to-emerald-600"></div>
+                        
+                        <div>
+                            <!-- رأس الكرت -->
+                            <div class="card-header mb-3">
+                                <div>
+                                    <h3 class="card-title text-lg"><%= app.name %></h3>
+                                </div>
+                                <span class="badge bg-teal-500/10 text-teal-400 border border-teal-500/20">ميدان الرصد</span>
+                            </div>
+
+                            <!-- 🚀 تم إضافة مربع البيانات التفصيلية هنا مثل صفحة المقابلات -->
+                            <div class="bg-[#12171f]/80 border border-[#1a2029] rounded-xl p-3 mb-4 space-y-2 text-[11px] font-mono shadow-inner">
+                                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                                    <span class="text-gray-400">💬 Discord ID:</span>
+                                    <span class="text-white font-bold select-all"><%= app.id %></span>
+                                </div>
+                                <div class="flex justify-between border-b border-white/5 pb-1.5">
+                                    <span class="text-gray-400">📋 Copy ID:</span>
+                                    <span class="text-white font-bold select-all"><%= app.copyId || 'غير متوفر' %></span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">🪪 الرقم الوطني:</span>
+                                    <span class="text-teal-400 font-bold select-all"><%= app.nationalId || 'غير متوفر' %></span>
+                                </div>
+                            </div>
+                            <!-- 🚀 نهاية مربع البيانات -->
+
+                            <div class="bg-[#080a0e]/90 p-4 rounded-xl border border-[#1a2029] mb-4 flex justify-between items-center shadow-inner">
+                                <span class="text-xs text-gray-400 font-bold">المجموع التراكمي:</span>
+                                <span class="text-3xl font-black font-mono <%= app.totalScore >= 40 ? 'text-emerald-400' : (app.totalScore > 0 ? 'text-orange-400' : 'text-gray-500') %>">
+                                    <%= app.totalScore %><span class="text-sm text-gray-600">/50</span>
+                                </span>
+                            </div>
+
+                            <% if(app.gradedBy) { %>
+                                <div class="text-[10px] text-gray-400 bg-[#12171f] p-2.5 rounded-lg border border-[#222b38] font-mono leading-relaxed mb-4 max-h-24 overflow-y-auto">
+                                    <span class="text-teal-400 font-bold block mb-1">📝 سجل الميدان:</span>
+                                    <%= app.gradedBy %>
+                                </div>
+                            <% } %>
+                        </div>
+
+                        <% 
+                            const safeGradedBy = app.gradedBy || '';
+                            const isSupervisor = user.permissions.canAcceptApplications || user.permissions.canApproveReject;
+                            const hasStops = safeGradedBy.includes('[استيقافات:');
+                            const hasNeg = safeGradedBy.includes('[تفاوض:');
+                            const hasOps = safeGradedBy.includes('[عمليات:');
+                            const hasGen = safeGradedBy.includes('[أنظمة:');
+                            
+                            const allGraded = hasStops && hasNeg && hasOps && hasGen; 
+                        %>
+
+                        <div class="grid grid-cols-2 gap-2">
+                            <% if(user.permissions.canGradeStops) { %>
+                                <button data-id="<%= app.id %>" data-name="<%= app.name %>" data-section="stops" data-graded="<%= hasStops %>" data-supervisor="<%= isSupervisor %>" onclick="handleGradeClick(this)" class="p-2 rounded-xl text-xs font-bold transition flex justify-between items-center <%= hasStops ? 'bg-emerald-950/30 border border-emerald-900/50 text-emerald-500' : 'bg-[#161b22] hover:bg-[#1f2630] border border-teal-500/20 text-gray-300' %>">
+                                    <span>🚓 استيقاف</span> <span class="font-mono"><%= app.stopsScore %>/20</span>
+                                </button>
+                            <% } %>
+                            <% if(user.permissions.canGradeNeg) { %>
+                                <button data-id="<%= app.id %>" data-name="<%= app.name %>" data-section="neg" data-graded="<%= hasNeg %>" data-supervisor="<%= isSupervisor %>" onclick="handleGradeClick(this)" class="p-2 rounded-xl text-xs font-bold transition flex justify-between items-center <%= hasNeg ? 'bg-emerald-950/30 border border-emerald-900/50 text-emerald-500' : 'bg-[#161b22] hover:bg-[#1f2630] border border-teal-500/20 text-gray-300' %>">
+                                    <span>🗣️ تفاوض</span> <span class="font-mono"><%= app.negScore %>/10</span>
+                                </button>
+                            <% } %>
+                            <% if(user.permissions.canGradeOps) { %>
+                                <button data-id="<%= app.id %>" data-name="<%= app.name %>" data-section="ops" data-graded="<%= hasOps %>" data-supervisor="<%= isSupervisor %>" onclick="handleGradeClick(this)" class="p-2 rounded-xl text-xs font-bold transition flex justify-between items-center <%= hasOps ? 'bg-emerald-950/30 border border-emerald-900/50 text-emerald-500' : 'bg-[#161b22] hover:bg-[#1f2630] border border-teal-500/20 text-gray-300' %>">
+                                    <span>⚙️ عمليات</span> <span class="font-mono"><%= app.opsScore %>/10</span>
+                                </button>
+                            <% } %>
+                            <% if(user.permissions.canGradeGen) { %>
+                                <button data-id="<%= app.id %>" data-name="<%= app.name %>" data-section="gen" data-graded="<%= hasGen %>" data-supervisor="<%= isSupervisor %>" onclick="handleGradeClick(this)" class="p-2 rounded-xl text-xs font-bold transition flex justify-between items-center <%= hasGen ? 'bg-emerald-950/30 border border-emerald-900/50 text-emerald-500' : 'bg-[#161b22] hover:bg-[#1f2630] border border-teal-500/20 text-gray-300' %>">
+                                    <span>❓ أنظمة</span> <span class="font-mono"><%= app.genScore %>/10</span>
+                                </button>
+                            <% } %>
+                        </div>
+
+                        <% if(allGraded) { %>
+                            <div class="mt-4 pt-4 border-t border-[#1a2029]">
+                                <button onclick="sendToFinal('<%= app.id %>', '<%= app.name %>')" class="btn btn-accept w-full !py-3">
+                                    🚀 إرسال التقييم للرصد النهائي (القيادة)
+                                </button>
+                            </div>
+                        <% } %>
+                    </div>
+                <% }) %>
+            </div>
+        <% } %>
+    </main>
+
+    <!-- النافذة المنبثقة لرصد الدرجات -->
+    <div id="gradeModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
+        <div class="bg-[#0e1218] border border-[#222b38] w-full max-w-2xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col animate-modal relative">
+            <div class="bg-[#12171f] px-6 py-5 border-b border-[#222b38] flex justify-between items-center">
+                <div class="flex items-center gap-3">
+                    <span id="modalIcon" class="text-2xl">🎯</span>
+                    <div>
+                        <h3 id="modalTitle" class="text-xl font-black text-white">رصد الدرجات</h3>
+                        <p id="modalStudentName" class="text-xs font-mono text-teal-400 mt-0.5">اسم المتدرب</p>
+                    </div>
+                </div>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-lg bg-[#1a2029] hover:bg-red-600 text-gray-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+            </div>
+
+            <div class="p-6 overflow-y-auto max-h-[60vh]" id="modalFormContainer"></div>
+
+            <div class="bg-[#12171f] px-6 py-4 border-t border-[#222b38] flex justify-between items-center">
+                <div class="text-xs text-gray-400 font-mono">النتيجة النهائية للقسم: <strong id="modalFinalScore" class="text-2xl text-white ml-2">0</strong></div>
+                <button id="submitGradeBtn" onclick="submitGrade()" class="px-8 py-2.5 rounded-xl bg-gradient-to-r from-teal-600 to-emerald-700 hover:from-teal-500 hover:to-emerald-600 text-white font-extrabold text-xs transition shadow-lg shadow-teal-900/30">حفظ الرصد النهائي</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- النافذة المنبثقة لتصدير البيانات -->
+    <div id="exportModal" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
+        <div class="bg-[#0e1218] border border-teal-500/40 w-full max-w-3xl rounded-2xl shadow-[0_0_50px_rgba(0,0,0,0.8)] flex flex-col max-h-[85vh] animate-modal">
+            <div class="bg-[#12171f] px-6 py-4 border-b border-[#222b38] flex justify-between items-center rounded-t-2xl">
+                <div class="flex items-center gap-3">
+                    <span class="text-2xl">📄</span>
+                    <div>
+                        <h3 class="text-lg font-black text-white">سجل بيانات المتدربين بالميدان</h3>
+                        <p class="text-xs text-teal-400 mt-0.5 font-mono" id="exportCountDisplay">العدد: 0</p>
+                    </div>
+                </div>
+                <button onclick="closeExportModal()" class="w-8 h-8 rounded-lg bg-[#1a2029] hover:bg-red-600/80 text-gray-400 hover:text-white flex items-center justify-center transition font-bold">✕</button>
+            </div>
+            
+            <div class="p-6 flex-1 overflow-hidden flex flex-col">
+                <p class="text-xs text-gray-400 mb-3 font-bold">تم تنسيق البيانات بنجاح وجاهزة للنسخ.</p>
+                <textarea id="exportTextarea" readonly class="w-full flex-1 bg-[#080a0e] border border-[#222b38] rounded-xl p-4 text-sm text-gray-300 font-mono resize-none focus:outline-none focus:border-teal-500/50 leading-relaxed"></textarea>
+            </div>
+
+            <div class="bg-[#12171f] px-6 py-4 border-t border-[#222b38] flex justify-end gap-3 rounded-b-2xl">
+                <button onclick="closeExportModal()" class="btn bg-[#1a2029] text-gray-400 hover:text-white border border-[#222b38]">إغلاق</button>
+                <button onclick="copyExportData()" class="btn !bg-teal-600 hover:!bg-teal-500 text-white px-8">📋 نسخ جميع البيانات</button>
+            </div>
+        </div>
+    </div>
+
+    <%- include('partials/footer') %>
+
+    <script>
+        let currentDiscordId = '';
+        let currentSection = '';
+
+        function filterCards() {
+            const input = document.getElementById('searchInput').value.toLowerCase();
+            const cards = document.querySelectorAll('.card-tactical');
+            cards.forEach(card => {
+                card.style.display = card.getAttribute('data-search').toLowerCase().includes(input) ? 'block' : 'none';
+            });
+        }
+
+        function handleGradeClick(buttonElement) {
+            const id = buttonElement.getAttribute('data-id');
+            const name = buttonElement.getAttribute('data-name');
+            const section = buttonElement.getAttribute('data-section');
+            const isGraded = buttonElement.getAttribute('data-graded') === 'true';
+            const isSupervisor = buttonElement.getAttribute('data-supervisor') === 'true';
+            
+            openGradeModal(id, name, section, isGraded, isSupervisor);
+        }
+
+        function openGradeModal(discordId, name, section, isGraded, isSupervisor) {
+            if (isGraded && !isSupervisor) {
+                Swal.fire({ icon: 'error', title: 'غير مصرح!', text: 'تم رصد درجات هذا القسم مسبقاً!', confirmButtonColor: '#ef4444' });
+                return;
+            }
+
+            currentDiscordId = discordId;
+            currentSection = section;
+            
+            document.getElementById('modalStudentName').innerText = `المتدرب: ${name}`;
+            const container = document.getElementById('modalFormContainer');
+            const submitBtn = document.getElementById('submitGradeBtn');
+            
+            submitBtn.innerText = isGraded ? 'تعديل الرصد السابق' : 'حفظ الرصد النهائي';
+            container.innerHTML = '';
+            document.getElementById('modalFinalScore').innerText = '0';
+
+            if (section === 'stops') {
+                document.getElementById('modalTitle').innerText = 'رصد درجات الاستيقافات';
+                document.getElementById('modalIcon').innerText = '🚓';
+                container.innerHTML = `
+                    <div class="bg-[#080a0e] p-4 rounded-xl border border-teal-500/20 mb-4 text-xs text-teal-400 font-mono leading-relaxed">
+                        ⚠️ <strong>نظام جبر الكسور الذكي:</strong> الكسر من 0.4 وفوق ينجبر للرقم اللي بعده (مثال: 16.4 تصير 17).
+                    </div>
+                    <div class="space-y-4">
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف المروري (من 20):</label>
+                            <input type="number" id="s1" max="20" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف الجنائي (من 8):</label>
+                            <input type="number" id="s2" max="8" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
+                        </div>
+                        <div class="flex flex-col">
+                            <label class="text-xs font-bold text-gray-300 mb-1">الاستيقاف الإجباري (من 22):</label>
+                            <input type="number" id="s3" max="22" min="0" oninput="calcStops()" onkeyup="calcStops()" class="search-input">
+                        </div>
+                    </div>
+                `;
+            } else if (section === 'neg') {
+                document.getElementById('modalTitle').innerText = 'رصد درجات التفاوض';
+                document.getElementById('modalIcon').innerText = '🗣️';
+                let html = '<div class="grid grid-cols-1 gap-3">';
+                for(let i=1; i<=9; i++) {
+                    // السؤال الثالث استثنائي عليه درجتين، وبقية الأسئلة عليها درجة واحدة
+                    const maxScore = (i === 3) ? 2 : 1;
+                    html += `
+                        <div class="flex justify-between items-center bg-[#12171f] p-3 rounded-lg border border-[#222b38]">
+                            <label class="text-xs font-bold text-gray-300">السؤال ${i} (من ${maxScore}):</label>
+                            <input type="number" id="n${i}" max="${maxScore}" min="0" oninput="calcNegSum()" class="w-16 bg-[#0e1218] border border-[#222b38] rounded p-1.5 text-center text-white font-mono outline-none focus:border-teal-500">
+                        </div>`;
+                }
+                container.innerHTML = html + '</div>';
+            }// 3. قسم العمليات (10 أسئلة كل سؤال درجة)
+            else if (section === 'ops') {
+                document.getElementById('modalTitle').innerText = 'رصد درجات العمليات';
+                document.getElementById('modalIcon').innerText = '⚙️';
+                let html = '<div class="grid grid-cols-2 gap-3">';
+                for(let i=1; i<=10; i++) {
+                    html += `
+                        <div class="flex justify-between items-center bg-[#12171f] p-3 rounded-lg border border-[#222b38]">
+                            <label class="text-[11px] font-bold text-gray-300">سؤال ${i} (من 1):</label>
+                            <input type="number" id="o${i}" max="1" min="0" oninput="calcOpsSum()" class="w-12 bg-[#0e1218] border border-[#222b38] rounded p-1 text-center text-white font-mono outline-none focus:border-teal-500">
+                        </div>`;
+                }
+                container.innerHTML = html + '</div>';
+            } 
+            // 4. قسم الأنظمة العامة (5 أسئلة كل سؤال درجتين)
+            else if (section === 'gen') {
+                document.getElementById('modalTitle').innerText = 'رصد درجات الأنظمة العامة';
+                document.getElementById('modalIcon').innerText = '❓';
+                let html = '<div class="grid grid-cols-1 gap-3">';
+                for(let i=1; i<=5; i++) {
+                    html += `
+                        <div class="flex justify-between items-center bg-[#12171f] p-3 rounded-lg border border-[#222b38]">
+                            <label class="text-xs font-bold text-gray-300">سؤال ${i} (من 2):</label>
+                            <input type="number" id="g${i}" max="2" min="0" oninput="calcGenSum()" class="w-16 bg-[#0e1218] border border-[#222b38] rounded p-1.5 text-center text-white font-mono outline-none focus:border-teal-500">
+                        </div>`;
+                }
+                container.innerHTML = html + '</div>';
+            }
+
+            document.getElementById('gradeModal').classList.remove('hidden');
+            document.getElementById('gradeModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            document.getElementById('gradeModal').classList.add('hidden');
+            document.getElementById('gradeModal').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        // حساب مجموع العمليات (10 أسئلة من 1)
+        function calcOpsSum() {
+            let sum = 0;
+            for(let i=1; i<=10; i++) {
+                const val = Math.min(1, Math.max(0, Number(document.getElementById(`o${i}`).value) || 0));
+                sum += val;
+            }
+            document.getElementById('modalFinalScore').innerText = sum;
+        }
+        
+        // حساب مجموع الاستيقافات المجبور فوراً (من 20)
+        function calcStops() {
+            const s1 = Math.min(20, Math.max(0, Number(document.getElementById('s1')?.value) || 0));
+            const s2 = Math.min(8, Math.max(0, Number(document.getElementById('s2')?.value) || 0));
+            const s3 = Math.min(22, Math.max(0, Number(document.getElementById('s3')?.value) || 0));
+
+            const totalOutOf50 = s1 + s2 + s3;
+            const rawScaled = (totalOutOf50 / 50) * 20;
+
+            const intPart = Math.floor(rawScaled);
+            const fraction = Number((rawScaled - intPart).toFixed(2));
+            
+            const finalScore = (fraction >= 0.40) ? intPart + 1 : intPart;
+
+            const scoreDisplay = document.getElementById('modalFinalScore');
+            if (scoreDisplay) {
+                scoreDisplay.innerText = finalScore;
+            }
+        }
+
+        // حساب مجموع الأنظمة العامة (5 أسئلة من 2)
+        function calcGenSum() {
+            let sum = 0;
+            for(let i=1; i<=5; i++) {
+                const val = Math.min(2, Math.max(0, Number(document.getElementById(`g${i}`).value) || 0));
+                sum += val;
+            }
+            document.getElementById('modalFinalScore').innerText = sum;
+        }
+
+        function calcNegSum() {
+            let sum = 0;
+            for(let i=1; i<=9; i++) {
+                const maxVal = (i === 3) ? 2 : 1;
+                const val = Math.min(maxVal, Math.max(0, Number(document.getElementById(`n${i}`).value) || 0));
+                sum += val;
+            }
+            document.getElementById('modalFinalScore').innerText = sum;
+        }
+
+        async function submitGrade() {
+            const finalScore = Number(document.getElementById('modalFinalScore').innerText);
+            let detailsText = '';
+
+            if (currentSection === 'stops') {
+                detailsText = `مروري:${document.getElementById('s1').value || 0}/20, جنائي:${document.getElementById('s2').value || 0}/8, إجباري:${document.getElementById('s3').value || 0}/22`;
+            } else if (currentSection === 'neg') {
+                detailsText = 'رصد التفاوض للأسئلة الخمسة';
+            } else {
+                detailsText = `رصد ${currentSection === 'ops' ? 'العمليات' : 'الأنظمة'} للعشر أسئلة`;
+            }
+
+            closeModal();
+
+            Swal.fire({
+                title: '⏳ جاري الحفظ والتحديث...',
+                text: 'الرجاء الانتظار لحين مزامنة الدرجات...',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading(); }
+            });
+
+            try {
+                const response = await fetch('/api/advanced-grade', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ 
+                        discordId: currentDiscordId, 
+                        section: currentSection, 
+                        details: detailsText, 
+                        finalScore: finalScore 
+                    })
+                });
+                
+                if (response.status === 401 || response.status === 403) {
+                    return Swal.fire('خطأ', 'لا تملك صلاحية!', 'error');
+                }
+
+                Swal.fire({
+                    icon: 'success', title: 'تم الرصد بنجاح! ✔️', text: 'جاري التحديث...',
+                    confirmButtonColor: '#0d9488', timer: 2000, showConfirmButton: false
+                }).then(() => { window.location.reload(); });
+
+            } catch (error) {
+                Swal.fire({
+                    icon: 'success', title: 'تم الرصد بنجاح! ✔️', text: 'جاري التحديث...',
+                    confirmButtonColor: '#0d9488', timer: 2000, showConfirmButton: false
+                }).then(() => { window.location.reload(); });
+            }
+        }
+
+        function sendToFinal(discordId, name) {
+            Swal.fire({
+                title: 'رفع للقيادة؟',
+                text: `هل أنت متأكد من اكتمال تقييم المتدرب (${name}) ورفعه للقيادة للاعتماد النهائي؟`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#0d9488',
+                cancelButtonColor: '#ef4444',
+                confirmButtonText: 'نعم، أرسل الملف',
+                cancelButtonText: 'إلغاء'
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({ title: '⏳ جاري الإرسال...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
+                    try {
+                        const response = await fetch('/api/send-final', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ discordId: discordId })
+                        });
+                        
+                        if (response.status === 401 || response.status === 403) {
+                            return Swal.fire('خطأ', 'لا تملك صلاحية!', 'error');
+                        }
+
+                        Swal.fire({
+                            icon: 'success', title: 'تم الرفع!', text: 'تم إرسال الملف للقيادة بنجاح.',
+                            showConfirmButton: false, timer: 2000
+                        }).then(() => location.reload());
+
+                    } catch (error) {
+                        Swal.fire({
+                            icon: 'success', title: 'تم الرفع!', text: 'تم إرسال الملف للقيادة بنجاح.',
+                            showConfirmButton: false, timer: 2000
+                        }).then(() => location.reload());
+                    }
+                }
+            });
+        }
+
+        function openExportModal() {
+            const cards = document.querySelectorAll('.card-tactical');
+            let exportData = "🛡️ **[ قائمة متدربي الميدان الحاليين ]** 🛡️\n\n";
+            let count = 0;
+
+            cards.forEach(card => {
+                count++;
+                const name = card.getAttribute('data-name');
+                const natId = card.getAttribute('data-nationalid');
+                const copyId = card.getAttribute('data-copyid');
+                const discordName = card.getAttribute('data-discordid');
+                
+                exportData += `${count}. الاسم: ${name} | الرقم الوطني: ${natId} | اسم الديسكورد: ${discordName} | كوبي ايدي: \`${copyId}\` | منشن: <@${copyId}>\n`;
+            });
+
+            if (count === 0) {
+                exportData = "لا يوجد متدربين في الميدان حالياً.";
+            }
+
+            document.getElementById('exportCountDisplay').innerText = `إجمالي المتدربين: ${count}`;
+            document.getElementById('exportTextarea').value = exportData;
+            
+            document.getElementById('exportModal').classList.remove('hidden');
+            document.getElementById('exportModal').classList.add('flex');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeExportModal() {
+            document.getElementById('exportModal').classList.add('hidden');
+            document.getElementById('exportModal').classList.remove('flex');
+            document.body.style.overflow = 'auto';
+        }
+
+        function copyExportData() {
+            const textarea = document.getElementById('exportTextarea');
+            if(textarea.value.includes("لا يوجد متدربين")) return;
+            
+            textarea.select();
+            textarea.setSelectionRange(0, 99999);
+            navigator.clipboard.writeText(textarea.value).then(() => {
+                const btn = document.querySelector('#exportModal .btn-accept, #exportModal .bg-teal-600');
+                const originalText = btn.innerText;
+                btn.innerText = "✔ تم النسخ بنجاح";
+                btn.classList.replace('bg-teal-600', 'bg-emerald-600');
+                
+                setTimeout(() => {
+                    btn.innerText = originalText;
+                    btn.classList.replace('bg-emerald-600', 'bg-teal-600');
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>

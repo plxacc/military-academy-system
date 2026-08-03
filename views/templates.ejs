@@ -45,18 +45,18 @@
             </div>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <!-- قالب المقابلة -->
-                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
-                    <div class="absolute top-0 right-0 w-full h-1 bg-orange-500 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-orange-400 mb-3 block">1. نموذج قبول المقابلة:</label>
-                    <textarea id="tpl-interview" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-orange-500" placeholder="مثال: يرجى التوجه للانتظار غداً الساعة 9 م..."><%= templates.interview %></textarea>
-                    <button onclick="saveTemp('interview', 'tpl-interview', '#f97316')" class="btn bg-[#161b22] hover:bg-orange-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب المقابلة</button>
-                </div>
-
+                <!-- قسم قوالب القبول -->
+        <div class="mb-12">
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-2xl">📥</span>
+                <h3 class="text-2xl font-black text-white">نماذج الاعتماد والقبول</h3>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
                 <!-- قالب الميدان -->
                 <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
                     <div class="absolute top-0 right-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-emerald-400 mb-3 block">2. نموذج القبول للميدان:</label>
+                    <label class="text-sm font-bold text-emerald-400 mb-3 block">1. نموذج القبول للميدان:</label>
                     <textarea id="tpl-preliminary" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500" placeholder="مثال: يرجى لبس الزي الرياضي والتواجد في الميدان..."><%= templates.preliminary %></textarea>
                     <button onclick="saveTemp('preliminary', 'tpl-preliminary', '#10b981')" class="btn bg-[#161b22] hover:bg-emerald-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب الميدان</button>
                 </div>
@@ -64,11 +64,10 @@
                 <!-- قالب التخرج -->
                 <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
                     <div class="absolute top-0 right-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-blue-400 mb-3 block">3. نموذج التخرج (النهائي):</label>
+                    <label class="text-sm font-bold text-blue-400 mb-3 block">2. نموذج التخرج (النهائي):</label>
                     <textarea id="tpl-final" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-blue-500" placeholder="مثال: نبارك لك اجتياز الأكاديمية بنجاح..."><%= templates.final %></textarea>
                     <button onclick="saveTemp('final', 'tpl-final', '#3b82f6')" class="btn bg-[#161b22] hover:bg-blue-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب التخرج</button>
                 </div>
-
             </div>
         </div>
 
@@ -116,7 +115,6 @@
                         <label class="text-sm font-bold text-gray-300 mb-2 block">1. اختر الفئة المستهدفة:</label>
                         <select id="targetGroup" onchange="toggleCustomInput()" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3.5 text-sm text-white focus:border-indigo-500 outline-none shadow-inner cursor-pointer">
                             <option value="raw">📝 تقديمات الشرطة الجديدة (<%= rawApps.length %>)</option>
-                            <option value="interview">🎙️ المرشحين للمقابلات (<%= interviewUsers.length %>)</option>
                             <option value="preliminary">🛡️ متدربين الميدان (<%= prelimUsers.length %>)</option>
                             <option value="final">👑 بانتظار الاعتماد النهائي (<%= finalUsers.length %>)</option>
                             <option value="custom">🎯 إرسال مخصص (للمرفوضين أو أشخاص محددين)</option>
