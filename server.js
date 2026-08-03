@@ -260,8 +260,9 @@ app.get('/templates', async (req, res) => {
     
     const prelimUsers = apps.filter(a => a.stage === 'preliminary' || a.status.includes('مقبول مبدئيا'));
     const finalUsers = apps.filter(a => a.status.includes('بانتظار الاعتماد النهائي'));
+    const rejectedUsers = apps.filter(a => a.stage === 'rejected' || a.stage === 'failed' || a.status.includes('مرفوض')); // 👈 السطر الجديد
 
-    res.render('templates', { user: req.user, templates, rawApps, prelimUsers, finalUsers, currentPage: 'templates' });
+    res.render('templates', { user: req.user, templates, rawApps, prelimUsers, finalUsers, rejectedUsers, currentPage: 'templates' });
 });
 
 app.post('/api/templates/save', async (req, res) => {

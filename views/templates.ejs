@@ -5,7 +5,6 @@
     <title>مركز المراسلات | الكلية العسكرية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
-    <!-- مكتبة التنبيهات الفخمة SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <style>
         .swal2-popup { background: #0e1218 !important; border: 1px solid #222b38 !important; border-radius: 1.5rem !important; color: #fff !important; }
@@ -37,68 +36,43 @@
             </div>
         </div>
 
-        <!-- قسم قوالب القبول -->
+        <!-- 🗂️ قسم قوالب النظام (مدمج ومرتب) -->
         <div class="mb-12">
             <div class="flex items-center gap-3 mb-6">
-                <span class="text-2xl">📥</span>
-                <h3 class="text-2xl font-black text-white">نماذج الاعتماد والقبول</h3>
+                <span class="text-2xl">📝</span>
+                <h3 class="text-2xl font-black text-white">إدارة قوالب النظام الأساسية</h3>
             </div>
+            
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 
-                <!-- قسم قوالب القبول -->
-        <div class="mb-12">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="text-2xl">📥</span>
-                <h3 class="text-2xl font-black text-white">نماذج الاعتماد والقبول</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <!-- قالب الميدان -->
+                <!-- قالب الميدان (قبول) -->
                 <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
                     <div class="absolute top-0 right-0 w-full h-1 bg-emerald-500 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-emerald-400 mb-3 block">1. نموذج القبول للميدان:</label>
-                    <textarea id="tpl-preliminary" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500" placeholder="مثال: يرجى لبس الزي الرياضي والتواجد في الميدان..."><%= templates.preliminary %></textarea>
+                    <label class="text-sm font-bold text-emerald-400 mb-3 block">نموذج القبول للميدان:</label>
+                    <textarea id="tpl-preliminary" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-emerald-500" placeholder="مثال: يرجى التواجد في الميدان..."><%= templates.preliminary %></textarea>
                     <button onclick="saveTemp('preliminary', 'tpl-preliminary', '#10b981')" class="btn bg-[#161b22] hover:bg-emerald-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب الميدان</button>
                 </div>
 
-                <!-- قالب التخرج -->
+                <!-- قالب التخرج (قبول نهائي) -->
                 <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
                     <div class="absolute top-0 right-0 w-full h-1 bg-blue-500 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-blue-400 mb-3 block">2. نموذج التخرج (النهائي):</label>
-                    <textarea id="tpl-final" class="w-full h-28 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-blue-500" placeholder="مثال: نبارك لك اجتياز الأكاديمية بنجاح..."><%= templates.final %></textarea>
+                    <label class="text-sm font-bold text-blue-400 mb-3 block">نموذج التخرج النهائي:</label>
+                    <textarea id="tpl-final" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-blue-500" placeholder="مثال: نبارك لك اجتياز الأكاديمية بنجاح..."><%= templates.final %></textarea>
                     <button onclick="saveTemp('final', 'tpl-final', '#3b82f6')" class="btn bg-[#161b22] hover:bg-blue-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ قالب التخرج</button>
                 </div>
-            </div>
-        </div>
 
-        <!-- قسم قوالب الرفض -->
-        <div class="mb-12">
-            <div class="flex items-center gap-3 mb-6">
-                <span class="text-2xl">🚫</span>
-                <h3 class="text-2xl font-black text-white">نماذج الرفض وطي القيد</h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                
-                <!-- رفض المقابلة -->
-                <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
-                    <div class="absolute top-0 right-0 w-full h-1 bg-red-500 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-red-400 mb-3 block">نموذج السقوط في المقابلة:</label>
-                    <textarea id="tpl-reject-interview" class="w-full h-24 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-red-500" placeholder="مثال: نعتذر منك لعدم اجتيازك المقابلة الشخصية..."><%= templates.reject_interview || 'نعتذر منك، لم تجتز المقابلة الشخصية.' %></textarea>
-                    <button onclick="saveTemp('reject_interview', 'tpl-reject-interview', '#ef4444')" class="btn bg-[#161b22] hover:bg-red-600 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ رسالة رفض المقابلة</button>
-                </div>
-
-                <!-- طي القيد النهائي -->
+                <!-- قالب طي القيد (رفض نهائي) -->
                 <div class="template-card bg-[#0a0d12] border border-[#1f2630] rounded-2xl p-6 relative">
                     <div class="absolute top-0 right-0 w-full h-1 bg-rose-700 rounded-t-2xl"></div>
-                    <label class="text-sm font-bold text-rose-400 mb-3 block">نموذج طي القيد (الرسوب في الأكاديمية):</label>
-                    <textarea id="tpl-reject-final" class="w-full h-24 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-rose-500" placeholder="مثال: يؤسفنا إعلامك بطي قيدك لعدم اجتياز الميدان..."><%= templates.reject_final || 'نعتذر منك، لم تجتز دورة الأكاديمية العسكرية بنجاح.' %></textarea>
-                    <button onclick="saveTemp('reject_final', 'tpl-reject-final', '#be123c')" class="btn bg-[#161b22] hover:bg-rose-700 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ رسالة طي القيد</button>
+                    <label class="text-sm font-bold text-rose-400 mb-3 block">نموذج طي القيد (رسوب / رفض):</label>
+                    <textarea id="tpl-reject-final" class="w-full h-32 bg-[#0d1117] border border-[#222b38] rounded-xl p-3 text-sm text-gray-300 font-mono resize-none focus:border-rose-500" placeholder="مثال: نعتذر منك لعدم اجتيازك..."><%= templates.reject_final || 'نعتذر منك، لم تجتز دورة الأكاديمية العسكرية بنجاح.' %></textarea>
+                    <button onclick="saveTemp('reject_final', 'tpl-reject-final', '#be123c')" class="btn bg-[#161b22] hover:bg-rose-700 border border-[#222b38] text-white w-full mt-4 !py-2.5 text-xs font-bold">💾 حفظ رسالة الرفض</button>
                 </div>
 
             </div>
         </div>
 
-        <!-- القسم الثالث: البث العام (Broadcast) -->
+        <!-- 📢 القسم الثالث: البث العام (Broadcast) -->
         <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 lg:p-10 relative shadow-lg">
             <div class="flex items-center gap-4 mb-8 border-b border-[#1f2630] pb-4">
                 <span class="text-3xl">📢</span>
@@ -114,10 +88,11 @@
                     <div>
                         <label class="text-sm font-bold text-gray-300 mb-2 block">1. اختر الفئة المستهدفة:</label>
                         <select id="targetGroup" onchange="toggleCustomInput()" class="w-full bg-[#0d1117] border border-[#222b38] rounded-xl p-3.5 text-sm text-white focus:border-indigo-500 outline-none shadow-inner cursor-pointer">
-                            <option value="raw">📝 تقديمات الشرطة الجديدة (<%= rawApps.length %>)</option>
-                            <option value="preliminary">🛡️ متدربين الميدان (<%= prelimUsers.length %>)</option>
-                            <option value="final">👑 بانتظار الاعتماد النهائي (<%= finalUsers.length %>)</option>
-                            <option value="custom">🎯 إرسال مخصص (للمرفوضين أو أشخاص محددين)</option>
+                            <option value="raw">📝 تقديمات الشرطة الجديدة (<%= typeof rawApps !== 'undefined' ? rawApps.length : 0 %>)</option>
+                            <option value="preliminary">🛡️ متدربين الميدان (<%= typeof prelimUsers !== 'undefined' ? prelimUsers.length : 0 %>)</option>
+                            <option value="final">👑 بانتظار الاعتماد النهائي (<%= typeof finalUsers !== 'undefined' ? finalUsers.length : 0 %>)</option>
+                            <option value="rejected" class="text-red-400">🚫 جميع المرفوضين وطي القيد (<%= typeof rejectedUsers !== 'undefined' ? rejectedUsers.length : 0 %>)</option>
+                            <option value="custom">🎯 إرسال مخصص (لأشخاص محددين)</option>
                         </select>
                     </div>
 
@@ -147,9 +122,10 @@
     <script>
         // تمرير الايديات من السيرفر بشكل آمن
         const groupData = {
-            raw: JSON.parse('<%- JSON.stringify(rawApps.map(u => u.copyId)) %>'),
-            preliminary: JSON.parse('<%- JSON.stringify(prelimUsers.map(u => u.copyId)) %>'),
-            final: JSON.parse('<%- JSON.stringify(finalUsers.map(u => u.copyId)) %>')
+            raw: JSON.parse('<%- JSON.stringify(typeof rawApps !== "undefined" ? rawApps.map(u => u.copyId) : []) %>'),
+            preliminary: JSON.parse('<%- JSON.stringify(typeof prelimUsers !== "undefined" ? prelimUsers.map(u => u.copyId) : []) %>'),
+            final: JSON.parse('<%- JSON.stringify(typeof finalUsers !== "undefined" ? finalUsers.map(u => u.copyId) : []) %>'),
+            rejected: JSON.parse('<%- JSON.stringify(typeof rejectedUsers !== "undefined" ? rejectedUsers.map(u => u.copyId) : []) %>')
         };
 
         function toggleCustomInput() {
@@ -206,7 +182,7 @@
                     return Swal.fire('تنبيه', "يرجى لصق 'Copy ID' واحد صحيح على الأقل!", 'warning');
                 }
             } else {
-                copyIds = groupData[groupKey];
+                copyIds = groupData[groupKey] || [];
             }
 
             const msg = document.getElementById('broadcastMsg').value.trim();
