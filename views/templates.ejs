@@ -148,7 +148,6 @@
         // تمرير الايديات من السيرفر بشكل آمن
         const groupData = {
             raw: JSON.parse('<%- JSON.stringify(rawApps.map(u => u.copyId)) %>'),
-            interview: JSON.parse('<%- JSON.stringify(interviewUsers.map(u => u.copyId)) %>'),
             preliminary: JSON.parse('<%- JSON.stringify(prelimUsers.map(u => u.copyId)) %>'),
             final: JSON.parse('<%- JSON.stringify(finalUsers.map(u => u.copyId)) %>')
         };
