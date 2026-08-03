@@ -278,28 +278,34 @@ app.post('/api/templates/send', async (req, res) => {
     
     if (!botToken) return res.status(500).json({ error: "لم يتم العثور على توكن البوت!" });
 
-    let successCount = 0; 
-    let failCount = 0; 
-    let errorLog = "";
+    let successList = [];
+    let failList = [];
 
     for (const copyId of copyIds) {
-        if (!copyId || copyId.length < 17) continue; 
+        const cleanId = String(copyId || '').trim();
+        if (!cleanId || cleanId.length < 17) {
+            failList.push({ id: cleanId || 'غير معروف', reason: "معرف غير صالح" });
+            continue; 
+        }
+
         try {
-            // 1. فتح قناة الخاص
+            // 1. فتح قناة خاص مع العسكري
             const dmRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
-                body: JSON.stringify({ recipient_id: copyId })
+                body: JSON.stringify({ recipient_id: cleanId })
             });
             const dmData = await dmRes.json();
             
             if (!dmRes.ok || !dmData.id) { 
-                failCount++; 
-                console.log(`❌ فشل فتح خاص لـ ${copyId}:`, dmData.message || "خطأ غير معروف");
+                let reason = "الخاص مقفل أو حظر للبوت";
+                if (dmData.code === 50007) reason = "مقفل الخاص (DMs Closed)";
+                if (dmData.code === 10013) reason = "مستخدم غير موجود";
+                failList.push({ id: cleanId, reason: reason });
                 continue; 
             }
 
-            // 2. إرسال الرسالة داخل القناة
+            // 2. إرسال الرسالة
             const msgRes = await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
@@ -307,24 +313,29 @@ app.post('/api/templates/send', async (req, res) => {
             });
 
             if (msgRes.ok) {
-                successCount++;
+                successList.push(cleanId);
             } else { 
-                failCount++; 
                 const errJson = await msgRes.json();
-                errorLog = errJson.message;
-                console.log(`❌ فشل إرسال نص لـ ${copyId}:`, errJson.message);
+                let reason = errJson.message || "فشل إرسال النص";
+                if (errJson.code === 50007) reason = "مقفل الخاص (DMs Closed)";
+                failList.push({ id: cleanId, reason: reason });
             }
             
-            // ⏳ زيادة فترة التوقف إلى 600 ملي ثانية لتفادي حظر سبام ديسكورد (Rate Limit)
+            // ⏳ تأخير 600 ملي ثانية لمنع حظر Rate Limit
             await new Promise(resolve => setTimeout(resolve, 600)); 
             
         } catch (error) { 
-            failCount++; 
-            console.log(`⚠️ خطأ استثنائي أثناء إرسال رسالة لـ ${copyId}:`, error.message);
+            failList.push({ id: cleanId, reason: "خطأ في الاتصال بالشبكة" });
         }
     }
     
-    res.json({ success: true, successCount, failCount, errorLog });
+    res.json({ 
+        success: true, 
+        successCount: successList.length, 
+        failCount: failList.length, 
+        successList, 
+        failList 
+    });
 });
 
 module.exports = app;

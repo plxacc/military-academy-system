@@ -171,7 +171,7 @@
             }
         }
 
-        async function sendBroadcast() {
+async function sendBroadcast() {
             const groupKey = document.getElementById('targetGroup').value;
             let copyIds = [];
 
@@ -203,8 +203,8 @@
                 if (result.isConfirmed) {
                     
                     Swal.fire({
-                        title: '⏳ جاري الإرسال...',
-                        html: 'يرجى عدم إغلاق الصفحة لحين انتهاء البث.',
+                        title: '⏳ جاري الإرسال المباشر...',
+                        html: 'يرجى الانتظار وعدم إغلاق الصفحة لضمان وصول الرسائل...',
                         allowOutsideClick: false,
                         didOpen: () => { Swal.showLoading(); }
                     });
@@ -218,10 +218,22 @@
                         const data = await res.json();
                         
                         if(data.success) {
+                            let failedText = data.failList.map(f => `• <@${f.id}> (السبب: ${f.reason})`).join('\n');
+                            
                             let resultHtml = `
-                                <div class="text-right space-y-2 mt-4">
-                                    <p class="text-emerald-400 font-bold">✔ نجاح الإرسال: ${data.successCount} شخص</p>
-                                    <p class="text-red-400 font-bold">✖ فشل الإرسال: ${data.failCount} شخص</p>
+                                <div class="text-right space-y-3 mt-4 text-xs font-mono">
+                                    <div class="p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-emerald-400 font-bold">
+                                        ✔ نجاح الإرسال: ${data.successCount} شخص
+                                    </div>
+                                    <div class="p-3 bg-red-950/40 border border-red-500/30 rounded-xl text-red-400 font-bold">
+                                        ✖ فشل الإرسال: ${data.failCount} شخص
+                                    </div>
+                                    ${data.failCount > 0 ? `
+                                        <div class="mt-3">
+                                            <p class="text-gray-400 font-bold mb-1">تفاصيل الفشل (الخاص مقفل):</p>
+                                            <textarea readonly class="w-full h-32 bg-[#080a0e] border border-[#222b38] rounded-xl p-2 text-red-400 text-[11px] resize-none focus:outline-none">${failedText}</textarea>
+                                        </div>
+                                    ` : ''}
                                 </div>
                             `;
                             
@@ -229,7 +241,8 @@
                                 icon: 'success',
                                 title: 'تم اكتمال البث! 📢',
                                 html: resultHtml,
-                                confirmButtonColor: '#4f46e5'
+                                confirmButtonColor: '#4f46e5',
+                                confirmButtonText: 'حسناً، فهمت'
                             });
                             
                             document.getElementById('broadcastMsg').value = ''; 
@@ -238,7 +251,7 @@
                             Swal.fire('خطأ', `⚠️ ${data.error}`, 'error');
                         }
                     } catch (err) { 
-                        Swal.fire('خطأ', "⚠️ تعذر إرسال الرسائل.", 'error');
+                        Swal.fire('خطأ', "⚠️ تعذر إرسال الرسائل. تأكد من الاتصال.", 'error');
                     }
                 }
             });
