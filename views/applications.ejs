@@ -5,6 +5,12 @@
     <title>تقديمات الشرطة | الكلية العسكرية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        .swal2-popup { background: #0e1218 !important; border: 1px solid #222b38 !important; border-radius: 1.5rem !important; color: #fff !important; }
+        .swal2-title { color: #fff !important; }
+        .swal2-html-container { color: #9ca3af !important; }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col selection:bg-orange-500 selection:text-white relative">
     <%- include('partials/navbar') %>
@@ -35,8 +41,7 @@
                             </div>
                             <span class="badge badge-new">جديد</span>
                         </div>
-                        <div class="grid grid-cols-2 gap-2 my-4 text-xs font-mono bg-[#080a0e]/80 p-3 rounded-xl border border-[#1a2029]">
-                            <div class="text-gray-400">👤 العمر: <strong class="text-white"><%= app.age %></strong></div>
+                        <div class="my-4 text-xs font-mono bg-[#080a0e]/80 p-3 rounded-xl border border-[#1a2029]">
                             <div class="text-gray-400">💬 الديسكورد: <strong class="text-white truncate" dir="ltr"><%= app.discordId %></strong></div>
                         </div>
                     </div>
@@ -72,6 +77,7 @@
         <% } %>
     </main>
 
+    <!-- نافذة استعراض الملف -->
     <div id="applicantModal" class="fixed inset-0 z-[60] hidden items-center justify-center bg-black/80 backdrop-blur-md p-4 sm:p-6 overflow-y-auto">
         <div class="bg-[#0e1218] border border-[#222b38] w-full max-w-4xl rounded-3xl shadow-[0_0_50px_rgba(0,0,0,0.9)] overflow-hidden flex flex-col max-h-[90vh] animate-modal relative">
             <div class="bg-[#12171f] px-6 py-5 border-b border-[#222b38] flex justify-between items-center sticky top-0 z-10">
@@ -92,52 +98,29 @@
             <% if(user.permissions.canApproveReject || user.permissions.canAcceptApplications) { %>
                 <div class="bg-[#12171f] px-6 py-4 border-t border-[#222b38] flex flex-col sm:flex-row gap-3 justify-end items-center sticky bottom-0 z-10">
                     <button id="btnRejectMain" onclick="promptReject()" class="btn btn-reject sm:w-auto px-8 py-2.5">✖ رفض التقديم</button>
-                    <button id="btnAcceptMain" onclick="promptAcceptData()" class="btn btn-accept sm:w-auto px-10 py-2.5">✔ قبول واستكمال البيانات</button>
+                    <button id="btnAcceptMain" onclick="promptAcceptData()" class="btn btn-accept sm:w-auto px-10 py-2.5">✔ قبول مبدئي للميدان</button>
                 </div>
             <% } %>
         </div>
     </div>
 
+    <!-- نافذة إكمال الرقم الوطني -->
     <div id="fillDataModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-[#0e1218] border border-emerald-500/40 w-full max-w-md rounded-2xl shadow-2xl p-6 animate-modal">
-            <h3 class="text-xl font-black text-white mb-2">📝 استكمال بيانات المرشح</h3>
-            <p class="text-xs text-gray-400 mb-6">يرجى التأكد من تعبئة الرقم الوطني للمتقدم قبل نقله للقبول المبدئي</p>
+            <h3 class="text-xl font-black text-white mb-2">📝 اعتماد وقبول المرشح</h3>
+            <p class="text-xs text-gray-400 mb-6">يرجى التأكد من صحة الرقم الوطني للمتقدم قبل نقله للميدان العسكري.</p>
             
             <div class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-gray-300">الرقم الوطني: <span class="text-red-500">*</span></label>
-                    <input type="text" id="fillNationalId" class="search-input mt-1 w-full" placeholder="أدخل الرقم الوطني للمتقدم">
-                </div>
-                <div id="ageContainer" style="display: none;">
-                    <label class="text-xs font-bold text-gray-300">العمر: <span class="text-red-500">*</span> <span class="text-[10px] text-gray-500">(غير متوفر في التقديم)</span></label>
-                    <input type="number" id="fillAge" class="search-input mt-1 w-full" placeholder="أدخل العمر الحقيقي">
+                    <input type="text" id="fillNationalId" class="search-input mt-1 w-full text-center font-bold tracking-widest text-emerald-400" placeholder="مثال: 0068746019">
+                    <p id="nationalIdHint" class="text-[10px] text-gray-500 mt-2 font-mono hidden">💡 تم سحب الرقم تلقائياً من الإجابات.</p>
                 </div>
             </div>
 
             <div class="flex gap-3 mt-8">
                 <button onclick="closeModal('fillDataModal')" class="btn bg-[#1a2029] text-gray-400 hover:text-white border border-[#222b38]">إلغاء</button>
                 <button onclick="confirmAcceptSubmit()" class="btn btn-accept" id="finalAcceptBtn">✔ تأكيد واعتماد</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="customAlert" class="fixed inset-0 z-[90] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-[#12171f] border border-orange-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-modal">
-            <div class="text-4xl mb-3">⚠️</div>
-            <h3 class="text-lg font-black text-white mb-2">تنبيه النظام</h3>
-            <p id="alertMessage" class="text-sm text-gray-300 mb-6 leading-relaxed">رسالة التنبيه هنا</p>
-            <button onclick="closeModal('customAlert')" class="btn bg-orange-600 hover:bg-orange-500 text-white">حسناً، فهمت</button>
-        </div>
-    </div>
-
-    <div id="customConfirm" class="fixed inset-0 z-[80] hidden items-center justify-center bg-black/80 backdrop-blur-sm p-4">
-        <div class="bg-[#12171f] border border-red-500/30 rounded-2xl p-6 max-w-sm w-full text-center shadow-2xl animate-modal">
-            <div class="text-4xl mb-3">🛑</div>
-            <h3 class="text-lg font-black text-white mb-2">تأكيد الرفض</h3>
-            <p id="confirmMessage" class="text-sm text-gray-300 mb-6 leading-relaxed">هل أنت متأكد من رفض المتقدم؟</p>
-            <div class="flex gap-3">
-                <button onclick="closeModal('customConfirm')" class="btn bg-[#1a2029] text-gray-400 hover:text-white">إلغاء</button>
-                <button onclick="executeReject()" id="finalRejectBtn" class="btn btn-reject">✖ نعم، ارفض المتقدم</button>
             </div>
         </div>
     </div>
@@ -189,31 +172,38 @@
         function closeModal(modalId) {
             document.getElementById(modalId).classList.add('hidden');
             document.getElementById(modalId).classList.remove('flex');
-            // نرجع السكرول للبودي فقط إذا قفلنا النافذة الرئيسية (عشان ما يعلق السكرول)
             if(modalId === 'applicantModal') document.body.style.overflow = 'auto';
         }
 
-        function showAlert(msg) {
-            document.getElementById('alertMessage').innerText = msg;
-            document.getElementById('customAlert').classList.remove('hidden');
-            document.getElementById('customAlert').classList.add('flex');
-        }
-
-        // فتح نافذة إكمال البيانات (الذكية)
+        // 🧠 خوارزمية السحب الذكي للرقم الوطني
         function promptAcceptData() {
             if (!currentApp) return;
             
-            document.getElementById('fillNationalId').value = '';
-
-            // فحص العمر: إذا كان يحتوي على أرقام (عربية أو إنجليزية) يعني متوفر
-            const ageVal = currentApp.age ? String(currentApp.age).trim() : '';
-            const hasValidAgeNumber = /\d|[\u0660-\u0669]/.test(ageVal);
-
-            if (hasValidAgeNumber) {
-                document.getElementById('ageContainer').style.display = 'none'; // نخفيه لأنه موجود
+            const natIdInput = document.getElementById('fillNationalId');
+            const hint = document.getElementById('nationalIdHint');
+            
+            // نبحث عن أي نص مكتوب تحته أو بجانبه "الرقم الوطني" في الإجابات
+            let extractedId = '';
+            
+            if (currentApp.qaList) {
+                // 1. نبحث عن سؤال يحتوي على كلمة "الرقم الوطني"
+                const idQuestion = currentApp.qaList.find(q => q.question.includes('الرقم الوطني'));
+                if (idQuestion) {
+                    // سحب أي رقم متصل (غالباً 6 أرقام أو أكثر) من الإجابة
+                    const match = idQuestion.answer.match(/\d{5,15}/);
+                    if (match) extractedId = match[0];
+                }
+            }
+            
+            // 2. إذا وجدناه، نضعه ونقفل الخانة، إذا ما وجدناه، نتركها فاضية للمدرب يكتبها
+            if (extractedId) {
+                natIdInput.value = extractedId;
+                hint.classList.remove('hidden');
+                natIdInput.classList.add('bg-[#161b22]'); // تمييز لونها كأنها جاهزة
             } else {
-                document.getElementById('ageContainer').style.display = 'block'; // نظهره لأنه ناقص
-                document.getElementById('fillAge').value = '';
+                natIdInput.value = '';
+                hint.classList.add('hidden');
+                natIdInput.classList.remove('bg-[#161b22]');
             }
 
             document.getElementById('fillDataModal').classList.remove('hidden');
@@ -223,26 +213,14 @@
         // إرسال طلب القبول
         async function confirmAcceptSubmit() {
             const nationalId = document.getElementById('fillNationalId').value.trim();
-            const ageContainerVisible = document.getElementById('ageContainer').style.display !== 'none';
-            const ageInput = document.getElementById('fillAge').value.trim();
 
             if (!nationalId) {
-                showAlert("عذراً، يجب تعبئة (الرقم الوطني) قبل الاعتماد!");
+                Swal.fire('تنبيه', 'عذراً، يجب تعبئة (الرقم الوطني) قبل الاعتماد!', 'warning');
                 return;
             }
 
-            // إذا كانت خانة العمر ظاهرة (يعني ناقص)، تأكد إنه عباها
-            let finalAge = currentApp.age;
-            if (ageContainerVisible) {
-                if (!ageInput) {
-                    showAlert("عذراً، التقديم لا يحتوي على عمر، يجب كتابته يدوياً!");
-                    return;
-                }
-                finalAge = ageInput; // ناخذ اللي كتبه بيده
-            }
-
             const btn = document.getElementById('finalAcceptBtn');
-            btn.innerText = "⏳ جاري الرفع..."; btn.disabled = true;
+            btn.innerText = "⏳ جاري النقل للميدان..."; btn.disabled = true;
 
             try {
                 const res = await fetch('/api/accept-raw', { 
@@ -252,31 +230,40 @@
                         id: currentApp.id, 
                         name: currentApp.name, 
                         answers: currentApp.answers,
-                        discordId: currentApp.discordId, // يُرسل مخفي في الخلفية
-                        nationalId: nationalId,
-                        age: finalAge
+                        discordId: currentApp.discordId,
+                        nationalId: nationalId
                     }) 
                 });
                 const result = await res.json();
                 if (result.success) location.reload(); 
-                else { showAlert('⚠️ خطأ: ' + result.error); btn.disabled = false; btn.innerText = "✔ تأكيد واعتماد"; }
+                else { Swal.fire('خطأ', result.error, 'error'); btn.disabled = false; btn.innerText = "✔ تأكيد واعتماد"; }
             } catch (error) { 
-                showAlert('⚠️ تعذر الاتصال بالسيرفر.'); 
+                Swal.fire('خطأ', 'تعذر الاتصال بالسيرفر.', 'error');
                 btn.disabled = false; btn.innerText = "✔ تأكيد واعتماد";
             }
         }
 
         // فتح نافذة الرفض
         function promptReject() {
-            document.getElementById('confirmMessage').innerText = `هل أنت متأكد من رفض المتقدم (${currentApp.name}) نهائياً؟`;
-            document.getElementById('customConfirm').classList.remove('hidden');
-            document.getElementById('customConfirm').classList.add('flex');
+            Swal.fire({
+                title: 'تأكيد الرفض 🛑',
+                text: `هل أنت متأكد من رفض المتقدم (${currentApp.name}) نهائياً؟`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#374151',
+                confirmButtonText: 'نعم، ارفض المتقدم',
+                cancelButtonText: 'إلغاء'
+            }).then((result) => {
+                if (result.isConfirmed) executeReject();
+            });
         }
 
         // إرسال الرفض
         async function executeReject() {
-            const btn = document.getElementById('finalRejectBtn');
-            btn.innerText = "⏳ جاري الرفض..."; btn.disabled = true;
+            const btn = document.getElementById('btnRejectMain');
+            btn.innerHTML = '<span class="animate-pulse">⏳ جاري الرفض...</span>'; btn.disabled = true;
+            Swal.fire({ title: '⏳ جاري الإرسال...', allowOutsideClick: false, didOpen: () => { Swal.showLoading(); }});
 
             try {
                 const res = await fetch('/api/reject-raw', { 
@@ -286,10 +273,10 @@
                 });
                 const result = await res.json();
                 if (result.success) location.reload(); 
-                else { showAlert('⚠️ خطأ: ' + result.error); btn.disabled = false; btn.innerText = "✖ نعم، ارفض المتقدم"; }
+                else { Swal.fire('خطأ', result.error, 'error'); btn.disabled = false; btn.innerText = "✖ رفض التقديم"; }
             } catch (error) { 
-                showAlert('⚠️ تعذر الاتصال بالسيرفر.'); 
-                btn.disabled = false; btn.innerText = "✖ نعم، ارفض المتقدم";
+                Swal.fire('خطأ', 'تعذر الاتصال بالسيرفر.', 'error');
+                btn.disabled = false; btn.innerText = "✖ رفض التقديم";
             }
         }
     </script>

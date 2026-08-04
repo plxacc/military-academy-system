@@ -158,8 +158,9 @@ app.get('/applications', async (req, res) => {
 app.post('/api/accept-raw', async (req, res) => {
     if (!(req.user.permissions.canAcceptApplications || req.user.permissions.canApproveReject)) return res.status(403).json({ error: "صلاحية للقيادة ومشرفين الكلية فقط!" });
     try {
-        const { id, name, answers, discordId, nationalId, age } = req.body;
-        await acceptFromRawToAcademy(id, name, answers, req.user.username, discordId, nationalId, age);
+        const { id, name, answers, discordId, nationalId } = req.body;
+        // تم إزالة العمر (age) بالكامل وتم تمرير الرقم الوطني بدلاً منه لدالة القبول
+        await acceptFromRawToAcademy(id, name, answers, req.user.username, discordId, nationalId, null);
         res.json({ success: true });
     } catch (err) { res.status(500).json({ error: err.message }); }
 });
