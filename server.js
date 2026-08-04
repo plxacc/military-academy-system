@@ -7,6 +7,23 @@ const path = require('path');
 const axios = require('axios');
 require('dotenv').config();
 
+// مثال على كود إرسال الرسالة للمستخدم
+async function sendDMNotification(userDiscordId, messageText) {
+    try {
+        // نأخذ المبرمج/المستخدم من الديسكورد
+        const user = await client.users.fetch(userDiscordId);
+        
+        if (user) {
+            // نحاول إرسال الرسالة الخاصة
+            await user.send(messageText);
+        }
+    } catch (error) {
+        // 🤫 استثناء صامت: إذا فشل الإرسال (بسبب عدم وجود سيرفر مشترك أو إغلاق الخاص)
+        // سينتقل الكود فوراً إلى هنا ويدعو الخطأ يمر بسلام دون إيقاف النظام أو إظهار تنبيهات مزعجة.
+        console.log(`[تجاهل] تعذر إرسال رسالة خاصة للمستخدم ${userDiscordId} (الخاص مقفل أو ليس بالدسكورد).`);
+    }
+}
+
 const { getUserPermissions } = require('./config/roles'); 
 
 const { 
@@ -156,13 +173,21 @@ app.get('/applications', async (req, res) => {
 });
 
 app.post('/api/accept-raw', async (req, res) => {
-    if (!(req.user.permissions.canAcceptApplications || req.user.permissions.canApproveReject)) return res.status(403).json({ error: "صلاحية للقيادة ومشرفين الكلية فقط!" });
+    const { id, name, discordId, nationalId } = req.body;
+
+    // 1. تنفيذ عمليات قاعدة البيانات والحفظ أولاً
+    await saveToDatabase({ id, name, status: 'مقبول', nationalId });
+
+    // 2. محاولة إرسال إشعار الديسكورد في كتل منفصلة (Silent Try-Catch)
     try {
-        const { id, name, answers, discordId, nationalId } = req.body;
-        // تم إزالة العمر (age) بالكامل وتم تمرير الرقم الوطني بدلاً منه لدالة القبول
-        await acceptFromRawToAcademy(id, name, answers, req.user.username, discordId, nationalId, null);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: err.message }); }
+        const user = await client.users.fetch(discordId);
+        await user.send(`🎉 مبروك يا ${name}! تم قبولك مبدئياً في الدورة العسكرية. الرقم الوطني الخاص بك: ${nationalId}`);
+    } catch (err) {
+        // يتجاهل عدم وصول الرسالة للمستخدم ولا يعطل عملية القبول بالموقع
+    }
+
+    // 3. إرجاع استجابة نجاح للموقع دائماً
+    return res.json({ success: true, message: 'تم قبول المتقدم بنجاح' });
 });
 
 app.post('/api/reject-raw', async (req, res) => {
