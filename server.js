@@ -156,21 +156,13 @@ app.get('/applications', async (req, res) => {
 });
 
 app.post('/api/accept-raw', async (req, res) => {
-    const { id, name, discordId, nationalId } = req.body;
-
-    // 1. تنفيذ عمليات قاعدة البيانات والحفظ أولاً
-    await saveToDatabase({ id, name, status: 'مقبول', nationalId });
-
-    // 2. محاولة إرسال إشعار الديسكورد في كتل منفصلة (Silent Try-Catch)
+    if (!(req.user.permissions.canAcceptApplications || req.user.permissions.canApproveReject)) return res.status(403).json({ error: "صلاحية للقيادة ومشرفين الكلية فقط!" });
     try {
-        const user = await client.users.fetch(discordId);
-        await user.send(`🎉 مبروك يا ${name}! تم قبولك مبدئياً في الدورة العسكرية. الرقم الوطني الخاص بك: ${nationalId}`);
-    } catch (err) {
-        // يتجاهل عدم وصول الرسالة للمستخدم ولا يعطل عملية القبول بالموقع
-    }
-
-    // 3. إرجاع استجابة نجاح للموقع دائماً
-    return res.json({ success: true, message: 'تم قبول المتقدم بنجاح' });
+        const { id, name, answers, discordId, nationalId } = req.body;
+        // تم إزالة العمر (age) بالكامل وتم تمرير الرقم الوطني بدلاً منه لدالة القبول
+        await acceptFromRawToAcademy(id, name, answers, req.user.username, discordId, nationalId, null);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 app.post('/api/reject-raw', async (req, res) => {
