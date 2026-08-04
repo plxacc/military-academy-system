@@ -22,7 +22,7 @@
                 <h2 class="text-3xl font-black text-white mt-1">التقديمات (الدورة الثالثة للشرطة)</h2>
             </div>
             <div class="flex items-center gap-3 w-full md:w-auto">
-                <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="🔍 ابحث بالاسم أو Copy ID..." class="search-input md:w-80">
+                <input type="text" id="searchInput" onkeyup="filterCards()" placeholder="🔍 ابحث بالاسم، الأيدي، أو الرقم الوطني..." class="search-input md:w-80">
                 <div class="bg-[#12171f] px-4 py-2.5 rounded-xl border border-[#222b38] text-xs font-bold whitespace-nowrap">
                     جديد: <span id="countDisplay" class="text-orange-400 font-mono"><%= applications.length %></span>
                 </div>
@@ -30,14 +30,34 @@
         </div>
 
         <div id="cardsGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
-            <% applications.forEach(app => { %>
-                <div class="card-tactical group" data-search="<%= app.name %> <%= app.id %>">
+            <% applications.forEach(app => { 
+                // خوارزمية استخراج الرقم الوطني للكرت الخارجي وشريط البحث
+                let natId = '';
+                if (app.qaList && app.qaList.length > 0) {
+                    let q1 = app.qaList.find(x => x.question.includes('الرقم الوطني') || x.question.includes('رقم الهوية'));
+                    if (q1) {
+                        let m = q1.answer.match(/\b\d{3,10}\b/);
+                        if (m) natId = m[0];
+                    }
+                    if (!natId) {
+                        let q2 = app.qaList.find(x => x.question.includes('اسم الشخصية'));
+                        if (q2) {
+                            let m = q2.answer.match(/\b\d{3,10}\b/);
+                            if (m) natId = m[0];
+                        }
+                    }
+                }
+                let displayNatId = natId ? natId : 'غير متوفر';
+            %>
+                <div class="card-tactical group" data-search="<%= app.name %> <%= app.id %> <%= displayNatId %>">
                     <div class="absolute top-0 right-0 w-2 h-full bg-gradient-to-b from-orange-500 to-amber-600"></div>
                     <div>
-                        <div class="card-header">
+                        <div class="card-header items-start">
                             <div>
                                 <h3 class="card-title"><%= app.name %></h3>
-                                <span class="card-id">ID: <%= app.id %></span>
+                                <span class="card-id block">ID: <%= app.id %></span>
+                                <!-- عرض الرقم الوطني في الكرت -->
+                                <span class="text-emerald-400 font-mono text-xs font-bold block mt-1.5">الرقم الوطني: <%= displayNatId %></span>
                             </div>
                             <span class="badge badge-new">جديد</span>
                         </div>
@@ -57,11 +77,14 @@
                 <h3 class="text-xl font-black text-gray-300 mb-6">📁 سجل التقديمات المراجعة (<%= reviewedApps.length %>)</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 opacity-75 hover:opacity-100 transition-opacity">
                     <% reviewedApps.forEach(app => { %>
-                        <div class="card-tactical !p-5" data-search="<%= app.name %> <%= app.id %> <%= app.copyId %>">
-                            <div class="card-header mb-2">
+                        <div class="card-tactical !p-5" data-search="<%= app.name %> <%= app.id %> <%= app.copyId %> <%= app.nationalId || '' %>">
+                            <div class="card-header mb-2 items-start">
                                 <div>
                                     <h3 class="card-title text-lg"><%= app.name %></h3>
-                                    <span class="card-id">ID: <%= app.copyId || app.id %></span>
+                                    <span class="card-id block">ID: <%= app.copyId || app.id %></span>
+                                    <% if (app.nationalId) { %>
+                                        <span class="text-emerald-500/80 font-mono text-xs font-bold block mt-1">الرقم الوطني: <%= app.nationalId %></span>
+                                    <% } %>
                                 </div>
                                 <span class="badge <%= app.status.includes('مقبول') ? 'badge-new !text-emerald-400 !border-emerald-500' : 'badge-rejected' %>">
                                     <%= app.status.includes('مقبول') ? '✔ مقبول' : '✖ مرفوض' %>
@@ -113,7 +136,7 @@
             <div class="space-y-4">
                 <div>
                     <label class="text-xs font-bold text-gray-300">الرقم الوطني: <span class="text-red-500">*</span></label>
-                    <input type="text" id="fillNationalId" class="search-input mt-1 w-full text-center font-bold tracking-widest text-emerald-400" placeholder="مكون من 4 ارقام مثال : 0123 " maxlength="15">
+                    <input type="text" id="fillNationalId" class="search-input mt-1 w-full text-center font-bold tracking-widest text-emerald-400" placeholder="اكتب الرقم الوطني هنا..." maxlength="15">
                     <p id="nationalIdHint" class="text-[10px] text-gray-500 mt-2 font-mono hidden">💡 تم سحب الرقم تلقائياً من الإجابات.</p>
                 </div>
             </div>
@@ -175,31 +198,38 @@
             if(modalId === 'applicantModal') document.body.style.overflow = 'auto';
         }
 
-        // 🧠 خوارزمية السحب الذكي للرقم الوطني
+        // 🧠 خوارزمية السحب الذكي للرقم الوطني عند النقر على القبول
         function promptAcceptData() {
             if (!currentApp) return;
             
             const natIdInput = document.getElementById('fillNationalId');
             const hint = document.getElementById('nationalIdHint');
             
-            // نبحث عن أي نص مكتوب تحته أو بجانبه "الرقم الوطني" في الإجابات
             let extractedId = '';
             
             if (currentApp.qaList) {
-                // 1. نبحث عن سؤال يحتوي على كلمة "الرقم الوطني"
-                const idQuestion = currentApp.qaList.find(q => q.question.includes('الرقم الوطني'));
+                // البحث في الأسئلة التي تحتوي على الرقم الوطني أو رقم الهوية
+                const idQuestion = currentApp.qaList.find(q => q.question.includes('الرقم الوطني') || q.question.includes('رقم الهوية'));
                 if (idQuestion) {
-                    // سحب أي رقم متصل (غالباً 6 أرقام أو أكثر) من الإجابة
-                    const match = idQuestion.answer.match(/\d{5,15}/);
+                    const match = idQuestion.answer.match(/\b\d{3,10}\b/);
                     if (match) extractedId = match[0];
+                }
+                
+                // في حال كان الرقم مكتوباً مع "اسم الشخصية" ولم يوجد بسؤال منفصل
+                if (!extractedId) {
+                    const nameQuestion = currentApp.qaList.find(q => q.question.includes('اسم الشخصية'));
+                    if (nameQuestion) {
+                        const match = nameQuestion.answer.match(/\b\d{3,10}\b/);
+                        if (match) extractedId = match[0];
+                    }
                 }
             }
             
-            // 2. إذا وجدناه، نضعه ونقفل الخانة، إذا ما وجدناه، نتركها فاضية للمدرب يكتبها
+            // إذا وجد الرقم يعبئه، وإذا لم يجده يفرغ الخانة ليقوم الإداري بكتابته
             if (extractedId) {
                 natIdInput.value = extractedId;
                 hint.classList.remove('hidden');
-                natIdInput.classList.add('bg-[#161b22]'); // تمييز لونها كأنها جاهزة
+                natIdInput.classList.add('bg-[#161b22]');
             } else {
                 natIdInput.value = '';
                 hint.classList.add('hidden');
