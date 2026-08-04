@@ -7,23 +7,6 @@ const path = require('path');
 const axios = require('axios');
 require('dotenv').config();
 
-// مثال على كود إرسال الرسالة للمستخدم
-async function sendDMNotification(userDiscordId, messageText) {
-    try {
-        // نأخذ المبرمج/المستخدم من الديسكورد
-        const user = await client.users.fetch(userDiscordId);
-        
-        if (user) {
-            // نحاول إرسال الرسالة الخاصة
-            await user.send(messageText);
-        }
-    } catch (error) {
-        // 🤫 استثناء صامت: إذا فشل الإرسال (بسبب عدم وجود سيرفر مشترك أو إغلاق الخاص)
-        // سينتقل الكود فوراً إلى هنا ويدعو الخطأ يمر بسلام دون إيقاف النظام أو إظهار تنبيهات مزعجة.
-        console.log(`[تجاهل] تعذر إرسال رسالة خاصة للمستخدم ${userDiscordId} (الخاص مقفل أو ليس بالدسكورد).`);
-    }
-}
-
 const { getUserPermissions } = require('./config/roles'); 
 
 const { 
