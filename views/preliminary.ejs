@@ -331,24 +331,15 @@
             }
         }
 
-        // حساب مجموع الأنظمة العامة (5 أسئلة من 2)
+        // حساب مجموع التفاوض (5 أسئلة من 2)
         function calcNegSum() {
             let sum = 0;
             for(let i=1; i<=5; i++) {
-                const val = Math.min(2, Math.max(0, Number(document.getElementById(`n${i}`).value) || 0));
+                const val = Math.min(2, Math.max(0, Number(document.getElementById(`n${i}`)?.value) || 0));
                 sum += val;
             }
-            document.getElementById('modalFinalScore').innerText = sum;
-        }
-
-        function calcNegSum() {
-            let sum = 0;
-            for(let i=1; i<=9; i++) {
-                const maxVal = (i === 3) ? 2 : 1;
-                const val = Math.min(maxVal, Math.max(0, Number(document.getElementById(`n${i}`).value) || 0));
-                sum += val;
-            }
-            document.getElementById('modalFinalScore').innerText = sum;
+            const scoreDisplay = document.getElementById('modalFinalScore');
+            if (scoreDisplay) scoreDisplay.innerText = sum;
         }
 
         async function submitGrade() {
