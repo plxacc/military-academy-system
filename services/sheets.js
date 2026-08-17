@@ -11,7 +11,7 @@ if (privateKey.startsWith('"') && privateKey.endsWith('"')) {
 }
 privateKey = privateKey.replace(/\\n/g, '\n').trim();
 
-// 2. إعداد تصريح الدخول (البطاقة العسكرية للبوت)
+// 2. إعداد تصريح الدخول
 const serviceAccountAuth = new JWT({
     email: clientEmail,
     key: privateKey,
@@ -21,9 +21,7 @@ const serviceAccountAuth = new JWT({
 // 3. تمرير تصريح الدخول للشيت
 const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
 
-// تعريف الكاش للذاكرة
 const memoryCache = { rawApps: null, academyApps: null, lastFetchTime: 0 };
-// تم تقليله إلى ثانية واحدة فقط لضمان التحديث اللحظي بين العساكر ومنع التضارب
 const CACHE_TTL = 1 * 1000; 
 
 function clearCache() {
@@ -32,27 +30,29 @@ function clearCache() {
     memoryCache.lastFetchTime = 0;
 }
 
-function clearCache() {
-    memoryCache.rawApps = null;
-    memoryCache.academyApps = null;
-    memoryCache.lastFetchTime = 0;
-}
-async function sendDiscordLog(message) {
+// 🚀 دالة إرسال اللوقات بنظام (Embed) الفخم والمنظم
+async function sendDiscordLog(embedData) {
     const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
     if (!webhookUrl) return;
     try {
         await fetch(webhookUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ content: message })
+            body: JSON.stringify({ 
+                embeds: [{
+                    title: embedData.title,
+                    description: embedData.description,
+                    color: embedData.color,
+                    fields: embedData.fields,
+                    footer: { text: "نظام الكلية العسكرية - اللوق المركزي" },
+                    timestamp: new Date().toISOString()
+                }]
+            })
         });
     } catch (err) {
         console.log("⚠️ فشل إرسال اللوق للديسكورد:", err.message);
     }
 }
-
-// ---------------------------------------------------------
-// من هنا تبدأ دوالك القديمة بدون أي تغيير (getRawApplications إلخ..)
 
 // 1. سحب التقديمات الخام
 async function getRawApplications() {
@@ -138,7 +138,7 @@ async function getApplications() {
     } catch (error) { return []; }
 }
 
-// النقل الذكي والمباشر: يقبل التقديم ويرسله للميدان فوراً
+// 3. النقل الذكي: يقبل التقديم ويرسله للميدان فوراً (بدون مقابلات وبدون DM)
 async function acceptFromRawToAcademy(rawId, name, answers, officerName, discordId, nationalId, age) {
     await doc.loadInfo();
     const academySheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -158,7 +158,7 @@ async function acceptFromRawToAcademy(rawId, name, answers, officerName, discord
             Copy_ID: finalCopyId,
             National_ID: finalNationalId,
             Stage: 'preliminary',       // 👈 تحول للميدان مباشرة
-            Status: 'مقبول مبدئيا',     // 👈 الحالة الجديدة
+            Status: 'مقبول مبدئيا',
             Stops_Score: 0, Neg_Score: 0, Ops_Score: 0, Gen_Score: 0, Total_Score: 0, 
             Graded_By: '[✔ قبول مبدئي للميدان]',
             Final_Decision: 'معلق'
@@ -174,10 +174,23 @@ async function acceptFromRawToAcademy(rawId, name, answers, officerName, discord
         await existingRow.save();
     }
     clearCache();
-      await sendDiscordLog(`✅ **قبول مبدئي للميدان**\n👮‍♂️ **المسؤول:** ${officerName}\n👤 **الاسم:** ${finalName}\n💬 **ديسكورد:** \`${finalDiscordId}\`\n📋 **كوبي ايدي:** \`${finalCopyId}\`\n🪪 **رقم وطني:** ${finalNationalId}`);
+    
+    // إرسال اللوق بنظام الـ Embed
+    await sendDiscordLog({
+        title: "✅ قبول تقديم (نقل للميدان)",
+        description: "تم قبول تقديم جديد وتحويله لميدان التدريب.",
+        color: 0x10B981, // أخضر
+        fields: [
+            { name: "👮‍♂️ المعتمد", value: officerName, inline: true },
+            { name: "👤 اسم المتقدم", value: finalName, inline: true },
+            { name: "💬 ديسكورد", value: `<@${finalDiscordId}>`, inline: true },
+            { name: "📋 Copy ID", value: `\`${finalCopyId}\``, inline: true },
+            { name: "🪪 رقم وطني", value: `\`${finalNationalId}\``, inline: true }
+        ]
+    });
 }
 
-// 4. رفض التقديم وإرسال اللوق
+// 4. رفض التقديم (بدون DM)
 async function rejectRawApplicant(rawId, name, answers, officerName) {
     await doc.loadInfo();
     const rawSheet = doc.sheetsByTitle['Applications_Raw'] || doc.sheetsByIndex[0];
@@ -191,7 +204,6 @@ async function rejectRawApplicant(rawId, name, answers, officerName) {
 
     const existingRows = await academySheet.getRows();
     const existingRow = existingRows.find(r => String(r.get('Copy_ID')).trim() === String(copyId).trim());
-    
     const nationalId = existingRow ? (existingRow.get('National_ID') || 'غير متوفر') : 'غير متوفر';
 
     if (!existingRow) {
@@ -212,92 +224,20 @@ async function rejectRawApplicant(rawId, name, answers, officerName) {
     }
     clearCache();
 
-    const logMsg = `🛑 **نوع الإجراء:** رفض تقديم جديد\n` +
-                   `━━━━━━━━━━━━━━━━━━━━\n` +
-                   `👮‍♂️ **بيانات المدرب:**\n` +
-                   `👤 **اسم الديسكورد:** ${officerName}\n` +
-                   `━━━━━━━━━━━━━━━━━━━━\n` +
-                   `🎯 **بيانات المتدرب (المتقدم):**\n` +
-                   `👤 **الاسم:** ${name}\n` +
-                   `💬 **الديسكورد:** \`${discordId}\`\n` +
-                   `📋 **كوبي ايدي:** \`${copyId}\`\n` +
-                   `🪪 **الرقم الوطني:** \`${nationalId}\`\n` +
-                   `━━━━━━━━━━━━━━━━━━━━\n` +
-                   `📝 **التفاصيل:** تم رفض طلب الالتحاق نهائياً.`;
-    await sendDiscordLog(logMsg);
+    await sendDiscordLog({
+        title: "🛑 رفض تقديم",
+        description: "تم رفض التقديم بشكل نهائي.",
+        color: 0xEF4444, // أحمر
+        fields: [
+            { name: "👮‍♂️ المعتمد", value: officerName, inline: true },
+            { name: "👤 اسم المتقدم", value: name, inline: true },
+            { name: "💬 ديسكورد", value: `<@${discordId}>`, inline: true },
+            { name: "📋 Copy ID", value: `\`${copyId}\``, inline: true }
+        ]
+    });
 }
 
-// قرار المقابلة (قبول/رفض) وإرسال رسالة التوجيه التلقائية
-async function decideInterview(discordId, decisionType, officerName, interviewerName = "") {
-    await doc.loadInfo();
-    const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
-    const rows = await sheet.getRows();
-    const row = rows.find(r => String(r.get('Discord_ID')).trim() === String(discordId).trim() || String(r.get('Copy_ID')).trim() === String(discordId).trim());
-    
-    if (row) {
-        const appName = row.get('Name') || 'غير متوفر';
-        const appCopyId = row.get('Copy_ID') || 'غير متوفر';
-        const appNatId = row.get('National_ID') || 'غير متوفر';
-        const dateNow = new Date().toLocaleDateString('en-GB');
-        
-        let newStage = '';
-        let newStatus = '';
-        let logMessage = '';
-
-        // 1. تحديد المرحلة بناءً على القرار (هذا الجزء اللي انحذف بالغلط ورجعناه)
-        if (decisionType === 'accept') {
-            newStage = 'preliminary';
-            newStatus = 'مقبول مبدئياً - ميدان التدريب';
-            logMessage = `[✔ اجتاز المقابلة مع: ${interviewerName} | اعتماد: ${officerName} (${dateNow})]`;
-        } else {
-            newStage = 'interview_rejected';
-            newStatus = 'مرفوض في المقابلة الشخصية';
-            logMessage = `[✖ رفض مقابلة بواسطة: ${officerName} (${dateNow})]`;
-        }
-
-        // 2. تحديث بيانات العسكري في الشيت
-        let currentLogs = row.get('Graded_By') || '';
-        const updatedLogs = `${currentLogs} ${logMessage}`.trim();
-
-        row.assign({ Stage: newStage, Status: newStatus, Graded_By: updatedLogs });
-        await row.save();
-        
-        // 3. إرسال اللوق لغرفة القيادة
-        const decisionMsg = decisionType === 'accept' ? `✔ تم اجتياز المقابلة المبدئية مع (${interviewerName}) ونقله لميدان التدريب.` : `✖ رسوب في المقابلة الشخصية والرفض من الإكمال.`;
-        const logMsg = `🎙️ **نوع الإجراء:** قرار المقابلة الشخصية\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `👮‍♂️ **بيانات المدرب (المُعتمد):**\n` +
-                       `👤 **اسم الديسكورد:** ${officerName}\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `🎯 **بيانات المتدرب (المرشح):**\n` +
-                       `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}>\n` +
-                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
-                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `📝 **التفاصيل:** ${decisionMsg}`;
-        await sendDiscordLog(logMsg);
-
-        // 4. إرسال رسالة الخاص (DM) بنظام الـ Embed الفخم
-        if (decisionType === 'accept') {
-            const templates = await getTemplates();
-            const customText = templates.preliminary || 'يسرنا إعلامك بأنه تم قبولك مبدئياً. يرجى التوجه لمقر الأكاديمية.';
-            await sendDiscordDM(appCopyId, {
-                title: "🎓 إشعار قبول مبدئي",
-                color: 0x10B981, // أخضر
-                description: `مرحباً **${appName}**،\n\n${customText}`
-            });
-        } else {
-            await sendDiscordDM(appCopyId, {
-                title: "❌ إشعار إداري",
-                color: 0xEF4444, // أحمر
-                description: `مرحباً **${appName}**،\n\nنعتذر منك، **لم تجتز** المقابلة الشخصية.\nنتمنى لك التوفيق في المرات القادمة.`
-            });
-        }
-    }
-    clearCache();
-}
-// رصد الدرجات المتقدم
+// 5. رصد الدرجات المتقدم
 async function advancedGradeApplicant(discordId, section, detailsText, finalScore, graderName, isSupervisorOrLeader) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -328,25 +268,23 @@ async function advancedGradeApplicant(discordId, section, detailsText, finalScor
         row.assign({ Graded_By: `${currentLogs} [${sectionAr}: تم الرصد]`.trim() });
         await row.save();
 
-        const logMsg = `🎯 **نوع الإجراء:** رصد درجات الميدان\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `👮‍♂️ **بيانات المدرب :**\n` +
-                       `👤 **اسم الديسكورد:** ${graderName}\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `🎯 **بيانات المتدرب :**\n` +
-                       `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
-                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
-                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `📊 **القسم:** ${sectionAr} | **الدرجة المسجلة:** **${finalScore}**\n` +
-                       `📝 **تفاصيل الرصد:** ${detailsText}`;
-        await sendDiscordLog(logMsg);
+        await sendDiscordLog({
+            title: `🎯 رصد ميداني - ${sectionAr}`,
+            description: `تم رصد درجة قسم **${sectionAr}** بنجاح.`,
+            color: 0x3B82F6, // أزرق
+            fields: [
+                { name: "👮‍♂️ المدرب", value: graderName, inline: true },
+                { name: "👤 المتدرب", value: appName, inline: true },
+                { name: "💬 ديسكورد", value: `<@${discordId}>`, inline: true },
+                { name: "📊 الدرجة المسجلة", value: `**${finalScore}**`, inline: true },
+                { name: "📝 التفاصيل", value: detailsText, inline: false }
+            ]
+        });
     }
     clearCache();
 }
 
-// إرسال المتدرب للرصد النهائي (للقيادة) - نسخة مصححة
+// 6. إرسال المتدرب للرصد النهائي (للقيادة)
 async function sendToFinalDecision(discordId, officerName) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -371,26 +309,22 @@ async function sendToFinalDecision(discordId, officerName) {
         row.assign({ Graded_By: `${currentLogs} ${logText}`.trim() });
         await row.save();
 
-        const logMsg = `🚀 **نوع الإجراء:** الرفع للتقييم النهائي\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `👮‍♂️ **بيانات المدرب:**\n` +
-                       `👤 **اسم الديسكورد:** ${officerName}\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `🎯 **بيانات المتدرب :**\n` +
-                       `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}>\n` +
-                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
-                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `📊 **المجموع الكلي للدرجات:** **${totalScore}/50**\n` +
-                       `📝 **التفاصيل:** تم اكتمال رصد درجات الميدان ورفع الملف للقيادة للاعتماد.`;
-        await sendDiscordLog(logMsg);
+        await sendDiscordLog({
+            title: "🚀 رفع للتقييم النهائي",
+            description: "تم اكتمال رصد الميدان ورفع الملف للقيادة.",
+            color: 0x8B5CF6, // بنفسجي
+            fields: [
+                { name: "👮‍♂️ الرافع", value: officerName, inline: true },
+                { name: "👤 المتدرب", value: appName, inline: true },
+                { name: "💬 ديسكورد", value: `<@${discordId}>`, inline: true },
+                { name: "📊 المجموع الكلي", value: `**${totalScore}/50**`, inline: true }
+            ]
+        });
     }
     clearCache();
-    // 🛑 تم إزالة الكود المنسوخ بالخطأ من هنا لضمان عمل الدالة
 }
 
-// دالة منح أو إلغاء النجاح الاستثنائي
+// 7. دالة منح أو إلغاء النجاح الاستثنائي
 async function toggleException(discordId, action, officerName) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -400,44 +334,43 @@ async function toggleException(discordId, action, officerName) {
     if (row) {
         const appName = row.get('Name') || 'غير متوفر';
         const appCopyId = row.get('Copy_ID') || 'غير متوفر';
-        const appNatId = row.get('National_ID') || 'غير متوفر';
         const dateNow = new Date().toLocaleDateString('en-GB');
         
         let currentLogs = row.get('Graded_By') || '';
         let logText = '';
         let actionDesc = '';
+        let embedColor = 0xF59E0B; // أصفر
 
         if (action === 'add') {
             row.assign({ Status: 'ناجح استثنائياً' });
-            logText = `[✨ مُنح نجاح استثنائي بواسطة: ${officerName} (${dateNow})]`;
-            actionDesc = '✨ تم منح المتدرب حالة (نجاح استثنائي) لتأهيله للتخرج.';
+            logText = `[✨ مُنح استثناء بواسطة: ${officerName} (${dateNow})]`;
+            actionDesc = '✨ تم منح المتدرب (نجاح استثنائي) للنجاح.';
+            embedColor = 0x10B981; // أخضر
         } else {
             row.assign({ Status: 'بانتظار الاعتماد النهائي' });
             logText = `[❌ أُلغي الاستثناء بواسطة: ${officerName} (${dateNow})]`;
-            actionDesc = '❌ تم إلغاء حالة الاستثناء وإعادة المتدرب لحالة الرسوب.';
+            actionDesc = '❌ تم إلغاء الاستثناء وإعادته للرسوب.';
+            embedColor = 0xEF4444; // أحمر
         }
 
         row.assign({ Graded_By: `${currentLogs} ${logText}`.trim() });
         await row.save();
 
-        const logMsg = `⚠️ **نوع الإجراء:** تعديل حالة استثنائية\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `👮‍♂️ **بيانات المدرب:**\n` +
-                       `👤 **اسم الديسكورد:** ${officerName}\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `🎯 **بيانات المتدرب :**\n` +
-                       `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}> (\`${discordId}\`)\n` +
-                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
-                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `📝 **التفاصيل:** ${actionDesc}`;
-        await sendDiscordLog(logMsg);
+        await sendDiscordLog({
+            title: "⚠️ تعديل حالة استثنائية",
+            description: actionDesc,
+            color: embedColor,
+            fields: [
+                { name: "👮‍♂️ المعتمد", value: officerName, inline: true },
+                { name: "👤 المتدرب", value: appName, inline: true },
+                { name: "💬 ديسكورد", value: `<@${discordId}>`, inline: true }
+            ]
+        });
     }
     clearCache();
 }
 
-// دالة الاعتماد النهائي (تخرج أو طي قيد) وإرسال التهنئة التلقائية
+// 8. دالة الاعتماد النهائي (تخرج أو طي قيد) - بدون DM
 async function finalDecision(discordId, decisionType, officerName) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
@@ -452,7 +385,7 @@ async function finalDecision(discordId, decisionType, officerName) {
         
         let newStage = decisionType === 'graduated' ? 'graduated' : 'failed';
         let newStatus = decisionType === 'graduated' ? 'متخرج ومقبول نهائياً' : 'مرفوض نهائياً - طي قيد';
-        let logText = decisionType === 'graduated' ? `[🎓 اُعتمد تخرجه بواسطة: ${officerName} (${dateNow})]` : `[✖ طُوي قيده بواسطة: ${officerName} (${dateNow})]`;
+        let logText = decisionType === 'graduated' ? `[🎓 تخرج بواسطة: ${officerName} (${dateNow})]` : `[✖ طُوي قيده بواسطة: ${officerName} (${dateNow})]`;
 
         let currentLogs = row.get('Graded_By') || '';
         row.assign({ 
@@ -463,32 +396,29 @@ async function finalDecision(discordId, decisionType, officerName) {
         });
         await row.save();
         
-        const discordMsg = decisionType === 'graduated' ? '🎓 **تم اعتماد التخرج بنجاح وانضمامه للسلك العسكري.**' : '✖ **تم اعتماد طي القيد (رسوب) وإغلاق الملف.**';
-        
-        const logMsg = `👑 **نوع الإجراء:** قرار القيادة النهائي\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `👮‍♂️ **بيانات المدرب:**\n` +
-                       `👤 **اسم الديسكورد:** ${officerName}\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `🎯 **بيانات المتدرب:**\n` +
-                       `👤 **الاسم:** ${appName}\n` +
-                       `💬 **الديسكورد:** <@${discordId}>\n` +
-                       `📋 **كوبي ايدي:** \`${appCopyId}\`\n` +
-                       `🪪 **الرقم الوطني:** \`${appNatId}\`\n` +
-                       `━━━━━━━━━━━━━━━━━━━━\n` +
-                       `📝 **التفاصيل:** ${discordMsg}`;
-        await sendDiscordLog(logMsg);
-        
+        const isGraduated = decisionType === 'graduated';
+        await sendDiscordLog({
+            title: isGraduated ? "👑 اعتماد تخرج (نجاح)" : "👑 طي قيد (رسوب)",
+            description: isGraduated ? "تم اعتماد التخرج رسمياً وانضمامه للشرطة." : "تم اعتماد طي القيد وإغلاق الملف.",
+            color: isGraduated ? 0xFBBF24 : 0xDC2626, // ذهبي للنجاح، أحمر غامق للرسوب
+            fields: [
+                { name: "👮‍♂️ القيادي", value: officerName, inline: true },
+                { name: "👤 المتدرب", value: appName, inline: true },
+                { name: "💬 ديسكورد", value: `<@${discordId}>`, inline: true },
+                { name: "🪪 رقم وطني", value: `\`${appNatId}\``, inline: true },
+                { name: "📋 Copy ID", value: `\`${appCopyId}\``, inline: true }
+            ]
+        });
     }
     clearCache();
 }
-// 🚀 نظام دليل الكلية: سحب الأسئلة من الشيت الجديد
+
+// 9. دوال دليل الكلية
 async function getGuideQuestions() {
     try {
         await doc.loadInfo();
         const sheet = doc.sheetsByTitle['Academy_Guide'];
         if (!sheet) return []; 
-
         const rows = await sheet.getRows();
         return rows.map(row => ({
             id: row.get('Question_ID') || '',
@@ -497,20 +427,15 @@ async function getGuideQuestions() {
             maxScore: Number(row.get('Max_Score')) || 0,
             addedBy: row.get('Added_By') || ''
         }));
-    } catch (error) {
-        console.log("⚠️ خطأ في قراءة دليل الكلية:", error.message);
-        return [];
-    }
+    } catch (error) { return []; }
 }
 
-// أضف سؤال جديد للدليل
 async function addGuideQuestion(section, text, maxScore, addedBy) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_Guide'];
     if (!sheet) return;
-
     await sheet.addRow({
-        Question_ID: 'Q-' + Date.now(), // توليد معرف فريد تلقائي للسؤال
+        Question_ID: 'Q-' + Date.now(),
         Section: section,
         Question_Text: text,
         Max_Score: Number(maxScore),
@@ -518,91 +443,34 @@ async function addGuideQuestion(section, text, maxScore, addedBy) {
     });
 }
 
-// حذف سؤال من الدليل (خاص بالمشرفين والقيادة)
 async function deleteGuideQuestion(questionId) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_Guide'];
     if (!sheet) return;
-
     const rows = await sheet.getRows();
     const rowToDelete = rows.find(r => r.get('Question_ID') === questionId);
-    if (rowToDelete) {
-        await rowToDelete.delete();
-    }
+    if (rowToDelete) await rowToDelete.delete();
 }
 
-// دوال فارغة للحفاظ على استقرار السيرفر ومنع أخطاء التصدير
-async function updateApplicationStage(discordId, newStage, newStatus) {}
-async function gradeApplicant(discordId, section, score, graderName) {}
-
-// 🚀 دالة الإرسال على الخاص (DM) بنظام الـ Embed الفخم مع كشف الأخطاء
-async function sendDiscordDM(copyId, embedConfig) {
-    const botToken = process.env.DISCORD_BOT_TOKEN;
-    if (!botToken) return console.log("⚠️ توكن البوت غير موجود!");
-    
-    try {
-        // 1. فتح قناة خاصة مع العسكري
-        const dmRes = await fetch(`https://discord.com/api/v10/users/@me/channels`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify({ recipient_id: String(copyId).trim() })
-        });
-        
-        const dmData = await dmRes.json();
-        
-        // كشف إذا الديسكورد رفض يفتح خاص (مثل إذا العسكري مقفل الرسايل أو مبند البوت)
-        if (!dmRes.ok || !dmData.id) {
-            return console.log("❌ ديسكورد رفض فتح محادثة مع:", copyId, " | السبب:", JSON.stringify(dmData));
-        }
-
-        // 2. تجهيز شكل الرسالة (Embed)
-        const payload = {
-            embeds: [{
-                title: embedConfig.title,
-                description: embedConfig.description,
-                color: embedConfig.color, 
-                footer: { text: "القيادة العامة للشرطة - مدينة جسس" }
-            }]
-        };
-
-        // 3. إرسال الرسالة
-        const msgRes = await fetch(`https://discord.com/api/v10/channels/${dmData.id}/messages`, {
-            method: 'POST',
-            headers: { 'Authorization': `Bot ${botToken}`, 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-
-        // كشف إذا تمت المحادثة بس الديسكورد رفض إرسال الرسالة داخلها
-        if (!msgRes.ok) {
-            const errData = await msgRes.json();
-            console.log("❌ فشل إرسال الرسالة للمستخدم:", copyId, " | السبب:", JSON.stringify(errData));
-        }
-
-    } catch (err) {
-        console.log("⚠️ خطأ برمجي داخلي في دالة الإرسال:", err.message);
-    }
-}
+// 10. دوال القوالب
 async function getTemplates() {
     try {
         await doc.loadInfo();
         const sheet = doc.sheetsByTitle['Academy_Templates'];
-        if (!sheet) return { interview: '', preliminary: '', final: '' };
+        if (!sheet) return { preliminary: '', final: '', reject_final: '' };
         
         const rows = await sheet.getRows();
-        let templates = { interview: '', preliminary: '', final: '' };
+        let templates = { preliminary: '', final: '', reject_final: '' };
         
         rows.forEach(r => {
             const type = r.get('Type');
             const msg = r.get('Message');
-            if (type === 'interview') templates.interview = msg;
             if (type === 'preliminary') templates.preliminary = msg;
             if (type === 'final') templates.final = msg;
+            if (type === 'reject_final') templates.reject_final = msg;
         });
         return templates;
-    } catch (err) {
-        console.log("⚠️ خطأ في قراءة القوالب:", err.message);
-        return { interview: '', preliminary: '', final: '' };
-    }
+    } catch (err) { return { preliminary: '', final: '', reject_final: '' }; }
 }
 
 async function saveTemplate(type, message) {
@@ -621,22 +489,18 @@ async function saveTemplate(type, message) {
     }
 }
 
-// التصدير الشامل والكامل لجميع دوال النظام بدون أي نقص
 module.exports = { 
     getRawApplications, 
     getApplications, 
     acceptFromRawToAcademy, 
     rejectRawApplicant, 
-    updateApplicationStage, 
-    gradeApplicant, 
-    decideInterview, 
     advancedGradeApplicant,
     sendToFinalDecision,
     toggleException,
     finalDecision,
-    getGuideQuestions,      // تأكدنا من تصديرها هنا
-    addGuideQuestion,       // وهنا
+    getGuideQuestions,
+    addGuideQuestion,
     deleteGuideQuestion, 
     getTemplates,
-    saveTemplate    // وهنا
+    saveTemplate
 };
