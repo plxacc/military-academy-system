@@ -5,13 +5,17 @@
     <title>الرئيسية | الكلية العسكرية</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
+    <style>
+        .staff-card { background: linear-gradient(145deg, #0d1117, #0a0d12); transition: all 0.3s ease; }
+        .staff-card:hover { transform: translateY(-3px); box-shadow: 0 10px 25px -5px rgba(0,0,0,0.4); }
+    </style>
 </head>
 <body class="min-h-screen flex flex-col bg-[#05070a] selection:bg-orange-500 selection:text-white font-sans">
     <%- include('partials/navbar') %>
 
     <main class="w-full max-w-[90rem] mx-auto px-6 py-12 flex-1">
         
-        <!-- القسم التعريفي للمركز (تصميم فخم وكبير) -->
+        <!-- القسم التعريفي للمركز -->
         <div class="relative rounded-[2.5rem] bg-[#0d1117] border border-[#1f2630] p-10 md:p-16 mb-12 shadow-2xl overflow-hidden">
             <div class="absolute top-0 right-0 w-1/2 h-full bg-gradient-to-l from-[#161b22] to-transparent opacity-50"></div>
             <div class="relative z-10">
@@ -27,7 +31,7 @@
             </div>
         </div>
 
-        <!-- أرقام وإحصائيات المنظومة (كروت نظيفة وخفيفة) -->
+        <!-- أرقام وإحصائيات المنظومة -->
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
             <div class="relative bg-[#0d1117] border border-[#1f2630] p-8 rounded-3xl overflow-hidden hover:border-gray-600 transition-colors">
                 <div class="absolute right-0 top-0 w-1.5 h-full bg-gray-600"></div>
@@ -54,86 +58,140 @@
             </div>
         </div>
 
-        <!-- الهيكل القيادي للمنظومة -->
-        <div class="mb-24">
+        <!-- الهيكل القيادي للكلية -->
+        <div class="mb-20">
             <div class="flex items-center gap-4 mb-10">
-                <h3 class="text-2xl font-black text-white uppercase tracking-widest">الهيكل الاداري للكلية العسكرية</h3>
+                <h3 class="text-2xl font-black text-white uppercase tracking-widest">الهيكل الإداري للكلية العسكرية</h3>
                 <div class="flex-1 h-px bg-gradient-to-l from-[#1f2630] to-transparent"></div>
             </div>
             
-            <!-- مسؤول الكلية (مستوى القيادة الأعلى) -->
-            <div class="max-w-3xl mx-auto bg-[#0d1117] border border-amber-500/30 rounded-[2rem] p-10 text-center relative shadow-[0_0_40px_rgba(245,158,11,0.05)] mb-10">
-                <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-1.5 bg-amber-500 rounded-b-md"></div>
-                <h4 class="text-4xl font-black text-white mb-3 tracking-wide">بيدرو الشمري</h4>
-                <p class="text-base text-amber-500 font-bold uppercase tracking-widest mb-6">مسؤول الكلية العسكرية</p>
-                <div class="text-sm text-gray-400 font-mono bg-[#161b22] px-6 py-3 rounded-xl border border-[#222b38] inline-block">
-                    الإشراف العام والاعتماد المباشر لكافة القرارات التنظيمية
+            <!-- القيادة العليا -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                <div class="staff-card border border-amber-500/30 rounded-[2rem] p-10 text-center relative shadow-[0_0_40px_rgba(245,158,11,0.05)]">
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-1.5 bg-amber-500 rounded-b-md"></div>
+                    <h4 class="text-4xl font-black text-white mb-2 tracking-wide">بيدرو الشمري</h4>
+                    <p class="text-sm text-amber-500 font-bold uppercase tracking-widest bg-amber-500/10 inline-block px-4 py-1.5 rounded-full border border-amber-500/20">مسؤول الكلية العسكرية</p>
+                </div>
+                
+                <div class="staff-card border border-blue-500/30 rounded-[2rem] p-10 text-center relative shadow-[0_0_40px_rgba(59,130,246,0.05)]">
+                    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-1/3 h-1.5 bg-blue-500 rounded-b-md"></div>
+                    <h4 class="text-4xl font-black text-white mb-2 tracking-wide">عبدالعزيز الحربي</h4>
+                    <p class="text-sm text-blue-400 font-bold uppercase tracking-widest bg-blue-500/10 inline-block px-4 py-1.5 rounded-full border border-blue-500/20">نائب مسؤول الكلية</p>
                 </div>
             </div>
 
-            <!-- المساعدين والمشرفين (مستوى القيادة الإشرافي) -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- نائب المسؤول -->
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-[2rem] p-8 text-center hover:bg-[#121820] transition-all relative overflow-hidden group">
-                    <div class="absolute bottom-0 left-0 w-full h-1 bg-blue-500/30 group-hover:bg-blue-500/60 transition-colors"></div>
-                    <h4 class="text-2xl font-black text-white mb-2">جو ريستوفا</h4>
-                    <p class="text-sm text-blue-400 font-bold mb-5 tracking-wide">نائب مسؤول الكلية ومسؤول العمليات</p>
-                    <div class="text-xs text-gray-400 font-mono leading-relaxed bg-[#05070a] p-4 rounded-xl border border-[#1f2630]">
-                        نائب المسؤول ومسؤول تدريب العمليات وأعضاء تدريب العمليات ومسؤول الرصد والتقييم النهائي للعمليات.
-                    </div>
-                </div>
-
-                <!-- مشرف التدريب والتفاوض -->
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-[2rem] p-8 text-center hover:bg-[#121820] transition-all relative overflow-hidden group">
-                    <div class="absolute bottom-0 left-0 w-full h-1 bg-emerald-500/30 group-hover:bg-emerald-500/60 transition-colors"></div>
-                    <h4 class="text-2xl font-black text-white mb-2">عبدالعزيز الحربي</h4>
-                    <p class="text-sm text-emerald-400 font-bold mb-5 tracking-wide">مشرف التدريب ومسؤول الأنظمة والتفاوض</p>
-                    <div class="text-xs text-gray-400 font-mono leading-relaxed bg-[#05070a] p-4 rounded-xl border border-[#1f2630]">
-                        مشرف تدريب الكلية لكل الاختبارات الميدانية ومسؤول تدريب التفاوض وأعضاء تدريب التفاوض ومسؤول عن رصد وتقييم مهارات التفاوض والتعامل مع المواقف الحرجة.
-                    </div>
-                </div>
-
-                <!-- مشرف التدريب والاستيقافات -->
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-[2rem] p-8 text-center hover:bg-[#121820] transition-all relative overflow-hidden group">
-                    <div class="absolute bottom-0 left-0 w-full h-1 bg-teal-500/30 group-hover:bg-teal-500/60 transition-colors"></div>
-                    <h4 class="text-2xl font-black text-white mb-2">بهاء خالد</h4>
-                    <p class="text-sm text-teal-400 font-bold mb-5 tracking-wide">مشرف التدريب ومسؤول الاستيقافات</p>
-                    <div class="text-xs text-gray-400 font-mono leading-relaxed bg-[#05070a] p-4 rounded-xl border border-[#1f2630]">
-                        مشرف تدريب الكلية لكل الاختبارات الميدانية ومسؤول تدريب الاستيقافات وأعضاء تدريب الاستيقافات ومسؤول عن رصد وتقييم مهارات الاستيقافات المرورية، الجنائية، الإجبارية.
-                    </div>
+            <!-- لجنة القبول والرفض -->
+            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-3xl p-8 mb-12 shadow-lg relative overflow-hidden">
+                <div class="absolute right-0 top-0 w-2 h-full bg-slate-500"></div>
+                <h4 class="text-xl font-black text-white mb-6 mr-3">لجنة القبول والرفض واعتماد التخرج</h4>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 pl-4">
+                    <div class="bg-[#12171f] p-4 rounded-xl border border-[#222b38] text-center font-bold text-gray-300">بيدرو الشمري</div>
+                    <div class="bg-[#12171f] p-4 rounded-xl border border-[#222b38] text-center font-bold text-gray-300">عبدالعزيز الحربي</div>
+                    <div class="bg-[#12171f] p-4 rounded-xl border border-[#222b38] text-center font-bold text-gray-300">بهاء خالد</div>
+                    <div class="bg-[#12171f] p-4 rounded-xl border border-[#222b38] text-center font-bold text-gray-300">جو ريستوفا</div>
                 </div>
             </div>
-        </div>
 
-        <!-- سجل أعضاء وهيئة تدريب الكلية (التصميم الجديد للكروت) -->
-        <div>
-            <div class="flex items-center gap-4 mb-8">
-                <h3 class="text-2xl font-black text-white uppercase tracking-widest">سجل أعضاء وهيئة تدريب الكلية</h3>
-                <div class="flex-1 h-px bg-gradient-to-l from-[#1f2630] to-transparent"></div>
-            </div>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                <% if(typeof trainers !== 'undefined' && trainers.length > 0) { %>
-                    <% trainers.forEach(trainer => { %>
-                        <!-- كرت تعريف المدرب الجديد -->
-                        <div class="relative bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 hover:bg-[#121820] hover:border-gray-600 transition-all group overflow-hidden flex flex-col justify-between min-h-[160px]">
-                            <div class="absolute right-0 top-0 w-1 h-full bg-gray-700 group-hover:bg-gray-400 transition-colors"></div>
-                            
-                            <div class="mb-4">
-                                <h5 class="text-xl font-black text-white mb-1 truncate tracking-wide"><%= trainer.name %></h5>
-                                <p class="text-xs font-bold text-gray-500 tracking-wider uppercase"><%= trainer.role %></p>
-                            </div>
-                            
-                            <div class="bg-[#05070a] border border-[#222b38] rounded-xl p-3 text-xs text-gray-400 font-mono leading-relaxed">
-                                <%= trainer.duty %>
+            <!-- قطاعات التدريب والتأهيل -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                
+                <!-- 1. قسم الاستيقافات -->
+                <div class="staff-card border border-teal-900/30 rounded-3xl p-8 relative">
+                    <div class="absolute right-0 top-0 w-1.5 h-full bg-teal-500 rounded-r-3xl"></div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-2xl">🚓</span>
+                        <h4 class="text-xl font-black text-teal-400">قسم الاستيقافات الميدانية</h4>
+                    </div>
+                    <div class="space-y-3 font-mono text-sm">
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-teal-500/20">
+                            <span class="text-gray-400">المسؤول:</span> <strong class="text-white">بهاء خالد</strong>
+                        </div>
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-teal-500/20">
+                            <span class="text-gray-400">نائب المسؤول:</span> <strong class="text-white">شجاع العطاوي</strong>
+                        </div>
+                        <div class="p-3">
+                            <span class="text-gray-500 block mb-2 font-bold text-xs uppercase tracking-widest">هيئة التدريب</span>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">ايدا مارتينيز</span>
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">ريحانه حرب</span>
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">عمار خالد</span>
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">غوار المغوار</span>
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">حمد فولاد</span>
                             </div>
                         </div>
-                    <% }) %>
-                <% } else { %>
-                    <div class="col-span-full bg-[#0d1117] border border-dashed border-[#222b38] rounded-3xl p-12 text-center text-gray-500">
-                        <p class="text-base font-bold font-mono tracking-widest uppercase">لا توجد أسماء مسجلة في كادر التدريب حالياً</p>
                     </div>
-                <% } %>
+                </div>
+
+                <!-- 2. قسم التفاوض -->
+                <div class="staff-card border border-amber-900/30 rounded-3xl p-8 relative">
+                    <div class="absolute right-0 top-0 w-1.5 h-full bg-amber-500 rounded-r-3xl"></div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-2xl">🗣️</span>
+                        <h4 class="text-xl font-black text-amber-500">قسم التفاوض الإستراتيجي</h4>
+                    </div>
+                    <div class="space-y-3 font-mono text-sm">
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-amber-500/20">
+                            <span class="text-gray-400">المسؤول:</span> <strong class="text-white">باسل صخر</strong>
+                        </div>
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-amber-500/20">
+                            <span class="text-gray-400">نائبة المسؤول:</span> <strong class="text-white">ود خالد</strong>
+                        </div>
+                        <div class="p-3">
+                            <span class="text-gray-500 block mb-2 font-bold text-xs uppercase tracking-widest">هيئة التدريب</span>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">جوفري رايلي</span>
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">مالك البتار</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3. قسم العمليات -->
+                <div class="staff-card border border-purple-900/30 rounded-3xl p-8 relative">
+                    <div class="absolute right-0 top-0 w-1.5 h-full bg-purple-500 rounded-r-3xl"></div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-2xl">⚙️</span>
+                        <h4 class="text-xl font-black text-purple-400">قسم إدارة العمليات</h4>
+                    </div>
+                    <div class="space-y-3 font-mono text-sm">
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-purple-500/20">
+                            <span class="text-gray-400">المسؤول:</span> <strong class="text-white">احمد هشام</strong>
+                        </div>
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-purple-500/20">
+                            <span class="text-gray-400">نائب المسؤول:</span> <strong class="text-white">ديمتري لافروف</strong>
+                        </div>
+                        <div class="p-3">
+                            <span class="text-gray-500 block mb-2 font-bold text-xs uppercase tracking-widest">هيئة التدريب</span>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">ضرغام حلتاوي</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. قسم الأسئلة العامة -->
+                <div class="staff-card border border-blue-900/30 rounded-3xl p-8 relative">
+                    <div class="absolute right-0 top-0 w-1.5 h-full bg-blue-500 rounded-r-3xl"></div>
+                    <div class="flex items-center gap-3 mb-6">
+                        <span class="text-2xl">❓</span>
+                        <h4 class="text-xl font-black text-blue-400">قسم الأنظمة والأسئلة العامة</h4>
+                    </div>
+                    <div class="space-y-3 font-mono text-sm">
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-blue-500/20">
+                            <span class="text-gray-400">المسؤول:</span> <strong class="text-white">جو ريستوفا</strong>
+                        </div>
+                        <div class="flex justify-between bg-[#12171f] p-3 rounded-lg border border-blue-500/20">
+                            <span class="text-gray-400">نائب المسؤول:</span> <strong class="text-white">جبر جابر</strong>
+                        </div>
+                        <div class="p-3">
+                            <span class="text-gray-500 block mb-2 font-bold text-xs uppercase tracking-widest">هيئة التدريب</span>
+                            <div class="flex flex-wrap gap-2">
+                                <span class="bg-[#05070a] px-3 py-1.5 rounded border border-[#1f2630] text-gray-300">احمد خلف</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
 
