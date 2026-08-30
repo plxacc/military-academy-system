@@ -14,18 +14,20 @@ const {
     getApplications, 
     acceptFromRawToAcademy, 
     rejectRawApplicant, 
-    advancedGradeApplicant,
-    sendToFinalDecision,
-    toggleException,
-    finalDecision,
-    getGuideQuestions,
-    addGuideQuestion,
-    deleteGuideQuestion,
-    getTemplates,      
-    saveTemplate,
-    getTrainingApplications,       // 👈 هذا السطر الناقص اللي كان يسبب الخطأ 500
-    getApplicationCustomQuestions,
-    submitNewApplicant            
+    advancedGradeApplicant, 
+    sendToFinalDecision, 
+    toggleException, 
+    finalDecision, 
+    getGuideQuestions, 
+    addGuideQuestion, 
+    deleteGuideQuestion, 
+    getTemplates,       
+    saveTemplate, 
+    getTrainingApplications,
+    getApplicationCustomQuestions, 
+    submitNewApplicant,
+    acceptTrainingApplicant, // 👈 لقبول طلب التدريب
+    rejectTrainingApplicant  // 👈 لرفض طلب التدريب
 } = require('./services/sheets');
 
 const app = express();
@@ -395,6 +397,7 @@ app.get('/api/police-members', async (req, res) => {
     }
 });
 
+// صفحة التقديم المخصصة ومراجعة طلبات التدريب
 app.get('/apply', async (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/discord');
 
@@ -415,7 +418,7 @@ app.get('/apply', async (req, res) => {
     let reviewedApps = [];
 
     if (isReviewer) {
-        // سحب تقديمات التدريب المعزولة
+        // سحب تقديمات التدريب المعزولة فقط
         const trainingApps = await getTrainingApplications();
         const academyApps = await getApplications();
         
@@ -434,12 +437,12 @@ app.get('/apply', async (req, res) => {
         user: req.user, 
         isReviewer: isReviewer,
         questions: questions,
-        applications: pendingTraining, // 👈 أصبحت الآن تقديمات التدريب فقط
+        applications: pendingTraining,
         reviewedApps: reviewedApps
     });
 });
 
-// 2. معالجة إرسال التقديم وإعطاء رتبة المرشح تلقائياً
+// معالجة إرسال التقديم وإعطاء رتبة المرشح تلقائياً
 app.post('/api/submit-application', async (req, res) => {
     if (!req.isAuthenticated()) return res.status(401).json({ error: "يجب تسجيل الدخول أولاً" });
 
@@ -452,7 +455,7 @@ app.post('/api/submit-application', async (req, res) => {
     if (!nationalId) return res.status(400).json({ error: "الرقم الوطني مطلوب!" });
 
     try {
-        // حفظ التقديم في الشيت
+        // حفظ التقديم في شيت التدريب
         await submitNewApplicant(req.user, nationalId, answers);
 
         // إعطاء رتبة مرشح للعسكري في سيرفر العساكر
@@ -469,6 +472,26 @@ app.post('/api/submit-application', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: "تعذر حفظ التقديم: " + err.message });
     }
+});
+
+// قبول طلب التدريب ونقله للميدان
+app.post('/api/accept-training', async (req, res) => {
+    if (!req.user.permissions.canAcceptApplications) return res.status(403).json({ error: "صلاحية لمسؤول ونائب الكلية فقط!" });
+    try {
+        const { id, name, answers, discordId, nationalId } = req.body;
+        await acceptTrainingApplicant(id, name, answers, req.user.username, discordId, nationalId);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
+});
+
+// رفض طلب التدريب
+app.post('/api/reject-training', async (req, res) => {
+    if (!req.user.permissions.canAcceptApplications) return res.status(403).json({ error: "صلاحية لمسؤول ونائب الكلية فقط!" });
+    try {
+        const { id, name, answers } = req.body;
+        await rejectTrainingApplicant(id, name, answers, req.user.username);
+        res.json({ success: true });
+    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = app;

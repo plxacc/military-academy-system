@@ -489,7 +489,7 @@ async function saveTemplate(type, message) {
     }
 }
 
-// جلب أسئلة التقديم المخصصة
+// 1. جلب أسئلة التقديم المخصصة
 async function getApplicationCustomQuestions() {
     try {
         await doc.loadInfo();
@@ -506,7 +506,7 @@ async function getApplicationCustomQuestions() {
     }
 }
 
-// 1. سحب تقديمات التدريب الجديدة والخاصة بالكلية فقط
+// 2. سحب تقديمات التدريب الجديدة والخاصة بالكلية فقط
 async function getTrainingApplications() {
     try {
         await doc.loadInfo();
@@ -552,7 +552,7 @@ async function getTrainingApplications() {
     }
 }
 
-// 2. حفظ طلب تقديم التدريب في الورقة المخصصة
+// 3. حفظ طلب تقديم التدريب في الورقة المخصصة
 async function submitNewApplicant(discordUser, nationalId, answersArray) {
     await doc.loadInfo();
     const sheet = doc.sheetsByTitle['Academy_Training_Applications'];
@@ -578,6 +578,98 @@ async function submitNewApplicant(discordUser, nationalId, answersArray) {
     clearCache();
 }
 
+// 4. قبول طلب التدريب ونقله مباشرة لميدان Academy_System
+async function acceptTrainingApplicant(id, name, answers, officerName, discordId, nationalId) {
+    await doc.loadInfo();
+    const academySheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
+    
+    const finalDiscordId = String(discordId).trim();
+    const finalName = String(name).trim();
+    const finalCopyId = String(id).trim(); 
+    const finalNationalId = String(nationalId).trim();
+
+    const existingRows = await academySheet.getRows();
+    const existingRow = existingRows.find(r => String(r.get('Copy_ID')).trim() === finalCopyId);
+    
+    if (!existingRow) {
+        await academySheet.addRow({
+            Discord_ID: finalDiscordId,
+            Name: finalName,
+            Copy_ID: finalCopyId,
+            National_ID: finalNationalId,
+            Stage: 'preliminary',
+            Status: 'مقبول مبدئيا',
+            Stops_Score: 0, Neg_Score: 0, Ops_Score: 0, Gen_Score: 0, Total_Score: 0, 
+            Graded_By: '[✔ قبول تدريب - ميدان]',
+            Final_Decision: 'معلق'
+        });
+    } else {
+        existingRow.assign({ 
+            Discord_ID: finalDiscordId,
+            National_ID: finalNationalId,
+            Stage: 'preliminary', 
+            Status: 'مقبول مبدئيا',
+            Graded_By: '[✔ قبول تدريب - ميدان]'
+        });
+        await existingRow.save();
+    }
+    clearCache();
+    
+    await sendDiscordLog({
+        title: "✅ قبول طلب تدريب عسكري",
+        description: "تم قبول المرشح للدورة التدريبية ونقله لميدان الرصد.",
+        color: 0x10B981,
+        fields: [
+            { name: "👮‍♂️ المسؤول", value: officerName, inline: true },
+            { name: "👤 المتدرب", value: finalName, inline: true },
+            { name: "💬 ديسكورد", value: `<@${finalDiscordId}>`, inline: true },
+            { name: "🪪 رقم وطني", value: `\`${finalNationalId}\``, inline: true }
+        ]
+    });
+}
+
+// 5. رفض طلب التدريب
+async function rejectTrainingApplicant(id, name, answers, officerName) {
+    await doc.loadInfo();
+    const academySheet = doc.sheetsByTitle['Academy_System'] || doc.sheetsByIndex[1];
+    
+    const existingRows = await academySheet.getRows();
+    const existingRow = existingRows.find(r => String(r.get('Copy_ID')).trim() === String(id).trim());
+
+    if (!existingRow) {
+        await academySheet.addRow({
+            Discord_ID: String(id).trim(),
+            Name: name,
+            Copy_ID: String(id).trim(),
+            National_ID: 'غير متوفر',
+            Stage: 'rejected',
+            Status: 'مرفوض من الدورة التدريبية',
+            Stops_Score: 0, Neg_Score: 0, Ops_Score: 0, Gen_Score: 0, Total_Score: 0, 
+            Graded_By: '[✖ تم الرفض من التدريب]',
+            Final_Decision: 'مرفوض'
+        });
+    } else {
+        existingRow.assign({ 
+            Stage: 'rejected', 
+            Status: 'مرفوض من الدورة التدريبية', 
+            Graded_By: '[✖ تم الرفض من التدريب]' 
+        });
+        await existingRow.save();
+    }
+    clearCache();
+
+    await sendDiscordLog({
+        title: "🛑 رفض طلب تدريب عسكري",
+        description: "تم رفض طلب الالتحاق بالدورة التدريبية.",
+        color: 0xEF4444,
+        fields: [
+            { name: "👮‍♂️ المسؤول", value: officerName, inline: true },
+            { name: "👤 الاسم", value: name, inline: true },
+            { name: "📋 Copy ID", value: `\`${id}\``, inline: true }
+        ]
+    });
+}
+
 module.exports = { 
     getRawApplications, 
     getApplications, 
@@ -592,8 +684,9 @@ module.exports = {
     deleteGuideQuestion, 
     getTemplates,
     saveTemplate,
-    getTrainingApplications, // 👈 إضافة دالة سحب تقديمات التدريب
-    getApplicationCustomQuestions, // 👈 إضافة الدالة هنا
-    submitNewApplicant             // 👈 وإضافة دالة الحفظ هنا
-    
+    getTrainingApplications,
+    getApplicationCustomQuestions,
+    submitNewApplicant,
+    acceptTrainingApplicant,
+    rejectTrainingApplicant
 };
