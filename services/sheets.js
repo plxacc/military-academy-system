@@ -489,21 +489,6 @@ async function saveTemplate(type, message) {
     }
 }
 
-module.exports = { 
-    getRawApplications, 
-    getApplications, 
-    acceptFromRawToAcademy, 
-    rejectRawApplicant, 
-    advancedGradeApplicant,
-    sendToFinalDecision,
-    toggleException,
-    finalDecision,
-    getGuideQuestions,
-    addGuideQuestion,
-    deleteGuideQuestion, 
-    getTemplates,
-    saveTemplate
-};
 // جلب أسئلة التقديم المخصصة
 async function getApplicationCustomQuestions() {
     try {
@@ -521,18 +506,16 @@ async function getApplicationCustomQuestions() {
     }
 }
 
-// حفظ طلب التقديم الجديد في Applications_Raw
+// حفظ طلب التقديم الجديد
 async function submitNewApplicant(discordUser, nationalId, answersArray) {
     await doc.loadInfo();
     const rawSheet = doc.sheetsByTitle['Applications_Raw'] || doc.sheetsByIndex[0];
     
     let answerHeaders = {};
-    let fullAnswersText = "";
     const dateStr = new Date().toLocaleDateString('en-GB');
 
     answersArray.forEach(a => {
         answerHeaders[a.question] = a.answer;
-        fullAnswersText += `🔹 **${a.question}**: ${a.answer}\n`;
     });
 
     await rawSheet.addRow({
@@ -547,3 +530,21 @@ async function submitNewApplicant(discordUser, nationalId, answersArray) {
 
     clearCache();
 }
+
+module.exports = { 
+    getRawApplications, 
+    getApplications, 
+    acceptFromRawToAcademy, 
+    rejectRawApplicant, 
+    advancedGradeApplicant,
+    sendToFinalDecision,
+    toggleException,
+    finalDecision,
+    getGuideQuestions,
+    addGuideQuestion,
+    deleteGuideQuestion, 
+    getTemplates,
+    saveTemplate,
+    getApplicationCustomQuestions, // 👈 إضافة الدالة هنا
+    submitNewApplicant             // 👈 وإضافة دالة الحفظ هنا
+};

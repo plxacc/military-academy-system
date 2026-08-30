@@ -22,7 +22,9 @@ const {
     addGuideQuestion,
     deleteGuideQuestion,
     getTemplates,      
-    saveTemplate       
+    saveTemplate,
+    getApplicationCustomQuestions, // 👈 استيراد هنا
+    submitNewApplicant             // 👈 استيراد هنا
 } = require('./services/sheets');
 
 const app = express();
