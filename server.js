@@ -339,4 +339,58 @@ app.post('/api/templates/send', async (req, res) => {
     });
 });
 
+
+// جلب قائمة العساكر حاملي الرتبة المحددة من السيرفر
+app.get('/api/police-members', async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "غير مصرح" });
+
+    const targetGuildId = "1482718339896836178";
+    const targetRoleId = "1489166988134580275";
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+
+    if (!botToken) return res.status(500).json({ error: "توكن البوت غير متوفر!" });
+
+    try {
+        let allMembers = [];
+        let after = '0';
+        let hasMore = true;
+
+        // سحب جميع أعضاء السيرفر على دفعات (Pagination)
+        while (hasMore) {
+            const response = await fetch(`https://discord.com/api/v10/guilds/${targetGuildId}/members?limit=1000&after=${after}`, {
+                headers: { 'Authorization': `Bot ${botToken}` }
+            });
+            const data = await response.json();
+
+            if (!response.ok || !Array.isArray(data)) {
+                return res.status(500).json({ error: data.message || "فشل جلب الأعضاء من ديسكورد" });
+            }
+
+            allMembers = allMembers.concat(data);
+
+            if (data.length < 1000) {
+                hasMore = false;
+            } else {
+                after = data[data.length - 1].user.id;
+            }
+        }
+
+        // فلترة الأعضاء الذين يحملون رتبة منسوبي الشرطة واستبعاد البوتات
+        const filtered = allMembers
+            .filter(m => m.roles.includes(targetRoleId) && !m.user.bot)
+            .map(m => ({
+                id: m.user.id,
+                username: m.nick || m.user.global_name || m.user.username,
+                avatar: m.user.avatar 
+                    ? `https://cdn.discordapp.com/avatars/${m.user.id}/${m.user.avatar}.png` 
+                    : 'https://cdn.discordapp.com/embed/avatars/0.png'
+            }));
+
+        res.json({ success: true, count: filtered.length, members: filtered });
+    } catch (err) {
+        res.status(500).json({ error: "تعذر الاتصال بخوادم ديسكورد: " + err.message });
+    }
+});
+
+
 module.exports = app;
