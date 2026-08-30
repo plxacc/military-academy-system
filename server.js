@@ -22,12 +22,7 @@ const {
     addGuideQuestion, 
     deleteGuideQuestion, 
     getTemplates,       
-    saveTemplate, 
-    getTrainingApplications,
-    getApplicationCustomQuestions, 
-    submitNewApplicant,
-    acceptTrainingApplicant, // 👈 لقبول طلب التدريب
-    rejectTrainingApplicant  // 👈 لرفض طلب التدريب
+    saveTemplate
 } = require('./services/sheets');
 
 const app = express();
@@ -395,107 +390,6 @@ app.get('/api/police-members', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: "تعذر الاتصال بخوادم ديسكورد: " + err.message });
     }
-});
-
-app.get('/apply', async (req, res) => {
-    if (!req.isAuthenticated()) return res.redirect('/auth/discord');
-
-    const perms = req.user.permissions;
-    const isReviewer = perms.canAcceptApplications; // مسؤول الكلية ونائبه فقط
-
-    // جلب الأسئلة
-    const customQuestions = await getApplicationCustomQuestions();
-    const defaultQuestions = [
-        { id: "q1", question: "الاسم الحقيقي والعمر والجنسية؟", placeholder: "اكتب إجابتك هنا..." },
-        { id: "q2", question: "ما هو سبب تقديمك للدورة التدريبية؟", placeholder: "اكتب سبب التقديم بالتفصيل..." },
-        { id: "q3", question: "ما هي الرتب التي يحق لها صرف التحية العسكرية؟", placeholder: "اذكر الرتب بالتفصيل..." },
-        { id: "q4", question: "ساعات تواجدك اليومية بالميدان؟", placeholder: "مثال: 6 ساعات يومياً" }
-    ];
-    const questions = customQuestions.length > 0 ? customQuestions : defaultQuestions;
-
-    let pendingTraining = [];
-    let reviewedTraining = [];
-
-    if (isReviewer) {
-        // سحب تقديمات التدريب فقط
-        const trainingApps = await getTrainingApplications();
-        const academyApps = await getApplications();
-        
-        // جلب أيديات المقبولين والمرفوضين في شيت الأكاديمية
-        const processedCopyIds = new Set(academyApps.map(a => String(a.copyId || '').trim().toLowerCase()));
-        const processedDiscordIds = new Set(academyApps.map(a => String(a.id || '').trim().toLowerCase()));
-        
-        // 1. الطلبات الجديدة المعلقة من شيت التدريب
-        pendingTraining = trainingApps.filter(app => {
-            const copyId = String(app.id || '').trim().toLowerCase();
-            const discordId = String(app.discordId || '').trim().toLowerCase();
-            return !processedCopyIds.has(copyId) && !processedDiscordIds.has(discordId);
-        });
-
-        // 2. الطلبات المفروزة الخاصة بالتدريب فقط (المطابقة لأيديات شيت التدريب)
-        const trainingIds = new Set(trainingApps.map(t => String(t.id || '').trim().toLowerCase()));
-        reviewedTraining = academyApps.filter(a => trainingIds.has(String(a.copyId || a.id || '').trim().toLowerCase()));
-    }
-
-    res.render('apply', { 
-        user: req.user, 
-        isReviewer: isReviewer,
-        questions: questions,
-        applications: pendingTraining,
-        reviewedApps: reviewedTraining
-    });
-});
-
-// معالجة إرسال التقديم وإعطاء رتبة المرشح تلقائياً
-app.post('/api/submit-application', async (req, res) => {
-    if (!req.isAuthenticated()) return res.status(401).json({ error: "يجب تسجيل الدخول أولاً" });
-
-    const { nationalId, answers } = req.body;
-    const userId = req.user.id;
-    const botToken = process.env.DISCORD_BOT_TOKEN;
-    const targetGuildId = "1482718339896836178";
-    const candidateRoleId = "1522163454050304114";
-
-    if (!nationalId) return res.status(400).json({ error: "الرقم الوطني مطلوب!" });
-
-    try {
-        // حفظ التقديم في شيت التدريب
-        await submitNewApplicant(req.user, nationalId, answers);
-
-        // إعطاء رتبة مرشح للعسكري في سيرفر العساكر
-        const roleRes = await fetch(`https://discord.com/api/v10/guilds/${targetGuildId}/members/${userId}/roles/${candidateRoleId}`, {
-            method: 'PUT',
-            headers: { 'Authorization': `Bot ${botToken}` }
-        });
-
-        if (!roleRes.ok) {
-            console.log(`⚠️ فشل إعطاء الرتبة للعضو ${userId}:`, await roleRes.text());
-        }
-
-        res.json({ success: true });
-    } catch (err) {
-        res.status(500).json({ error: "تعذر حفظ التقديم: " + err.message });
-    }
-});
-
-// قبول طلب التدريب ونقله للميدان
-app.post('/api/accept-training', async (req, res) => {
-    if (!req.user.permissions.canAcceptApplications) return res.status(403).json({ error: "صلاحية لمسؤول ونائب الكلية فقط!" });
-    try {
-        const { id, name, answers, discordId, nationalId } = req.body;
-        await acceptTrainingApplicant(id, name, answers, req.user.username, discordId, nationalId);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: err.message }); }
-});
-
-// رفض طلب التدريب
-app.post('/api/reject-training', async (req, res) => {
-    if (!req.user.permissions.canAcceptApplications) return res.status(403).json({ error: "صلاحية لمسؤول ونائب الكلية فقط!" });
-    try {
-        const { id, name, answers } = req.body;
-        await rejectTrainingApplicant(id, name, answers, req.user.username);
-        res.json({ success: true });
-    } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 module.exports = app;
