@@ -592,6 +592,8 @@ module.exports = {
     deleteGuideQuestion, 
     getTemplates,
     saveTemplate,
+    getTrainingApplications, // 👈 إضافة دالة سحب تقديمات التدريب
     getApplicationCustomQuestions, // 👈 إضافة الدالة هنا
     submitNewApplicant             // 👈 وإضافة دالة الحفظ هنا
+    
 };

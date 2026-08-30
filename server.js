@@ -23,8 +23,9 @@ const {
     deleteGuideQuestion,
     getTemplates,      
     saveTemplate,
-    getApplicationCustomQuestions, // 👈 استيراد هنا
-    submitNewApplicant             // 👈 استيراد هنا
+    getTrainingApplications,       // 👈 هذا السطر الناقص اللي كان يسبب الخطأ 500
+    getApplicationCustomQuestions,
+    submitNewApplicant            
 } = require('./services/sheets');
 
 const app = express();
