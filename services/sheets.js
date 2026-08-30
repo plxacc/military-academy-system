@@ -506,10 +506,57 @@ async function getApplicationCustomQuestions() {
     }
 }
 
-// حفظ طلب التقديم الجديد
+// 1. سحب تقديمات التدريب الجديدة والخاصة بالكلية فقط
+async function getTrainingApplications() {
+    try {
+        await doc.loadInfo();
+        const sheet = doc.sheetsByTitle['Academy_Training_Applications'];
+        if (!sheet) return [];
+
+        const rows = await sheet.getRows();
+        const results = rows.map((row, index) => {
+            let fullAnswers = "";
+            const qaList = [];
+            const headers = sheet.headerValues || [];
+            
+            headers.forEach(header => {
+                if (!['#', 'اليوزر نيم', 'الاسم داخل السيرفر', 'الرقم الوطني', 'Copy ID', 'التاريخ'].includes(header)) {
+                    const answerText = row.get(header) || 'بدون إجابة';
+                    fullAnswers += `🔹 **${header}**: ${answerText}\n`;
+                    qaList.push({ question: header, answer: answerText });
+                }
+            });
+
+            const copyId = row.get('Copy ID') || row.get('ID') || 'غير متوفر';
+            const discordId = row.get('اليوزر نيم') || 'غير متوفر';
+            const nationalId = row.get('الرقم الوطني') || 'غير متوفر';
+
+            return {
+                rowNumber: index + 2,
+                id: String(copyId).trim(),
+                copyId: String(copyId).trim(),
+                discordId: String(discordId).trim(),
+                nationalId: String(nationalId).trim(),
+                username: String(discordId).trim(),
+                name: String(row.get('الاسم داخل السيرفر')).trim() || 'متدرب غير معروف',
+                date: row.get('التاريخ') || '',
+                answers: fullAnswers,
+                qaList: qaList
+            };
+        });
+
+        return results;
+    } catch (error) {
+        console.log("⚠️ خطأ في قراءة شيت تقديمات التدريب:", error.message);
+        return [];
+    }
+}
+
+// 2. حفظ طلب تقديم التدريب في الورقة المخصصة
 async function submitNewApplicant(discordUser, nationalId, answersArray) {
     await doc.loadInfo();
-    const rawSheet = doc.sheetsByTitle['Applications_Raw'] || doc.sheetsByIndex[0];
+    const sheet = doc.sheetsByTitle['Academy_Training_Applications'];
+    if (!sheet) throw new Error("شيت Academy_Training_Applications غير موجود!");
     
     let answerHeaders = {};
     const dateStr = new Date().toLocaleDateString('en-GB');
@@ -518,7 +565,7 @@ async function submitNewApplicant(discordUser, nationalId, answersArray) {
         answerHeaders[a.question] = a.answer;
     });
 
-    await rawSheet.addRow({
+    await sheet.addRow({
         '#': Date.now(),
         'اليوزر نيم': discordUser.username,
         'الاسم داخل السيرفر': discordUser.displayName || discordUser.username,

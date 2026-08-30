@@ -394,7 +394,6 @@ app.get('/api/police-members', async (req, res) => {
     }
 });
 
-// 1. صفحة التقديم العامة للعساكر
 app.get('/apply', async (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/discord');
 
@@ -405,25 +404,26 @@ app.get('/apply', async (req, res) => {
     const customQuestions = await getApplicationCustomQuestions();
     const defaultQuestions = [
         { id: "q1", question: "الاسم الحقيقي والعمر والجنسية؟", placeholder: "اكتب إجابتك هنا..." },
-        { id: "q2", question: "ما هو سبب تقديمك للكلية العسكرية؟", placeholder: "اكتب سبب التقديم بالتفصيل..." },
+        { id: "q2", question: "ما هو سبب تقديمك للدورة التدريبية؟", placeholder: "اكتب سبب التقديم بالتفصيل..." },
         { id: "q3", question: "ما هي الرتب التي يحق لها صرف التحية العسكرية؟", placeholder: "اذكر الرتب بالتفصيل..." },
         { id: "q4", question: "ساعات تواجدك اليومية بالميدان؟", placeholder: "مثال: 6 ساعات يومياً" }
     ];
     const questions = customQuestions.length > 0 ? customQuestions : defaultQuestions;
 
-    // إذا كان الداخل مسؤول أو نائب الكلية، نسحب له طلبات التقديم لمراجعتها
-    let pendingRaw = [];
+    let pendingTraining = [];
     let reviewedApps = [];
 
     if (isReviewer) {
-        const rawApps = await getRawApplications();
+        // سحب تقديمات التدريب المعزولة
+        const trainingApps = await getTrainingApplications();
         const academyApps = await getApplications();
         
         const processedCopyIds = academyApps.map(a => String(a.copyId).trim().toLowerCase());
         const processedDiscordIds = academyApps.map(a => String(a.id).trim().toLowerCase());
         
-        pendingRaw = rawApps.filter(raw => {
-            return !(processedCopyIds.includes(String(raw.id).trim().toLowerCase()) || processedDiscordIds.includes(String(raw.discordId).trim().toLowerCase()));
+        // استبعاد من تمت مراجعتهم مسبقاً
+        pendingTraining = trainingApps.filter(app => {
+            return !(processedCopyIds.includes(String(app.id).trim().toLowerCase()) || processedDiscordIds.includes(String(app.discordId).trim().toLowerCase()));
         });
         
         reviewedApps = academyApps.filter(a => a.stage === 'preliminary' || a.stage === 'rejected' || a.status.includes('مرفوض') || a.status.includes('مقبول'));
@@ -433,7 +433,7 @@ app.get('/apply', async (req, res) => {
         user: req.user, 
         isReviewer: isReviewer,
         questions: questions,
-        applications: pendingRaw,
+        applications: pendingTraining, // 👈 أصبحت الآن تقديمات التدريب فقط
         reviewedApps: reviewedApps
     });
 });
