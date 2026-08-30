@@ -504,3 +504,46 @@ module.exports = {
     getTemplates,
     saveTemplate
 };
+// جلب أسئلة التقديم المخصصة
+async function getApplicationCustomQuestions() {
+    try {
+        await doc.loadInfo();
+        const sheet = doc.sheetsByTitle['Academy_Application_Questions'];
+        if (!sheet) return [];
+        const rows = await sheet.getRows();
+        return rows.map(r => ({
+            id: r.get('ID') || '',
+            question: r.get('Question_Text') || '',
+            placeholder: r.get('Placeholder') || ''
+        }));
+    } catch (err) {
+        return [];
+    }
+}
+
+// حفظ طلب التقديم الجديد في Applications_Raw
+async function submitNewApplicant(discordUser, nationalId, answersArray) {
+    await doc.loadInfo();
+    const rawSheet = doc.sheetsByTitle['Applications_Raw'] || doc.sheetsByIndex[0];
+    
+    let answerHeaders = {};
+    let fullAnswersText = "";
+    const dateStr = new Date().toLocaleDateString('en-GB');
+
+    answersArray.forEach(a => {
+        answerHeaders[a.question] = a.answer;
+        fullAnswersText += `🔹 **${a.question}**: ${a.answer}\n`;
+    });
+
+    await rawSheet.addRow({
+        '#': Date.now(),
+        'اليوزر نيم': discordUser.username,
+        'الاسم داخل السيرفر': discordUser.displayName || discordUser.username,
+        'الرقم الوطني': nationalId,
+        'Copy ID': discordUser.id,
+        'التاريخ': dateStr,
+        ...answerHeaders
+    });
+
+    clearCache();
+}

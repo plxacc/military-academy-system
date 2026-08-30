@@ -1,10 +1,9 @@
-// استبدل الأرقام بأيديات الرتب الحقيقية من سيرفر الديسكورد حقكم
 module.exports = {
     ROLES: {
         CHIEF: "1525897619602276495", // قائد الشرطة
         DEPUTY_CHIEF: "1525897533010743497", // نائب قائد الشرطة
-        ACADEMY_LEADER: "1516611905417117720", // مسؤول الكلية
-        DEPUTY_ACADEMY_LEADER: "1516612117464354948", // نائب مسؤول الكلية
+        ACADEMY_LEADER: "1516611905417117720", // مسؤول الكلية (بيدرو الشمري)
+        DEPUTY_ACADEMY_LEADER: "1516612117464354948", // نائب مسؤول الكلية (عبدالعزيز الحربي)
         TRAINING_SUPERVISOR: "1516613053355917412", // مشرفين التدريب
         
         // مسؤولي الأقسام
@@ -18,25 +17,30 @@ module.exports = {
         NEG_TRAINER: "1516629376219877476",
         STOPS_TRAINER: "1516629393257267402",
         GEN_TRAINER: "1516613351357157517"
-},
+    },
 
     getUserPermissions: (userRoles) => {
         const r = module.exports.ROLES;
         
-        const isTopManagement = userRoles.some(role => [r.CHIEF, r.DEPUTY_CHIEF, r.ACADEMY_LEADER, r.DEPUTY_ACADEMY_LEADER].includes(role));
+        // القيادة العسكرية العليا للكلية
+        const isAcademyLeadership = userRoles.some(role => [r.CHIEF, r.DEPUTY_CHIEF, r.ACADEMY_LEADER, r.DEPUTY_ACADEMY_LEADER].includes(role));
         const isSupervisor = userRoles.includes(r.TRAINING_SUPERVISOR);
 
         return {
-            // أضفنا مشرفين الكلية هنا عشان يقدرون يقبلون التقديمات وينقلونها للمقابلة
-            canApproveReject: isTopManagement || isSupervisor,
-            canAcceptApplications: isTopManagement || isSupervisor,
+            // قبول التقديمات الأولية محصور على مسؤول الكلية ونائبه وقادة الشرطة فقط
+            canAcceptApplications: isAcademyLeadership,
+
+            // الاعتماد النهائي والرفض (القيادة العليا والمشرفين المعتمدين)
+            canApproveReject: isAcademyLeadership || isSupervisor,
             
-            canViewAll: isTopManagement || isSupervisor,
+            // الاطلاع الكامل
+            canViewAll: isAcademyLeadership || isSupervisor,
             
-            canGradeStops: isTopManagement || isSupervisor || userRoles.includes(r.STOPS_LEADER) || userRoles.includes(r.STOPS_TRAINER),
-            canGradeNeg: isTopManagement || isSupervisor || userRoles.includes(r.NEG_LEADER) || userRoles.includes(r.NEG_TRAINER),
-            canGradeOps: isTopManagement || isSupervisor || userRoles.includes(r.OPS_LEADER) || userRoles.includes(r.OPS_TRAINER),
-            canGradeGen: isTopManagement || isSupervisor || userRoles.includes(r.GEN_LEADER) || userRoles.includes(r.GEN_TRAINER),
+            // صلاحيات رصد الميدان التخصصية
+            canGradeStops: isAcademyLeadership || isSupervisor || userRoles.includes(r.STOPS_LEADER) || userRoles.includes(r.STOPS_TRAINER),
+            canGradeNeg: isAcademyLeadership || isSupervisor || userRoles.includes(r.NEG_LEADER) || userRoles.includes(r.NEG_TRAINER),
+            canGradeOps: isAcademyLeadership || isSupervisor || userRoles.includes(r.OPS_LEADER) || userRoles.includes(r.OPS_TRAINER),
+            canGradeGen: isAcademyLeadership || isSupervisor || userRoles.includes(r.GEN_LEADER) || userRoles.includes(r.GEN_TRAINER),
         };
     }
 };

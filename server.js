@@ -392,5 +392,80 @@ app.get('/api/police-members', async (req, res) => {
     }
 });
 
+// 1. صفحة التقديم العامة للعساكر
+app.get('/apply', async (req, res) => {
+    if (!req.isAuthenticated()) return res.redirect('/auth/discord');
+
+    const perms = req.user.permissions;
+    const isReviewer = perms.canAcceptApplications; // مسؤول الكلية ونائبه فقط
+
+    // جلب الأسئلة
+    const customQuestions = await getApplicationCustomQuestions();
+    const defaultQuestions = [
+        { id: "q1", question: "الاسم الحقيقي والعمر والجنسية؟", placeholder: "اكتب إجابتك هنا..." },
+        { id: "q2", question: "ما هو سبب تقديمك للكلية العسكرية؟", placeholder: "اكتب سبب التقديم بالتفصيل..." },
+        { id: "q3", question: "ما هي الرتب التي يحق لها صرف التحية العسكرية؟", placeholder: "اذكر الرتب بالتفصيل..." },
+        { id: "q4", question: "ساعات تواجدك اليومية بالميدان؟", placeholder: "مثال: 6 ساعات يومياً" }
+    ];
+    const questions = customQuestions.length > 0 ? customQuestions : defaultQuestions;
+
+    // إذا كان الداخل مسؤول أو نائب الكلية، نسحب له طلبات التقديم لمراجعتها
+    let pendingRaw = [];
+    let reviewedApps = [];
+
+    if (isReviewer) {
+        const rawApps = await getRawApplications();
+        const academyApps = await getApplications();
+        
+        const processedCopyIds = academyApps.map(a => String(a.copyId).trim().toLowerCase());
+        const processedDiscordIds = academyApps.map(a => String(a.id).trim().toLowerCase());
+        
+        pendingRaw = rawApps.filter(raw => {
+            return !(processedCopyIds.includes(String(raw.id).trim().toLowerCase()) || processedDiscordIds.includes(String(raw.discordId).trim().toLowerCase()));
+        });
+        
+        reviewedApps = academyApps.filter(a => a.stage === 'preliminary' || a.stage === 'rejected' || a.status.includes('مرفوض') || a.status.includes('مقبول'));
+    }
+
+    res.render('apply', { 
+        user: req.user, 
+        isReviewer: isReviewer,
+        questions: questions,
+        applications: pendingRaw,
+        reviewedApps: reviewedApps
+    });
+});
+
+// 2. معالجة إرسال التقديم وإعطاء رتبة المرشح تلقائياً
+app.post('/api/submit-application', async (req, res) => {
+    if (!req.isAuthenticated()) return res.status(401).json({ error: "يجب تسجيل الدخول أولاً" });
+
+    const { nationalId, answers } = req.body;
+    const userId = req.user.id;
+    const botToken = process.env.DISCORD_BOT_TOKEN;
+    const targetGuildId = "1482718339896836178";
+    const candidateRoleId = "1522163454050304114";
+
+    if (!nationalId) return res.status(400).json({ error: "الرقم الوطني مطلوب!" });
+
+    try {
+        // حفظ التقديم في الشيت
+        await submitNewApplicant(req.user, nationalId, answers);
+
+        // إعطاء رتبة مرشح للعسكري في سيرفر العساكر
+        const roleRes = await fetch(`https://discord.com/api/v10/guilds/${targetGuildId}/members/${userId}/roles/${candidateRoleId}`, {
+            method: 'PUT',
+            headers: { 'Authorization': `Bot ${botToken}` }
+        });
+
+        if (!roleRes.ok) {
+            console.log(`⚠️ فشل إعطاء الرتبة للعضو ${userId}:`, await roleRes.text());
+        }
+
+        res.json({ success: true });
+    } catch (err) {
+        res.status(500).json({ error: "تعذر حفظ التقديم: " + err.message });
+    }
+});
 
 module.exports = app;
