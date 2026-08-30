@@ -1,78 +1,107 @@
 <%- include('loader') %>
+
+<%
+    // استخراج المسمى العسكري والرتبة بدقة لعرضها في النافبار
+    const userRoles = (user && user.roles) || [];
+    let roleTitle = "عضو الكلية";
+    let roleBadgeColor = "text-emerald-400 border-emerald-500/20 bg-emerald-500/10";
+
+    if (userRoles.includes("1525897619602276495")) {
+        roleTitle = "قائد الشرطة";
+        roleBadgeColor = "text-yellow-400 border-yellow-500/20 bg-yellow-500/10";
+    } else if (userRoles.includes("1525897533010743497")) {
+        roleTitle = "نائب قائد الشرطة";
+        roleBadgeColor = "text-yellow-400 border-yellow-500/20 bg-yellow-500/10";
+    } else if (userRoles.includes("1516611905417117720")) {
+        roleTitle = "مسؤول الكلية";
+        roleBadgeColor = "text-amber-400 border-amber-500/20 bg-amber-500/10";
+    } else if (userRoles.includes("1516612117464354948")) {
+        roleTitle = "نائب مسؤول الكلية";
+        roleBadgeColor = "text-blue-400 border-blue-500/20 bg-blue-500/10";
+    } else if (userRoles.includes("1516613053355917412")) {
+        roleTitle = "مشرف التدريب";
+        roleBadgeColor = "text-teal-400 border-teal-500/20 bg-teal-500/10";
+    } else if (userRoles.includes("1516613182167322674")) {
+        roleTitle = "مسؤول العمليات";
+        roleBadgeColor = "text-purple-400 border-purple-500/20 bg-purple-500/10";
+    } else if (userRoles.includes("1516629008429617231")) {
+        roleTitle = "مسؤول التفاوض";
+        roleBadgeColor = "text-amber-400 border-amber-500/20 bg-amber-500/10";
+    } else if (userRoles.includes("1516629050951733249")) {
+        roleTitle = "مسؤول الاستيقافات";
+        roleBadgeColor = "text-teal-400 border-teal-500/20 bg-teal-500/10";
+    } else if (userRoles.includes("1516629923568156672")) {
+        roleTitle = "مسؤول الأنظمة";
+        roleBadgeColor = "text-cyan-400 border-cyan-500/20 bg-cyan-500/10";
+    } else if (userRoles.includes("1516629359513833482")) {
+        roleTitle = "مدرب عمليات";
+        roleBadgeColor = "text-purple-300 border-purple-500/20 bg-purple-500/10";
+    } else if (userRoles.includes("1516629376219877476")) {
+        roleTitle = "مدرب تفاوض";
+        roleBadgeColor = "text-amber-300 border-amber-500/20 bg-amber-500/10";
+    } else if (userRoles.includes("1516629393257267402")) {
+        roleTitle = "مدرب استيقافات";
+        roleBadgeColor = "text-teal-300 border-teal-500/20 bg-teal-500/10";
+    } else if (userRoles.includes("1516613351357157517")) {
+        roleTitle = "مدرب أنظمة";
+        roleBadgeColor = "text-cyan-300 border-cyan-500/20 bg-cyan-500/10";
+    }
+
+    const avatarUrl = (user && user.avatar) ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png';
+%>
+
 <header class="bg-[#0b0e12]/95 backdrop-blur-xl border-b border-[#1f2630] sticky top-0 z-50 shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
-    <div class="max-w-[100rem] mx-auto px-4 sm:px-6 lg:px-8 h-20 md:h-24 flex justify-between items-center gap-4">
+    <div class="w-full px-4 lg:px-8 h-20 md:h-24 flex items-center justify-between gap-4">
         
-        <!-- أقصى اليمين: الشعار واسم الكلية -->
-        <div class="flex items-center gap-3 md:gap-4 shrink-0">
-            <div class="w-11 h-11 md:w-14 md:h-14 flex items-center justify-center">
+        <!-- أقصى اليمين: الشعار واسم المنظومة -->
+        <div class="flex items-center gap-3 shrink-0">
+            <div class="w-11 h-11 md:w-14 md:h-14 flex items-center justify-center shrink-0">
                 <img src="/images/logo.png" alt="شعار الكلية" class="w-full h-full object-contain drop-shadow-[0_0_15px_rgba(249,115,22,0.4)] hover:scale-105 transition-transform duration-300">
             </div>
             <div>
-                <h1 class="text-base md:text-xl font-black tracking-wider text-white uppercase font-mono leading-none">الكلية العسكرية</h1>
-                <p class="text-[10px] md:text-[11px] text-orange-400 font-bold tracking-widest uppercase mt-1">نظام إدارة القيادة والتدريب | شرطة جستس</p>
+                <h1 class="text-base md:text-lg font-black tracking-wider text-white uppercase font-mono">الكلية العسكرية</h1>
+                <p class="text-[9px] md:text-[10px] text-orange-400 font-bold tracking-widest uppercase">شرطة جستس</p>
             </div>
         </div>
 
-        <!-- الوسط: القائمة الملاحية (مرنة ومتجاوبة) -->
-        <nav class="hidden lg:flex items-center gap-1 bg-[#12171f]/90 p-1.5 rounded-2xl border border-[#222b38] backdrop-blur-md shadow-inner shrink-0">
-            <a href="/dashboard" class="px-3.5 xl:px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap <%= currentPage === 'dashboard' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">الرئيسية</a>
+        <!-- الوسط: شريط التنقل الشامل والمتجاوب مع الشاشات الكبيرة والصغيرة -->
+        <nav class="flex items-center gap-1 md:gap-1.5 bg-[#12171f]/80 p-1 md:p-1.5 rounded-2xl border border-[#222b38] backdrop-blur-md shadow-inner overflow-x-auto max-w-full">
+            <a href="/dashboard" class="px-3 md:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 <%= currentPage === 'dashboard' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">الرئيسية</a>
             
-            <a href="/applications" class="px-3.5 xl:px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap <%= currentPage === 'applications' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">تقديمات الشرطة</a>
+            <a href="/applications" class="px-3 md:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 <%= currentPage === 'applications' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">تقديمات الشرطة</a>
             
-            <a href="/preliminary" class="px-3.5 xl:px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap <%= currentPage === 'preliminary' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">المقبولين مبدئياً</a>
+            <a href="/preliminary" class="px-3 md:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 <%= currentPage === 'preliminary' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">المقبولين مبدئياً</a>
             
             <% if(user && user.permissions && user.permissions.canApproveReject) { %>
-            <a href="/final" class="px-3.5 xl:px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap <%= currentPage === 'final' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">الرصد النهائي</a>
+                <a href="/final" class="px-3 md:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 <%= currentPage === 'final' ? 'bg-gradient-to-r from-orange-600 to-amber-600 text-white shadow-[0_0_15px_rgba(249,115,22,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">الرصد النهائي</a>
             <% } %>
             
-            <a href="/guide" class="px-3.5 xl:px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap <%= currentPage === 'guide' ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'text-blue-400 hover:text-white hover:bg-[#1a212c]' %>">دليل الكلية</a>
+            <a href="/guide" class="px-3 md:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 <%= currentPage === 'guide' ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.4)]' : 'text-blue-400 hover:text-white hover:bg-[#1a212c]' %>">دليل الكلية</a>
             
             <% if(user && user.permissions && user.permissions.canApproveReject) { %>
-            <a href="/templates" class="px-3.5 xl:px-5 py-2.5 rounded-xl text-xs font-bold transition-all duration-200 whitespace-nowrap <%= currentPage === 'templates' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">إدارة المراسلات</a>
+                <a href="/templates" class="px-3 md:px-4 py-2 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-300 <%= currentPage === 'templates' ? 'bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-[0_0_15px_rgba(79,70,229,0.4)]' : 'text-gray-400 hover:text-white hover:bg-[#1a212c]' %>">إدارة المراسلات</a>
             <% } %>
         </nav>
 
-        <!-- أقصى اليسار: البروفايل، زر القائمة للشاشات الصغيرة، وزر الخروج -->
+        <!-- أقصى اليسار: بيانات المستخدم، الرتبة التكتيكية، الصورة، وزر تسجيل الخروج -->
         <div class="flex items-center gap-3 shrink-0">
-            <div class="hidden sm:flex flex-col items-end text-left">
-                <div class="text-xs md:text-sm font-black text-white tracking-wide truncate max-w-[120px]"><%= user.username %></div>
-                <div class="text-[10px] text-emerald-400 font-mono font-bold tracking-wider">● متصل</div>
+            <div class="hidden sm:flex flex-col items-end text-left select-none">
+                <span class="text-xs md:text-sm font-black text-white tracking-wide truncate max-w-[120px] md:max-w-[160px]"><%= user.username %></span>
+                <span class="text-[10px] font-mono font-bold tracking-wider px-2 py-0.5 rounded-md border mt-0.5 <%= roleBadgeColor %>">
+                    ● <%= roleTitle %>
+                </span>
             </div>
             
-            <% const avatarUrl = user.avatar ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png` : 'https://cdn.discordapp.com/embed/avatars/0.png'; %>
-            <img src="<%= avatarUrl %>" alt="صورة المستخدم" class="w-10 h-10 md:w-11 md:h-11 rounded-xl border-2 border-[#222b38] shadow-[0_0_15px_rgba(0,0,0,0.5)] object-cover bg-[#161b22]">
+            <img src="<%= avatarUrl %>" alt="صورة المستخدم" class="w-10 h-10 md:w-12 md:h-12 rounded-xl border-2 border-[#222b38] shadow-[0_0_15px_rgba(0,0,0,0.5)] object-cover bg-[#161b22] shrink-0">
             
-            <div class="h-6 w-px bg-[#222b38] hidden sm:block"></div>
+            <div class="h-7 w-px bg-[#222b38] mx-0.5 hidden sm:block"></div>
             
-            <a href="/logout" title="تسجيل الخروج" class="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 flex items-center justify-center transition-all shadow-lg group">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+            <a href="/logout" title="تسجيل الخروج" class="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-red-500/10 hover:bg-red-600 text-red-500 hover:text-white border border-red-500/20 flex items-center justify-center transition-all shadow-lg group shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:rotate-12 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
             </a>
-
-            <!-- زر فتح القائمة للشاشات الصغيرة -->
-            <button onclick="toggleMobileNav()" class="lg:hidden w-10 h-10 rounded-xl bg-[#12171f] border border-[#222b38] text-gray-300 flex items-center justify-center hover:text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" /></svg>
-            </button>
         </div>
-    </div>
 
-    <!-- قائمة الشاشات الصغيرة (Mobile Menu) -->
-    <div id="mobileNavMenu" class="hidden lg:hidden border-t border-[#1f2630] bg-[#0d1117] px-6 py-4 space-y-2">
-        <a href="/dashboard" class="block px-4 py-2.5 rounded-xl text-xs font-bold <%= currentPage === 'dashboard' ? 'bg-orange-600 text-white' : 'text-gray-400 hover:bg-[#161b22] hover:text-white' %>">الرئيسية</a>
-        <a href="/applications" class="block px-4 py-2.5 rounded-xl text-xs font-bold <%= currentPage === 'applications' ? 'bg-orange-600 text-white' : 'text-gray-400 hover:bg-[#161b22] hover:text-white' %>">تقديمات الشرطة</a>
-        <a href="/preliminary" class="block px-4 py-2.5 rounded-xl text-xs font-bold <%= currentPage === 'preliminary' ? 'bg-orange-600 text-white' : 'text-gray-400 hover:bg-[#161b22] hover:text-white' %>">المقبولين مبدئياً</a>
-        <% if(user && user.permissions && user.permissions.canApproveReject) { %>
-        <a href="/final" class="block px-4 py-2.5 rounded-xl text-xs font-bold <%= currentPage === 'final' ? 'bg-orange-600 text-white' : 'text-gray-400 hover:bg-[#161b22] hover:text-white' %>">الرصد النهائي</a>
-        <% } %>
-        <a href="/guide" class="block px-4 py-2.5 rounded-xl text-xs font-bold <%= currentPage === 'guide' ? 'bg-blue-600 text-white' : 'text-blue-400 hover:bg-[#161b22] hover:text-white' %>">دليل الكلية</a>
-        <% if(user && user.permissions && user.permissions.canApproveReject) { %>
-        <a href="/templates" class="block px-4 py-2.5 rounded-xl text-xs font-bold <%= currentPage === 'templates' ? 'bg-indigo-600 text-white' : 'text-gray-400 hover:bg-[#161b22] hover:text-white' %>">إدارة المراسلات</a>
-        <% } %>
     </div>
 </header>
-
-<script>
-    function toggleMobileNav() {
-        const menu = document.getElementById('mobileNavMenu');
-        menu.classList.toggle('hidden');
-    }
-</script>
