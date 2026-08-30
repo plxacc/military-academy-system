@@ -397,7 +397,6 @@ app.get('/api/police-members', async (req, res) => {
     }
 });
 
-// صفحة التقديم المخصصة ومراجعة طلبات التدريب
 app.get('/apply', async (req, res) => {
     if (!req.isAuthenticated()) return res.redirect('/auth/discord');
 
@@ -415,22 +414,27 @@ app.get('/apply', async (req, res) => {
     const questions = customQuestions.length > 0 ? customQuestions : defaultQuestions;
 
     let pendingTraining = [];
-    let reviewedApps = [];
+    let reviewedTraining = [];
 
     if (isReviewer) {
-        // سحب تقديمات التدريب المعزولة فقط
+        // سحب تقديمات التدريب فقط
         const trainingApps = await getTrainingApplications();
         const academyApps = await getApplications();
         
-        const processedCopyIds = academyApps.map(a => String(a.copyId).trim().toLowerCase());
-        const processedDiscordIds = academyApps.map(a => String(a.id).trim().toLowerCase());
+        // جلب أيديات المقبولين والمرفوضين في شيت الأكاديمية
+        const processedCopyIds = new Set(academyApps.map(a => String(a.copyId || '').trim().toLowerCase()));
+        const processedDiscordIds = new Set(academyApps.map(a => String(a.id || '').trim().toLowerCase()));
         
-        // استبعاد من تمت مراجعتهم مسبقاً
+        // 1. الطلبات الجديدة المعلقة من شيت التدريب
         pendingTraining = trainingApps.filter(app => {
-            return !(processedCopyIds.includes(String(app.id).trim().toLowerCase()) || processedDiscordIds.includes(String(app.discordId).trim().toLowerCase()));
+            const copyId = String(app.id || '').trim().toLowerCase();
+            const discordId = String(app.discordId || '').trim().toLowerCase();
+            return !processedCopyIds.has(copyId) && !processedDiscordIds.has(discordId);
         });
-        
-        reviewedApps = academyApps.filter(a => a.stage === 'preliminary' || a.stage === 'rejected' || a.status.includes('مرفوض') || a.status.includes('مقبول'));
+
+        // 2. الطلبات المفروزة الخاصة بالتدريب فقط (المطابقة لأيديات شيت التدريب)
+        const trainingIds = new Set(trainingApps.map(t => String(t.id || '').trim().toLowerCase()));
+        reviewedTraining = academyApps.filter(a => trainingIds.has(String(a.copyId || a.id || '').trim().toLowerCase()));
     }
 
     res.render('apply', { 
@@ -438,7 +442,7 @@ app.get('/apply', async (req, res) => {
         isReviewer: isReviewer,
         questions: questions,
         applications: pendingTraining,
-        reviewedApps: reviewedApps
+        reviewedApps: reviewedTraining
     });
 });
 
