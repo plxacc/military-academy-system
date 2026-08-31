@@ -489,7 +489,6 @@ async function saveTemplate(type, message) {
     }
 }
 
-// جلب شروحات الأقسام ويوم الاختبار من الشيت بشكل آمن
 async function getCurriculum() {
     try {
         await doc.loadInfo();
@@ -506,7 +505,6 @@ async function getCurriculum() {
         });
         return curriculum;
     } catch (err) {
-        console.log("⚠️ خطأ في قراءة منهج الكلية:", err.message);
         return { exam_day: '', stops: '', neg: '', ops: '', gen: '' };
     }
 }

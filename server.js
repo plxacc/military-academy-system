@@ -397,11 +397,11 @@ app.get('/api/police-members', async (req, res) => {
 app.get('/guide', async (req, res) => {
     try {
         const allQuestions = await getGuideQuestions();
-        const curriculum = typeof getCurriculum === 'function' ? await getCurriculum() : {};
+        const curriculumData = typeof getCurriculum === 'function' ? await getCurriculum() : {};
         const perms = req.user.permissions;
         const isSupervisorOrLeader = perms.canAcceptApplications || perms.canApproveReject;
-        
-        const filteredQuestions = allQuestions.filter(q => {
+
+        const filteredQuestions = (allQuestions || []).filter(q => {
             if (isSupervisorOrLeader) return true;
             if (q.section === 'stops' && perms.canGradeStops) return true;
             if (q.section === 'neg' && perms.canGradeNeg) return true;
@@ -413,12 +413,11 @@ app.get('/guide', async (req, res) => {
         res.render('guide', { 
             user: req.user, 
             questions: filteredQuestions, 
-            curriculum: curriculum || {},
+            curriculum: curriculumData, // 👈 هذا المتغير الذي يحل خطأ 500
             isSupervisor: isSupervisorOrLeader, 
             currentPage: 'guide' 
         });
-    } catch (error) {
-        console.error("خطأ في صفحة الدليل:", error);
+    } catch (err) {
         res.render('guide', { 
             user: req.user, 
             questions: [], 
