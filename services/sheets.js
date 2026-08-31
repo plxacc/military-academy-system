@@ -489,14 +489,15 @@ async function saveTemplate(type, message) {
     }
 }
 
-// جلب شروحات الأقسام ويوم الاختبار من الشيت
+// جلب شروحات الأقسام ويوم الاختبار من الشيت بشكل آمن
 async function getCurriculum() {
     try {
         await doc.loadInfo();
         const sheet = doc.sheetsByTitle['Academy_Curriculum'];
-        if (!sheet) return {};
-        const rows = await sheet.getRows();
         let curriculum = { exam_day: '', stops: '', neg: '', ops: '', gen: '' };
+        if (!sheet) return curriculum;
+        
+        const rows = await sheet.getRows();
         rows.forEach(r => {
             const sec = r.get('Section');
             if (sec && curriculum.hasOwnProperty(sec)) {
@@ -506,7 +507,7 @@ async function getCurriculum() {
         return curriculum;
     } catch (err) {
         console.log("⚠️ خطأ في قراءة منهج الكلية:", err.message);
-        return {};
+        return { exam_day: '', stops: '', neg: '', ops: '', gen: '' };
     }
 }
 
@@ -516,7 +517,6 @@ module.exports = {
     acceptFromRawToAcademy, 
     rejectRawApplicant, 
     advancedGradeApplicant,
-    getCurriculum,
     sendToFinalDecision,
     toggleException,
     finalDecision,
@@ -524,5 +524,6 @@ module.exports = {
     addGuideQuestion,
     deleteGuideQuestion, 
     getTemplates,
-    saveTemplate
+    saveTemplate,
+    getCurriculum
 };

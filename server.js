@@ -22,9 +22,10 @@ const {
     addGuideQuestion, 
     deleteGuideQuestion, 
     getTemplates,    
-    getCurriculum,   
-    saveTemplate
+    saveTemplate,
+    getCurriculum
 } = require('./services/sheets');
+
 
 const app = express();
 app.use(cors());
@@ -394,25 +395,38 @@ app.get('/api/police-members', async (req, res) => {
 });
 
 app.get('/guide', async (req, res) => {
-    const allQuestions = await getGuideQuestions();
-    const curriculum = await getCurriculum();
-    const perms = req.user.permissions;
-    const isSupervisorOrLeader = perms.canAcceptApplications || perms.canApproveReject;
-    const filteredQuestions = allQuestions.filter(q => {
-        if (isSupervisorOrLeader) return true;
-        if (q.section === 'stops' && perms.canGradeStops) return true;
-        if (q.section === 'neg' && perms.canGradeNeg) return true;
-        if (q.section === 'ops' && perms.canGradeOps) return true;
-        if (q.section === 'gen' && perms.canGradeGen) return true;
-        return false;
-    });
-    res.render('guide', { 
-        user: req.user, 
-        questions: filteredQuestions, 
-        curriculum: curriculum,
-        isSupervisor: isSupervisorOrLeader, 
-        currentPage: 'guide' 
-    });
+    try {
+        const allQuestions = await getGuideQuestions();
+        const curriculum = typeof getCurriculum === 'function' ? await getCurriculum() : {};
+        const perms = req.user.permissions;
+        const isSupervisorOrLeader = perms.canAcceptApplications || perms.canApproveReject;
+        
+        const filteredQuestions = allQuestions.filter(q => {
+            if (isSupervisorOrLeader) return true;
+            if (q.section === 'stops' && perms.canGradeStops) return true;
+            if (q.section === 'neg' && perms.canGradeNeg) return true;
+            if (q.section === 'ops' && perms.canGradeOps) return true;
+            if (q.section === 'gen' && perms.canGradeGen) return true;
+            return false;
+        });
+
+        res.render('guide', { 
+            user: req.user, 
+            questions: filteredQuestions, 
+            curriculum: curriculum || {},
+            isSupervisor: isSupervisorOrLeader, 
+            currentPage: 'guide' 
+        });
+    } catch (error) {
+        console.error("خطأ في صفحة الدليل:", error);
+        res.render('guide', { 
+            user: req.user, 
+            questions: [], 
+            curriculum: {}, 
+            isSupervisor: false, 
+            currentPage: 'guide' 
+        });
+    }
 });
 
 module.exports = app;
