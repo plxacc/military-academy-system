@@ -13,6 +13,18 @@
 <body class="min-h-screen flex flex-col bg-[#05070a] selection:bg-blue-500 selection:text-white font-sans">
     <%- include('partials/navbar') %>
 
+    <%
+        // حماية تامة ضد انهيار الصفحة في حال عدم تمرير المتغير من السيرفر
+        const safeCurriculum = (typeof curriculum !== 'undefined' && curriculum) ? curriculum : {};
+        const safeQuestions = (typeof questions !== 'undefined' && Array.isArray(questions)) ? questions : [];
+        const isSuper = (typeof isSupervisor !== 'undefined') ? isSupervisor : false;
+
+        const stopsQ = safeQuestions.filter(q => q.section === 'stops');
+        const negQ = safeQuestions.filter(q => q.section === 'neg');
+        const opsQ = safeQuestions.filter(q => q.section === 'ops');
+        const genQ = safeQuestions.filter(q => q.section === 'gen');
+    %>
+
     <main class="max-w-[90rem] mx-auto px-6 py-12 flex-1 w-full">
         
         <!-- الهيدر الرئيسي -->
@@ -81,9 +93,7 @@
                     <p class="text-xs text-amber-400 font-mono mt-0.5">FIELD EXAM DAY PROTOCOL</p>
                 </div>
             </div>
-            <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-6 text-sm text-gray-300 font-mono leading-relaxed whitespace-pre-wrap">
-<%= (curriculum && curriculum.exam_day) ? curriculum.exam_day : 'يتم كتابة بروتوكول وشرح أحداث يوم الاختبار الميداني في شيت Academy_Curriculum ليظهر هنا تلقائياً.' %>
-            </div>
+            <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-6 text-sm text-gray-300 font-mono leading-relaxed whitespace-pre-wrap"><%= safeCurriculum.exam_day || 'يتم كتابة بروتوكول وشرح أحداث يوم الاختبار الميداني في شيت Academy_Curriculum ليظهر هنا تلقائياً.' %></div>
         </div>
 
         <!-- 3. المناهج التدريبية والشروحات التكتيكية للأقسام -->
@@ -100,9 +110,7 @@
                         <span class="text-2xl">🚓</span>
                         <h4 class="text-lg font-black text-teal-400">منهج وقواعد الاستيقافات</h4>
                     </div>
-                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
-<%= (curriculum && curriculum.stops) ? curriculum.stops : 'شرح الاستيقافات الميدانية (مروري، جنائي، إجباري) يضاف في الشيت.' %>
-                    </div>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap"><%= safeCurriculum.stops || 'شرح الاستيقافات الميدانية (مروري، جنائي، إجباري) يضاف في الشيت.' %></div>
                 </div>
 
                 <!-- شرح التفاوض -->
@@ -111,9 +119,7 @@
                         <span class="text-2xl">🗣️</span>
                         <h4 class="text-lg font-black text-amber-500">منهج وقواعد التفاوض</h4>
                     </div>
-                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
-<%= (curriculum && curriculum.neg) ? curriculum.neg : 'شرح أساليب وقواعد التفاوض التكتيكي يضاف في الشيت.' %>
-                    </div>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap"><%= safeCurriculum.neg || 'شرح أساليب وقواعد التفاوض التكتيكي يضاف في الشيت.' %></div>
                 </div>
 
                 <!-- شرح العمليات -->
@@ -122,9 +128,7 @@
                         <span class="text-2xl">⚙️</span>
                         <h4 class="text-lg font-black text-purple-400">منهج إدارة العمليات والبلاغات</h4>
                     </div>
-                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
-<%= (curriculum && curriculum.ops) ? curriculum.ops : 'شرح إدارة البلاغات والتوجيه الميداني للعمليات يضاف في الشيت.' %>
-                    </div>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap"><%= safeCurriculum.ops || 'شرح إدارة البلاغات والتوجيه الميداني للعمليات يضاف في الشيت.' %></div>
                 </div>
 
                 <!-- شرح الأنظمة -->
@@ -133,21 +137,12 @@
                         <span class="text-2xl">❓</span>
                         <h4 class="text-lg font-black text-blue-400">منهج اللائحة والأنظمة العامة</h4>
                     </div>
-                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
-<%= (curriculum && curriculum.gen) ? curriculum.gen : 'شرح اللوائح العسكرية والأنظمة العامة يضاف في الشيت.' %>
-                    </div>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap"><%= safeCurriculum.gen || 'شرح اللوائح العسكرية والأنظمة العامة يضاف في الشيت.' %></div>
                 </div>
             </div>
         </div>
 
         <!-- 4. بنك الأسئلة الميدانية -->
-        <% 
-            const stopsQ = questions.filter(q => q.section === 'stops');
-            const negQ = questions.filter(q => q.section === 'neg');
-            const opsQ = questions.filter(q => q.section === 'ops');
-            const genQ = questions.filter(q => q.section === 'gen');
-        %>
-
         <div class="mt-20">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 border-b border-[#1f2630] pb-5">
                 <div>
@@ -164,7 +159,6 @@
                 </div>
             </div>
 
-            <!-- حاوية القطاعات المطوية -->
             <div class="flex flex-col gap-6">
                 
                 <!-- قطاع الاستيقافات -->
@@ -197,7 +191,7 @@
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-teal-400"><%= q.maxScore %></strong></div>
-                                                <% if(isSupervisor) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
+                                                <% if(isSuper) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
                                             </div>
                                         </div>
                                     <% }) %>
@@ -237,7 +231,7 @@
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-amber-500"><%= q.maxScore %></strong></div>
-                                                <% if(isSupervisor) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
+                                                <% if(isSuper) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
                                             </div>
                                         </div>
                                     <% }) %>
@@ -277,7 +271,7 @@
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-purple-400"><%= q.maxScore %></strong></div>
-                                                <% if(isSupervisor) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
+                                                <% if(isSuper) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
                                             </div>
                                         </div>
                                     <% }) %>
@@ -317,7 +311,7 @@
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-blue-400"><%= q.maxScore %></strong></div>
-                                                <% if(isSupervisor) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
+                                                <% if(isSuper) { %><button onclick="deleteQuestion('<%= q.id %>')" class="text-red-500 hover:text-red-400 bg-red-500/10 p-1.5 rounded-lg transition" title="حذف">✕</button><% } %>
                                             </div>
                                         </div>
                                     <% }) %>
@@ -341,10 +335,10 @@
                 <div>
                     <label class="text-xs font-bold text-gray-300">القطاع المستهدف:</label>
                     <select id="qSection" class="search-input mt-1 w-full bg-[#12171f]">
-                        <% if(user.permissions.canGradeStops || isSupervisor) { %><option value="stops">🚓 قطاع الاستيقافات</option><% } %>
-                        <% if(user.permissions.canGradeNeg || isSupervisor) { %><option value="neg">🗣️ قطاع التفاوض</option><% } %>
-                        <% if(user.permissions.canGradeOps || isSupervisor) { %><option value="ops">⚙️ قطاع العمليات</option><% } %>
-                        <% if(user.permissions.canGradeGen || isSupervisor) { %><option value="gen">❓ قطاع الأنظمة العامة</option><% } %>
+                        <% if(user.permissions.canGradeStops || isSuper) { %><option value="stops">🚓 قطاع الاستيقافات</option><% } %>
+                        <% if(user.permissions.canGradeNeg || isSuper) { %><option value="neg">🗣️ قطاع التفاوض</option><% } %>
+                        <% if(user.permissions.canGradeOps || isSuper) { %><option value="ops">⚙️ قطاع العمليات</option><% } %>
+                        <% if(user.permissions.canGradeGen || isSuper) { %><option value="gen">❓ قطاع الأنظمة العامة</option><% } %>
                     </select>
                 </div>
                 <div>
