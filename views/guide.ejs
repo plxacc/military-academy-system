@@ -6,18 +6,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="/css/style.css">
     <style>
-        /* تأثيرات البطاقات العسكرية */
-        .rank-card {
-            background: linear-gradient(145deg, #12171f, #0a0d12);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.05), 0 4px 10px rgba(0,0,0,0.5);
-            transition: all 0.3s ease;
-        }
-        .rank-card:hover {
-            transform: translateY(-5px);
-            box-shadow: inset 0 1px 0 rgba(255,255,255,0.1), 0 8px 20px rgba(0,0,0,0.8);
-            border-color: #f59e0b; /* لون ذهبي خفيف عند الهوفر */
-        }
-        /* حركة السهم عند الطي */
         .toggle-icon { transition: transform 0.3s ease; }
         .is-open .toggle-icon { transform: rotate(180deg); }
     </style>
@@ -27,187 +15,132 @@
 
     <main class="max-w-[90rem] mx-auto px-6 py-12 flex-1 w-full">
         
-        <!-- الهيدر الرئيسي للدليل -->
+        <!-- الهيدر الرئيسي -->
         <div class="relative rounded-[2.5rem] bg-[#0d1117] border border-[#1f2630] p-10 md:p-12 mb-12 shadow-2xl overflow-hidden">
             <div class="absolute top-0 left-0 w-1/3 h-full bg-gradient-to-r from-blue-900/20 to-transparent opacity-50"></div>
-            <div class="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                <div>
-                    <span class="inline-block bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">
-                        OFFICIAL ACADEMY MANUAL
-                    </span>
-                    <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">دليل النظام العسكري الشامل</h2>
-                    <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">
-                        المرجع الرسمي للإجراءات، الرتب، المناهج الميدانية، وبنك الأسئلة المخصص للمدربين وقيادة الكلية.
-                    </p>
-                </div>
+            <div class="relative z-10">
+                <span class="inline-block bg-blue-500/10 text-blue-400 border border-blue-500/20 text-xs font-mono font-bold px-4 py-1.5 rounded-full uppercase tracking-widest mb-4">
+                    OFFICIAL ACADEMY MANUAL
+                </span>
+                <h2 class="text-3xl md:text-4xl font-black text-white mb-2 tracking-wide">دليل ومناهج الكلية العسكرية</h2>
+                <p class="text-sm text-gray-400 max-w-2xl leading-relaxed">
+                    المرجع المعتمد لسيناريو يوم الاختبار الميداني، الشروحات التكتيكية لكافة الأقسام، وبنك الأسئلة الرسمي.
+                </p>
             </div>
         </div>
 
-        <!-- 1. مسار القبول والتأهيل (بدون تواريخ محددة) -->
-        <div class="mb-20">
+        <!-- 1. مسار القبول والتأهيل -->
+        <div class="mb-16">
             <div class="flex items-center gap-4 mb-8">
                 <h3 class="text-2xl font-black text-white uppercase tracking-widest">مسار القبول والتأهيل الدوري</h3>
                 <div class="flex-1 h-px bg-gradient-to-l from-[#1f2630] to-transparent"></div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden group hover:border-orange-500/50 transition-colors">
+                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-1.5 h-full bg-orange-500/70"></div>
-                    <div class="text-orange-400 font-black text-5xl mb-4 opacity-20 group-hover:opacity-40 transition-opacity">01</div>
+                    <div class="text-orange-400 font-black text-5xl mb-4 opacity-20">01</div>
                     <h4 class="text-lg font-black text-white mb-2">فتح التقديم</h4>
                     <p class="text-xs text-orange-400 font-mono mb-4 border-b border-white/5 pb-3">يفتح يوم السبت (كل 3 أسابيع)</p>
                     <p class="text-sm text-gray-400 leading-relaxed">استقبال الطلبات إلكترونياً واستكمال البيانات الأولية للمتقدمين وتدقيقها.</p>
                 </div>
 
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden group hover:border-blue-500/50 transition-colors">
+                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-1.5 h-full bg-blue-500/70"></div>
-                    <div class="text-blue-500 font-black text-5xl mb-4 opacity-20 group-hover:opacity-40 transition-opacity">02</div>
+                    <div class="text-blue-500 font-black text-5xl mb-4 opacity-20">02</div>
                     <h4 class="text-lg font-black text-white mb-2">إغلاق التقديم والفرز</h4>
                     <p class="text-xs text-blue-400 font-mono mb-4 border-b border-white/5 pb-3">من الإثنين إلى الثلاثاء</p>
-                    <p class="text-sm text-gray-400 leading-relaxed">يتم إغلاق الباب وفرز الملفات لتحديد المقبولين مبدئياً والمرفوضين.</p>
+                    <p class="text-sm text-gray-400 leading-relaxed">إغلاق الباب وفرز الملفات لتحديد المقبولين مبدئياً للميدان والمرفوضين.</p>
                 </div>
 
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden group hover:border-amber-500/50 transition-colors">
+                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-1.5 h-full bg-amber-500/70"></div>
-                    <div class="text-amber-400 font-black text-5xl mb-4 opacity-20 group-hover:opacity-40 transition-opacity">03</div>
+                    <div class="text-amber-400 font-black text-5xl mb-4 opacity-20">03</div>
                     <h4 class="text-lg font-black text-white mb-2">التدريب النظري</h4>
                     <p class="text-xs text-amber-400 font-mono mb-4 border-b border-white/5 pb-3">يوم الخميس (بنفس الأسبوع)</p>
                     <p class="text-sm text-gray-400 leading-relaxed">تلقين المتدربين التعليمات والأنظمة النظرية والأسس العسكرية المهمة.</p>
                 </div>
 
-                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
+                <div class="bg-[#0d1117] border border-[#1f2630] rounded-2xl p-6 relative overflow-hidden">
                     <div class="absolute right-0 top-0 w-1.5 h-full bg-emerald-500/70"></div>
-                    <div class="text-emerald-500 font-black text-5xl mb-4 opacity-20 group-hover:opacity-40 transition-opacity">04</div>
+                    <div class="text-emerald-500 font-black text-5xl mb-4 opacity-20">04</div>
                     <h4 class="text-lg font-black text-white mb-2">التدريب والاختبار الميداني</h4>
                     <p class="text-xs text-emerald-400 font-mono mb-4 border-b border-white/5 pb-3">يوم الجمعة</p>
                     <p class="text-sm text-gray-400 leading-relaxed">دخول الميدان لتطبيق السيناريوهات الحية، رصد الدرجات، واعتماد التخرج.</p>
                 </div>
             </div>
         </div>
- 
-        <!-- 2. سلم الرتب العسكرية (التسلسل الهرمي المرتب) -->
-        <div class="mb-24">
+
+        <!-- 2. شرح بروتوكول يوم الاختبار الميداني -->
+        <div class="mb-16 bg-[#0a0d12] border border-amber-500/30 rounded-[2rem] p-8 shadow-2xl relative overflow-hidden">
+            <div class="absolute top-0 right-0 w-full h-1 bg-amber-500"></div>
+            <div class="flex items-center gap-3 mb-6">
+                <span class="text-3xl">📋</span>
+                <div>
+                    <h3 class="text-2xl font-black text-white">بروتوكول وإجراءات يوم الاختبار الميداني (الجمعة)</h3>
+                    <p class="text-xs text-amber-400 font-mono mt-0.5">FIELD EXAM DAY PROTOCOL</p>
+                </div>
+            </div>
+            <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-6 text-sm text-gray-300 font-mono leading-relaxed whitespace-pre-wrap">
+<%= (curriculum && curriculum.exam_day) ? curriculum.exam_day : 'يتم كتابة بروتوكول وشرح أحداث يوم الاختبار الميداني في شيت Academy_Curriculum ليظهر هنا تلقائياً.' %>
+            </div>
+        </div>
+
+        <!-- 3. المناهج التدريبية والشروحات التكتيكية للأقسام -->
+        <div class="mb-20">
             <div class="flex items-center gap-4 mb-8">
-                <h3 class="text-2xl font-black text-white uppercase tracking-widest">لوحة الشرف: التسلسل الهرمي للرتب</h3>
+                <h3 class="text-2xl font-black text-white uppercase tracking-widest">الشروحات والمناهج التدريبية للأقسام</h3>
                 <div class="flex-1 h-px bg-gradient-to-l from-[#1f2630] to-transparent"></div>
             </div>
 
-            <!-- صف الأفراد (Enlisted) -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-[2rem] p-8 relative overflow-hidden shadow-lg mb-8">
-                <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-slate-500 to-transparent"></div>
-                <div class="flex flex-col items-center mb-6 text-center">
-                    <h4 class="text-2xl font-black text-white">صف الأفراد وضباط الصف</h4>
-                    <p class="text-xs text-slate-400 font-mono mt-1 tracking-widest">ENLISTED RANKS</p>
-                </div>
-                
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
-                    <div class="rank-card border border-slate-800 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/jundi.png" alt="جندي" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                        <h5 class="text-slate-300 font-bold text-sm">جندي</h5>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- شرح الاستيقافات -->
+                <div class="bg-[#0d1117] border border-teal-900/40 rounded-3xl p-6 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">🚓</span>
+                        <h4 class="text-lg font-black text-teal-400">منهج وقواعد الاستيقافات</h4>
                     </div>
-                    <div class="rank-card border border-slate-700 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/jundi_awwal.png" alt="جندي أول" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                        <h5 class="text-slate-300 font-bold text-sm">جندي أول</h5>
-                    </div>
-                    <div class="rank-card border border-slate-600 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/areef.png" alt="عريف" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                        <h5 class="text-slate-200 font-bold text-sm">عريف</h5>
-                    </div>
-                    <div class="rank-card border border-blue-900/40 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/wakeel_raqeeb.png" alt="وكيل رقيب" class="w-16 h-16 object-contain mb-3 drop-shadow-lg">
-                        <h5 class="text-blue-300 font-bold text-sm">وكيل رقيب</h5>
-                    </div>
-                    <div class="rank-card border border-blue-800/40 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/raqeeb.png" alt="رقيب" class="w-16 h-16 object-contain mb-3 drop-shadow-lg">
-                        <h5 class="text-blue-400 font-bold text-sm">رقيب</h5>
-                    </div>
-                    <div class="rank-card border border-blue-700/40 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/raqeeb_awwal.png" alt="رقيب أول" class="w-16 h-16 object-contain mb-3 drop-shadow-xl">
-                        <h5 class="text-blue-500 font-black text-sm">رقيب أول</h5>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
+<%= (curriculum && curriculum.stops) ? curriculum.stops : 'شرح الاستيقافات الميدانية (مروري، جنائي، إجباري) يضاف في الشيت.' %>
                     </div>
                 </div>
 
-                <!-- رئيس رقباء (مستقل أعلى الأفراد) -->
-                <div class="mt-6 flex justify-center">
-                    <div class="rank-card border border-indigo-500/40 rounded-2xl p-6 w-56 flex flex-col items-center text-center shadow-[0_0_15px_rgba(99,102,241,0.15)] relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-full h-1 bg-indigo-500"></div>
-                        <img src="/images/ranks/raees_ruqaba.png" alt="رئيس رقباء" class="w-20 h-20 object-contain mb-3 drop-shadow-2xl">
-                        <h5 class="text-indigo-400 font-black text-lg tracking-wide">رئيس رقباء</h5>
+                <!-- شرح التفاوض -->
+                <div class="bg-[#0d1117] border border-amber-900/40 rounded-3xl p-6 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">🗣️</span>
+                        <h4 class="text-lg font-black text-amber-500">منهج وقواعد التفاوض</h4>
                     </div>
-                </div>
-            </div>
-
-            <!-- صف الضباط (Officers) -->
-            <div class="bg-[#0a0d12] border border-[#1f2630] rounded-[2rem] p-8 relative overflow-hidden shadow-lg mb-8">
-                <div class="absolute top-0 right-0 w-full h-1 bg-gradient-to-l from-amber-500 to-transparent"></div>
-                <div class="flex flex-col items-center mb-6 text-center">
-                    <h4 class="text-2xl font-black text-white">الضباط الميدانيين</h4> 
-                    <p class="text-xs text-amber-500/70 font-mono mt-1 tracking-widest">OFFICER RANKS</p>
-                </div>
-
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-                    <div class="rank-card border border-amber-900/30 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/mulazim.png" alt="ملازم" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                        <h5 class="text-amber-500/70 font-bold text-sm">ملازم</h5>
-                    </div>
-                    <div class="rank-card border border-amber-900/50 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/mulazim_awwal.png" alt="ملازم أول" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                        <h5 class="text-amber-500/80 font-bold text-sm">ملازم أول</h5>
-                    </div>
-                    <div class="rank-card border border-amber-800/50 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/naqeeb.png" alt="نقيب" class="w-16 h-16 object-contain mb-3 drop-shadow-md">
-                        <h5 class="text-amber-500/90 font-bold text-sm">نقيب</h5>
-                    </div>
-                    <div class="rank-card border border-amber-700/50 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/raed.png" alt="رائد" class="w-16 h-16 object-contain mb-3 drop-shadow-lg">
-                        <h5 class="text-amber-500 font-bold text-sm">رائد</h5>
-                    </div>
-                    <div class="rank-card border border-amber-600/50 rounded-2xl p-4 flex flex-col items-center text-center">
-                        <img src="/images/ranks/muqaddam.png" alt="مقدم" class="w-16 h-16 object-contain mb-3 drop-shadow-lg">
-                        <h5 class="text-amber-400 font-bold text-sm">مقدم</h5>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
+<%= (curriculum && curriculum.neg) ? curriculum.neg : 'شرح أساليب وقواعد التفاوض التكتيكي يضاف في الشيت.' %>
                     </div>
                 </div>
 
-                <!-- عقيد وعميد -->
-                <div class="mt-6 flex justify-center gap-6">
-                    <div class="rank-card border border-amber-500/50 rounded-2xl p-5 w-48 flex flex-col items-center text-center">
-                        <img src="/images/ranks/aqeed.png" alt="عقيد" class="w-16 h-16 object-contain mb-3 drop-shadow-xl">
-                        <h5 class="text-amber-300 font-black text-lg">عقيد</h5>
+                <!-- شرح العمليات -->
+                <div class="bg-[#0d1117] border border-purple-900/40 rounded-3xl p-6 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">⚙️</span>
+                        <h4 class="text-lg font-black text-purple-400">منهج إدارة العمليات والبلاغات</h4>
                     </div>
-                    <div class="rank-card border border-amber-400/60 rounded-2xl p-5 w-48 flex flex-col items-center text-center shadow-[0_0_15px_rgba(245,158,11,0.15)] relative overflow-hidden">
-                        <div class="absolute top-0 right-0 w-full h-1 bg-amber-400"></div>
-                        <img src="/images/ranks/ameed.png" alt="عميد" class="w-20 h-20 object-contain mb-3 drop-shadow-2xl">
-                        <h5 class="text-amber-200 font-black text-lg">عميد</h5>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
+<%= (curriculum && curriculum.ops) ? curriculum.ops : 'شرح إدارة البلاغات والتوجيه الميداني للعمليات يضاف في الشيت.' %>
                     </div>
                 </div>
-            </div>
 
-            <!-- القيادة العليا (لواء وفريق) -->
-            <div class="bg-[#05070a] rounded-[2rem] relative mt-12 flex flex-col lg:flex-row justify-center items-center gap-8">
-                <div class="w-full sm:w-80 bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-700 border-2 border-yellow-400 rounded-3xl p-8 flex flex-col items-center text-center shadow-[0_0_50px_rgba(245,158,11,0.3)] relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <img src="/images/ranks/liwa.png" alt="لواء" class="w-28 h-28 object-contain mb-4 drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]">
-                    <p class="text-amber-900 text-xs font-mono font-bold mb-1 uppercase tracking-widest">Supreme Command</p>
-                    <h5 class="text-white font-black text-4xl tracking-widest drop-shadow-lg">لواء</h5>
-                </div>
-                
-                <div class="w-full sm:w-80 bg-gradient-to-r from-amber-600 via-yellow-500 to-amber-600 border-4 border-yellow-300 rounded-3xl p-8 flex flex-col items-center text-center shadow-[0_0_60px_rgba(245,158,11,0.5)] relative overflow-hidden group scale-105 z-10">
-                    <div class="absolute inset-0 bg-white/20 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <img src="/images/ranks/fareeq.png" alt="فريق" class="w-32 h-32 object-contain mb-4 drop-shadow-[0_20px_20px_rgba(0,0,0,0.7)] transform group-hover:scale-110 transition-transform">
-                    <p class="text-amber-900 text-xs font-mono font-bold mb-1 uppercase tracking-widest">Supreme Command</p>
-                    <h5 class="text-black font-black text-4xl tracking-widest drop-shadow-lg">فريق</h5>
-                </div>
-                
-                <div class="w-full sm:w-80 bg-gradient-to-r from-amber-700 via-yellow-600 to-amber-700 border-2 border-yellow-400 rounded-3xl p-8 flex flex-col items-center text-center shadow-[0_0_50px_rgba(245,158,11,0.3)] relative overflow-hidden group">
-                    <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                    <img src="/images/ranks/fareeq_awal.png" alt="فريق أول" class="w-28 h-28 object-contain mb-4 drop-shadow-[0_15px_15px_rgba(0,0,0,0.6)]">
-                    <p class="text-amber-900 text-xs font-mono font-bold mb-1 uppercase tracking-widest">Supreme Command</p>
-                    <h5 class="text-white font-black text-4xl tracking-widest drop-shadow-lg">فريق أول</h5>
+                <!-- شرح الأنظمة -->
+                <div class="bg-[#0d1117] border border-blue-900/40 rounded-3xl p-6 flex flex-col">
+                    <div class="flex items-center gap-3 mb-4">
+                        <span class="text-2xl">❓</span>
+                        <h4 class="text-lg font-black text-blue-400">منهج اللائحة والأنظمة العامة</h4>
+                    </div>
+                    <div class="bg-[#05070a] border border-[#1f2630] rounded-2xl p-5 text-xs text-gray-300 font-mono leading-relaxed flex-1 whitespace-pre-wrap">
+<%= (curriculum && curriculum.gen) ? curriculum.gen : 'شرح اللوائح العسكرية والأنظمة العامة يضاف في الشيت.' %>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- 3. بنك الأسئلة الميدانية -->
+        <!-- 4. بنك الأسئلة الميدانية -->
         <% 
             const stopsQ = questions.filter(q => q.section === 'stops');
             const negQ = questions.filter(q => q.section === 'neg');
@@ -215,16 +148,16 @@
             const genQ = questions.filter(q => q.section === 'gen');
         %>
 
-        <div class="mt-24">
+        <div class="mt-20">
             <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 mb-10 border-b border-[#1f2630] pb-5">
                 <div>
                     <span class="text-blue-500 font-mono text-xs font-bold uppercase tracking-widest">OFFICIAL QUESTION BANK</span>
-                    <h3 class="text-3xl font-black text-white tracking-wide mt-1">بنك الأسئلة الميدانية الشامل</h3>
-                    <p class="text-sm text-gray-500 mt-2">قاعدة بيانات مقسمة بحسب قطاعات التدريب. اضغط على القطاع لاستعراض الأسئلة.</p>
+                    <h3 class="text-3xl font-black text-white tracking-wide mt-1">بنك الأسئلة الميدانية المعتمد</h3>
+                    <p class="text-sm text-gray-500 mt-1">قاعدة بيانات الأسئلة التخصصية مع أرقام الأسئلة والدرجات المستحقة.</p>
                 </div>
                 
                 <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-center">
-                    <input type="text" id="searchInput" onkeyup="filterQuestions()" placeholder="🔍 ابحث في جميع القطاعات..." class="search-input sm:w-64">
+                    <input type="text" id="searchInput" onkeyup="filterQuestions()" placeholder="🔍 ابحث في بنك الأسئلة..." class="search-input sm:w-64">
                     <button onclick="openAddModal()" class="btn !bg-white !text-black hover:!bg-gray-200 whitespace-nowrap !py-2.5 font-bold shadow-[0_0_15px_rgba(255,255,255,0.2)]">
                         ➕ إدراج سؤال جديد
                     </button>
@@ -255,9 +188,12 @@
                                 <p class="text-sm text-gray-600 font-mono text-center py-4">لا توجد أسئلة مدرجة في قطاع الاستيقافات حالياً.</p>
                             <% } else { %>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <% stopsQ.forEach(q => { %>
+                                    <% stopsQ.forEach((q, idx) => { %>
                                         <div class="question-line flex flex-col md:flex-row items-center justify-between bg-[#0a0d12] border border-teal-900/30 rounded-xl p-4 gap-4" data-search="<%= q.text %>">
-                                            <p class="text-sm font-bold text-gray-300 leading-relaxed flex-1"><%= q.text %></p>
+                                            <div class="flex items-start gap-3 flex-1">
+                                                <span class="text-xs font-black text-teal-500 bg-teal-500/10 border border-teal-500/20 px-2.5 py-1 rounded-lg font-mono">سؤال <%= idx + 1 %></span>
+                                                <p class="text-sm font-bold text-gray-300 leading-relaxed"><%= q.text %></p>
+                                            </div>
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-teal-400"><%= q.maxScore %></strong></div>
@@ -292,9 +228,12 @@
                                 <p class="text-sm text-gray-600 font-mono text-center py-4">لا توجد أسئلة مدرجة في قطاع التفاوض حالياً.</p>
                             <% } else { %>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <% negQ.forEach(q => { %>
+                                    <% negQ.forEach((q, idx) => { %>
                                         <div class="question-line flex flex-col md:flex-row items-center justify-between bg-[#0a0d12] border border-amber-900/30 rounded-xl p-4 gap-4" data-search="<%= q.text %>">
-                                            <p class="text-sm font-bold text-gray-300 leading-relaxed flex-1"><%= q.text %></p>
+                                            <div class="flex items-start gap-3 flex-1">
+                                                <span class="text-xs font-black text-amber-500 bg-amber-500/10 border border-amber-500/20 px-2.5 py-1 rounded-lg font-mono">سؤال <%= idx + 1 %></span>
+                                                <p class="text-sm font-bold text-gray-300 leading-relaxed"><%= q.text %></p>
+                                            </div>
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-amber-500"><%= q.maxScore %></strong></div>
@@ -329,9 +268,12 @@
                                 <p class="text-sm text-gray-600 font-mono text-center py-4">لا توجد أسئلة مدرجة في قطاع العمليات حالياً.</p>
                             <% } else { %>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <% opsQ.forEach(q => { %>
+                                    <% opsQ.forEach((q, idx) => { %>
                                         <div class="question-line flex flex-col md:flex-row items-center justify-between bg-[#0a0d12] border border-purple-900/30 rounded-xl p-4 gap-4" data-search="<%= q.text %>">
-                                            <p class="text-sm font-bold text-gray-300 leading-relaxed flex-1"><%= q.text %></p>
+                                            <div class="flex items-start gap-3 flex-1">
+                                                <span class="text-xs font-black text-purple-400 bg-purple-500/10 border border-purple-500/20 px-2.5 py-1 rounded-lg font-mono">سؤال <%= idx + 1 %></span>
+                                                <p class="text-sm font-bold text-gray-300 leading-relaxed"><%= q.text %></p>
+                                            </div>
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-purple-400"><%= q.maxScore %></strong></div>
@@ -366,9 +308,12 @@
                                 <p class="text-sm text-gray-600 font-mono text-center py-4">لا توجد أسئلة مدرجة في قطاع الأنظمة العامة حالياً.</p>
                             <% } else { %>
                                 <div class="grid grid-cols-1 gap-3">
-                                    <% genQ.forEach(q => { %>
+                                    <% genQ.forEach((q, idx) => { %>
                                         <div class="question-line flex flex-col md:flex-row items-center justify-between bg-[#0a0d12] border border-blue-900/30 rounded-xl p-4 gap-4" data-search="<%= q.text %>">
-                                            <p class="text-sm font-bold text-gray-300 leading-relaxed flex-1"><%= q.text %></p>
+                                            <div class="flex items-start gap-3 flex-1">
+                                                <span class="text-xs font-black text-blue-400 bg-blue-500/10 border border-blue-500/20 px-2.5 py-1 rounded-lg font-mono">سؤال <%= idx + 1 %></span>
+                                                <p class="text-sm font-bold text-gray-300 leading-relaxed"><%= q.text %></p>
+                                            </div>
                                             <div class="flex items-center gap-4">
                                                 <div class="text-[11px] font-mono text-gray-500">المُضيف: <span class="text-gray-400"><%= q.addedBy %></span></div>
                                                 <div class="bg-[#05070a] px-3 py-1 rounded-lg border border-[#1f2630] text-xs font-mono"><span class="text-gray-500">الدرجة:</span> <strong class="text-blue-400"><%= q.maxScore %></strong></div>
@@ -386,7 +331,7 @@
         </div>
     </main>
 
-    <!-- النافذة المنبثقة لإضافة الأسئلة -->
+    <!-- نافذة إضافة الأسئلة -->
     <div id="addQuestionModal" class="fixed inset-0 z-[70] hidden items-center justify-center bg-black/90 backdrop-blur-md p-4">
         <div class="bg-[#0e1218] border border-blue-500/40 w-full max-w-md rounded-2xl shadow-2xl p-6 animate-modal">
             <h3 class="text-xl font-black text-white mb-2">➕ إضافة سؤال تخصصي</h3>

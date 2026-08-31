@@ -21,7 +21,8 @@ const {
     getGuideQuestions, 
     addGuideQuestion, 
     deleteGuideQuestion, 
-    getTemplates,       
+    getTemplates,    
+    getCurriculum,   
     saveTemplate
 } = require('./services/sheets');
 
@@ -390,6 +391,28 @@ app.get('/api/police-members', async (req, res) => {
     } catch (err) {
         res.status(500).json({ error: "تعذر الاتصال بخوادم ديسكورد: " + err.message });
     }
+});
+
+app.get('/guide', async (req, res) => {
+    const allQuestions = await getGuideQuestions();
+    const curriculum = await getCurriculum();
+    const perms = req.user.permissions;
+    const isSupervisorOrLeader = perms.canAcceptApplications || perms.canApproveReject;
+    const filteredQuestions = allQuestions.filter(q => {
+        if (isSupervisorOrLeader) return true;
+        if (q.section === 'stops' && perms.canGradeStops) return true;
+        if (q.section === 'neg' && perms.canGradeNeg) return true;
+        if (q.section === 'ops' && perms.canGradeOps) return true;
+        if (q.section === 'gen' && perms.canGradeGen) return true;
+        return false;
+    });
+    res.render('guide', { 
+        user: req.user, 
+        questions: filteredQuestions, 
+        curriculum: curriculum,
+        isSupervisor: isSupervisorOrLeader, 
+        currentPage: 'guide' 
+    });
 });
 
 module.exports = app;

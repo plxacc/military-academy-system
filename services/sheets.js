@@ -489,12 +489,34 @@ async function saveTemplate(type, message) {
     }
 }
 
+// جلب شروحات الأقسام ويوم الاختبار من الشيت
+async function getCurriculum() {
+    try {
+        await doc.loadInfo();
+        const sheet = doc.sheetsByTitle['Academy_Curriculum'];
+        if (!sheet) return {};
+        const rows = await sheet.getRows();
+        let curriculum = { exam_day: '', stops: '', neg: '', ops: '', gen: '' };
+        rows.forEach(r => {
+            const sec = r.get('Section');
+            if (sec && curriculum.hasOwnProperty(sec)) {
+                curriculum[sec] = r.get('Content') || '';
+            }
+        });
+        return curriculum;
+    } catch (err) {
+        console.log("⚠️ خطأ في قراءة منهج الكلية:", err.message);
+        return {};
+    }
+}
+
 module.exports = { 
     getRawApplications, 
     getApplications, 
     acceptFromRawToAcademy, 
     rejectRawApplicant, 
     advancedGradeApplicant,
+    getCurriculum,
     sendToFinalDecision,
     toggleException,
     finalDecision,
